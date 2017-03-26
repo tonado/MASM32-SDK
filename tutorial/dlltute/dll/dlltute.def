@@ -1,0 +1,4 @@
+LIBRARY dlltute
+EXPORTS MessageBoxSTD
+EXPORTS MessageBoxCC
+EXPORTS MessageBoxFC

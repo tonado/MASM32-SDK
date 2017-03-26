@@ -1,0 +1,173 @@
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+;                    create a new format QE plugin
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+    INTEGER hFile
+    INTEGER rv
+
+    STRING path$
+    STRING proj$
+    STRING def$
+    STRING asm$
+    STRING qt$
+    STRING txt$
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+    path$ = getfolder "Set or create a folder for your new QE Plugin" "Ensure you do not overwrite an existing project"
+    if$ path$ = ""
+    end
+
+    chdir path$     ; change directory to the new location
+
+    qt$ = chr$ 34
+
+    gettext "Type the project name" "Ensure you do NOT enter a file extension" "plugin"
+    if$ $0 = ""
+    end
+
+    proj$ = $0
+
+    hFile = fcreate "makeit.bat"
+
+    rv = fprint hFile "@echo off"
+    rv = fprintc hFile "if exist \q" proj$ ".obj\q del \q" proj$ ".obj\q\r\n"
+    rv = fprintc hFile "if exist \q" proj$ ".dll\q del \q" proj$ ".dll\q\r\n"
+    rv = fprintc hFile "\\masm32\\bin\\ml /c /coff \q" proj$ ".asm\q\r\n"
+    rv = fprintc hFile "\\masm32\\bin\\Link /SUBSYSTEM:WINDOWS /DLL /DEF:\q" proj$ ".def\q \q" proj$ ".obj\q \r\n"
+    rv = fprintc hFile "del \q" proj$ ".obj\q\r\n"
+    rv = fprintc hFile "del \q" proj$ ".exp\q\r\n"
+    rv = fprintc hFile "dir \q" proj$ ".*\q\r\n"
+    rv = fprint hFile "pause"
+
+    rv = fclose hFile
+
+    def$ = cat$ proj$ ".def"
+    hFile = fcreate def$
+
+    rv = fprint hFile "LIBRARY " proj$
+    rv = fprint hFile "EXPORTS PiEntryPoint"
+
+    rv = fclose hFile
+
+    asm$ = cat$ proj$ ".asm"
+    hFile = fcreate asm$
+
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile "    include \masm32\include\masm32rt.inc"
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile ""
+    rv = fprint hFile "  ; **********************"
+    rv = fprint hFile "  ; handles for QE windows"
+    rv = fprint hFile "  ; **********************"
+    rv = fprint hFile "    GethInstance MACRO"
+    rv = fprint hFile "      push 0"
+    rv = fprint hFile "      call QEinterface"
+    rv = fprint hFile "      EXITM <eax>"
+    rv = fprint hFile "    ENDM"
+    rv = fprint hFile ""
+    rv = fprint hFile "    GethWnd MACRO"
+    rv = fprint hFile "      push 1"
+    rv = fprint hFile "      call QEinterface"
+    rv = fprint hFile "      EXITM <eax>"
+    rv = fprint hFile "    ENDM"
+    rv = fprint hFile ""
+    rv = fprint hFile "    GethEdit MACRO"
+    rv = fprint hFile "      push 2"
+    rv = fprint hFile "      call QEinterface"
+    rv = fprint hFile "      EXITM <eax>"
+    rv = fprint hFile "    ENDM"
+    rv = fprint hFile ""
+    rv = fprint hFile "    GethToolBar MACRO"
+    rv = fprint hFile "      push 4"
+    rv = fprint hFile "      call QEinterface"
+    rv = fprint hFile "      EXITM <eax>"
+    rv = fprint hFile "    ENDM"
+    rv = fprint hFile ""
+    rv = fprint hFile "    GethStatus MACRO"
+    rv = fprint hFile "      push 5"
+    rv = fprint hFile "      call QEinterface"
+    rv = fprint hFile "      EXITM <eax>"
+    rv = fprint hFile "    ENDM"
+    rv = fprint hFile ""
+    rv = fprint hFile "    GethMnu MACRO"
+    rv = fprint hFile "      push 6"
+    rv = fprint hFile "      call QEinterface"
+    rv = fprint hFile "      EXITM <eax>"
+    rv = fprint hFile "    ENDM"
+    rv = fprint hFile ""
+    rv = fprint hFile "    .data?"
+    rv = fprint hFile "    ; -------------------------"
+    rv = fprint hFile "    ; local DLL instance handle"
+    rv = fprint hFile "    ; -------------------------"
+    rv = fprint hFile "      DLLinstance dd ?"
+    rv = fprint hFile ""
+    rv = fprint hFile "    ; ----------"
+    rv = fprint hFile "    ; QE handles"
+    rv = fprint hFile "    ; ----------"
+    rv = fprint hFile "      hInstance dd ?"
+    rv = fprint hFile "      hWnd dd ?"
+    rv = fprint hFile "      hEdit dd ?"
+    rv = fprint hFile "      hToolBar dd ?"
+    rv = fprint hFile "      hStatus dd ?"
+    rv = fprint hFile "      hMnu dd ?"
+    rv = fprint hFile ""
+    rv = fprint hFile "    .code"
+    rv = fprint hFile ""
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile ""
+    rv = fprint hFile "LibMain proc instance:DWORD,reason:DWORD,unused:DWORD "
+    rv = fprint hFile ""
+    rv = fprint hFile "    switch reason"
+    rv = fprint hFile "      case DLL_PROCESS_ATTACH"
+    rv = fprint hFile "        mrm DLLinstance,instance"
+    rv = fprint hFile "        mov eax, TRUE"
+    rv = fprint hFile ""
+    rv = fprint hFile "      case DLL_PROCESS_DETACH"
+    rv = fprint hFile "        nop"
+    rv = fprint hFile ""
+    rv = fprint hFile "      case DLL_THREAD_ATTACH"
+    rv = fprint hFile "        nop"
+    rv = fprint hFile ""
+    rv = fprint hFile "      case DLL_THREAD_DETACH"
+    rv = fprint hFile "        nop"
+    rv = fprint hFile ""
+    rv = fprint hFile "      endsw"
+    rv = fprint hFile ""
+    rv = fprint hFile "    ret"
+    rv = fprint hFile ""
+    rv = fprint hFile "LibMain endp"
+    rv = fprint hFile ""
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile ""
+    rv = fprint hFile "PiEntryPoint proc QEinterface:DWORD"
+    rv = fprint hFile ""
+    rv = fprint hFile "  ; -------------------------------"
+    rv = fprint hFile "  ; get any required editor handles"
+    rv = fprint hFile "  ; -------------------------------"
+    rv = fprint hFile "    mov hInstance,  GethInstance()"
+    rv = fprint hFile "    mov hWnd,       GethWnd()"
+    rv = fprint hFile "    mov hEdit,      GethEdit()"
+    rv = fprint hFile "    mov hToolBar,   GethToolBar()"
+    rv = fprint hFile "    mov hStatus,    GethStatus()"
+    rv = fprint hFile "    mov hMnu,       GethMnu()"
+    rv = fprint hFile ""
+    rv = fprint hFile "    ret"
+    rv = fprint hFile ""
+    rv = fprint hFile "PiEntryPoint endp"
+    rv = fprint hFile ""
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile ""
+    rv = fprint hFile "end LibMain"
+
+    rv = fclose hFile
+
+    txt$ = cat$ "Open " qt$ proj$ ".asm" qt$ " to edit new plugin, build it with MAKEIT.BAT"
+
+    msgbox txt$ "Done" MB_OK
+
+    openfile
+
+    end
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤

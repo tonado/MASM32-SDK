@@ -1,0 +1,128 @@
+; --------------------------------------------------------------------------------------------------
+;                           clusapi.inc Copyright The MASM32 SDK 1998-2010
+; --------------------------------------------------------------------------------------------------
+
+IFNDEF CLUSAPI_INC
+CLUSAPI_INC equ <1>
+
+AddClusterResourceDependency PROTO STDCALL :DWORD,:DWORD
+AddClusterResourceNode PROTO STDCALL :DWORD,:DWORD
+BackupClusterDatabase PROTO STDCALL :DWORD,:DWORD
+CanResourceBeDependent PROTO STDCALL :DWORD,:DWORD
+ChangeClusterResourceGroup PROTO STDCALL :DWORD,:DWORD
+CloseCluster PROTO STDCALL :DWORD
+CloseClusterGroup PROTO STDCALL :DWORD
+CloseClusterNetInterface PROTO STDCALL :DWORD
+CloseClusterNetwork PROTO STDCALL :DWORD
+CloseClusterNode PROTO STDCALL :DWORD
+CloseClusterNotifyPort PROTO STDCALL :DWORD
+CloseClusterResource PROTO STDCALL :DWORD
+ClusterCloseEnum PROTO STDCALL :DWORD
+ClusterControl PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterEnum PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterGetEnumCount PROTO STDCALL :DWORD
+ClusterGroupCloseEnum PROTO STDCALL :DWORD
+ClusterGroupControl PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterGroupEnum PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterGroupGetEnumCount PROTO STDCALL :DWORD
+ClusterGroupOpenEnum PROTO STDCALL :DWORD,:DWORD
+ClusterNetInterfaceControl PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterNetworkCloseEnum PROTO STDCALL :DWORD
+ClusterNetworkControl PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterNetworkEnum PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterNetworkGetEnumCount PROTO STDCALL :DWORD
+ClusterNetworkOpenEnum PROTO STDCALL :DWORD,:DWORD
+ClusterNodeCloseEnum PROTO STDCALL :DWORD
+ClusterNodeControl PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterNodeEnum PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterNodeGetEnumCount PROTO STDCALL :DWORD
+ClusterNodeOpenEnum PROTO STDCALL :DWORD,:DWORD
+ClusterOpenEnum PROTO STDCALL :DWORD,:DWORD
+ClusterRegCloseKey PROTO STDCALL :DWORD
+ClusterRegCreateKey PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterRegDeleteKey PROTO STDCALL :DWORD,:DWORD
+ClusterRegDeleteValue PROTO STDCALL :DWORD,:DWORD
+ClusterRegEnumKey PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterRegEnumValue PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterRegGetKeySecurity PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+ClusterRegOpenKey PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+ClusterRegQueryInfoKey PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterRegQueryValue PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterRegSetKeySecurity PROTO STDCALL :DWORD,:DWORD,:DWORD
+ClusterRegSetValue PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterResourceCloseEnum PROTO STDCALL :DWORD
+ClusterResourceControl PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterResourceEnum PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterResourceGetEnumCount PROTO STDCALL :DWORD
+ClusterResourceOpenEnum PROTO STDCALL :DWORD,:DWORD
+ClusterResourceTypeCloseEnum PROTO STDCALL :DWORD
+ClusterResourceTypeControl PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterResourceTypeEnum PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ClusterResourceTypeGetEnumCount PROTO STDCALL :DWORD
+ClusterResourceTypeOpenEnum PROTO STDCALL :DWORD,:DWORD,:DWORD
+CreateClusterGroup PROTO STDCALL :DWORD,:DWORD
+CreateClusterNotifyPort PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+CreateClusterResource PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+CreateClusterResourceType PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+DeleteClusterGroup PROTO STDCALL :DWORD
+DeleteClusterResource PROTO STDCALL :DWORD
+DeleteClusterResourceType PROTO STDCALL :DWORD,:DWORD
+EvictClusterNode PROTO STDCALL :DWORD
+EvictClusterNodeEx PROTO STDCALL :DWORD,:DWORD,:DWORD
+FailClusterResource PROTO STDCALL :DWORD
+GetClusterFromGroup PROTO STDCALL :DWORD
+GetClusterFromNetInterface PROTO STDCALL :DWORD
+GetClusterFromNetwork PROTO STDCALL :DWORD
+GetClusterFromNode PROTO STDCALL :DWORD
+GetClusterFromResource PROTO STDCALL :DWORD
+GetClusterGroupKey PROTO STDCALL :DWORD,:DWORD
+GetClusterGroupState PROTO STDCALL :DWORD,:DWORD,:DWORD
+GetClusterInformation PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+GetClusterKey PROTO STDCALL :DWORD,:DWORD
+GetClusterNetInterface PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+GetClusterNetInterfaceKey PROTO STDCALL :DWORD,:DWORD
+GetClusterNetInterfaceState PROTO STDCALL :DWORD
+GetClusterNetworkId PROTO STDCALL :DWORD,:DWORD,:DWORD
+GetClusterNetworkKey PROTO STDCALL :DWORD,:DWORD
+GetClusterNetworkState PROTO STDCALL :DWORD
+GetClusterNodeId PROTO STDCALL :DWORD,:DWORD,:DWORD
+GetClusterNodeKey PROTO STDCALL :DWORD,:DWORD
+GetClusterNodeState PROTO STDCALL :DWORD
+GetClusterNotify PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+GetClusterQuorumResource PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+GetClusterResourceKey PROTO STDCALL :DWORD,:DWORD
+GetClusterResourceNetworkName PROTO STDCALL :DWORD,:DWORD,:DWORD
+GetClusterResourceState PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+GetClusterResourceTypeKey PROTO STDCALL :DWORD,:DWORD,:DWORD
+GetNodeClusterState PROTO STDCALL :DWORD,:DWORD
+MoveClusterGroup PROTO STDCALL :DWORD,:DWORD
+OfflineClusterGroup PROTO STDCALL :DWORD
+OfflineClusterResource PROTO STDCALL :DWORD
+OnlineClusterGroup PROTO STDCALL :DWORD,:DWORD
+OnlineClusterResource PROTO STDCALL :DWORD
+OpenCluster PROTO STDCALL :DWORD
+OpenClusterGroup PROTO STDCALL :DWORD,:DWORD
+OpenClusterNetInterface PROTO STDCALL :DWORD,:DWORD
+OpenClusterNetwork PROTO STDCALL :DWORD,:DWORD
+OpenClusterNode PROTO STDCALL :DWORD,:DWORD
+OpenClusterResource PROTO STDCALL :DWORD,:DWORD
+PauseClusterNode PROTO STDCALL :DWORD
+RegisterClusterNotify PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+RemoveClusterResourceDependency PROTO STDCALL :DWORD,:DWORD
+RemoveClusterResourceNode PROTO STDCALL :DWORD,:DWORD
+RestoreClusterDatabase PROTO STDCALL :DWORD,:DWORD,:DWORD
+ResumeClusterNode PROTO STDCALL :DWORD
+SetClusterGroupName PROTO STDCALL :DWORD,:DWORD
+SetClusterGroupNodeList PROTO STDCALL :DWORD,:DWORD,:DWORD
+SetClusterName PROTO STDCALL :DWORD,:DWORD
+SetClusterNetworkName PROTO STDCALL :DWORD,:DWORD
+SetClusterNetworkPriorityOrder PROTO STDCALL :DWORD,:DWORD,:DWORD
+SetClusterQuorumResource PROTO STDCALL :DWORD,:DWORD,:DWORD
+SetClusterResourceName PROTO STDCALL :DWORD,:DWORD
+SetClusterServiceAccountPassword PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+
+ELSE
+  echo ------------------------------------------
+  echo WARNING duplicate include file clusapi.inc
+  echo ------------------------------------------
+ENDIF

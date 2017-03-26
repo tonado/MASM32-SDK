@@ -1,0 +1,652 @@
+<HTML>
+<HEAD>
+<META NAME="Author" CONTENT="Raymond Filiatreault">
+<META NAME="Description" CONTENT="Tutorial on the use of the floating point coprocessor in assembly programming. Chap. 13 Commented example">
+<TITLE>Simply FPU Chap. 13</TITLE>
+</HEAD>
+<BODY TEXT="#402000" LINK="#0000ff" VLINK="#0000ff" ALINK="#0000ff" BACKGROUND="fpufigs/bluewave.gif">
+
+<CENTER><FONT SIZE="+3">SIMPLY  FPU</FONT>
+<BR>by <B>Raymond Filiatreault</B><BR>
+Copyright 2003</CENTER>
+
+<P><CENTER><B>Chap. 13<BR>Commented example</B></CENTER>
+
+<P><BR>The example presented in this chapter is based on a simple dialog box to compute the monthly payments on a mortgage based on the following formula:
+
+<P><img src="fpufigs/equ1.gif" width="170" height="50" >
+
+<P>where:
+
+<BR><STRONG>P</STRONG> = Mortgage Principle
+
+<BR><STRONG>R</STRONG> = Monthly Interest Rate (expressed in decimal)
+
+<BR><STRONG>N</STRONG> = Number of months
+
+<BR><STRONG>PMT</STRONG> = Computed monthly payments
+
+<P>The dialog box itself was designed with the "WYSIWYG" feature of the Symantec Resource Editor Rs32.exe provided with the MASM32 package in the rc sub-folder. The only manual modification to the generated script was to add the ES_NUMBER style to two of the edit controls, that style not being an option with Rs32. The resource script is reproduced at the end of this document.
+
+<P>Three separate edit controls are provided for the user to input the mortgage principal, the annual interest rate (expressed as a %) and the number of years. Two radio buttons are also provided to choose between two procedures for computing monthly payments.
+
+<P>One procedure is based on the generally allowed practice in the USA of compounding interest on a monthly basis. For example, a 12% stated annual rate becomes a 1% monthly rate which, when compounded, is equivalent to a true 12.6825% annual rate.
+
+<P>The other procedure is based on a restriction imposed on Canadian chartered banks for mortgage loans where the stated annual rate cannot be compounded more than twice per year. For example, a 12% stated annual rate becomes a 6% semi-annual rate which, when compounded, is equivalent to a true 12.36% annual rate. The monthly rate must thus be computed according to the following formula where R<SUB><FONT SIZE="-1">SA</FONT></SUB> is the semi-annual rate:
+
+<P><B>R = (1+R<SUB><FONT SIZE="-1">SA</FONT></SUB>)<SUP>1/6</SUP> - 1</B>
+
+<P>When this computed monthly rate is compounded on a monthly basis, it would be equivalent to the semi-annual rate.
+
+<P>In order to simplify the program as much as possible, some limits have been imposed on the user input but may not even be noticed.
+
+<P><B>--</B> The input for the mortgage principal is restricted to numbers only (with the ES_NUMBER style for its edit control) and limited to a maximum of 9 characters (with the EM_SETLIMITTEXT message during the WM_INITDIALOG phase). This still allows for a mortgage input of up to 1 billion dollars which should generally be sufficient, but disallows the inclusion of pennies (which would be very rarely specified anyway) as part of the input. The main advantage of those restrictions is that it guarantees a positive binary 32-bit integer can be retrieved directly from the edit control without any need to parse the input for invalid characters and perform the conversion from ASCII with additional code.
+
+<P><B>--</B> The input for the number of years is also restricted to numbers only and limited to a maximum of 2 characters. This still allows for a mortgage life of up to 99 years, but disallows partial years (which is also rarely specified) as part of the input. Advantages are the same as above.
+
+<P><B>--</B> The input for the annual rate is restricted to 9 characters (rates are rarely specified with more than 3 decimals). This, however, guarantees that the value of the numerical digits excluding the decimal delimiter would not exceed the maximum possible value of a positive 32-bit integer.
+
+<P>While parsing the annual rate, a few more restrictions generate an error message:
+
+<P><B>--</B> An annual rate exceeding 100% (which would be considered illegal loan-sharking). 
+This guarantees that the log<SUB>2</SUB> of any (1+R) term will always be less than 1.
+
+<P><B>--</B> A "-" sign. The rate must be positive.
+
+<P>A lack of input or an input equal to 0 in any of the three edit controls also generates an error message and no computation is performed.
+
+<P>With pre-validated data, the computation can thus proceed without any risk of error. Some code has nevertheless been added before displaying the result to ascertain that no major problem has been encountered due to unforeseeable circumstances.
+
+<P>The code has been kept as simple as possible, without any attempt to optimize it for speed or size (speed optimization would be a waste of time and effort for such an application). It is also specific for the application. Even the code to convert the annual rate from a string to a floating point should not be generalized without modifying the parts which rely on the designed purpose and restrictions.
+
+<P>The provided code is fully tested. It can be assembled without modification with MASM32 if copied into a file with the .asm extension. If the resource script is copied into a file named rsrc.rc and placed in the same directory as the .asm file, the .exe file can be generated in a single step with the Project-&gt;Build All menu option of the QEditor in MASM32. Modifications to the code and/or assembly procedures will be required with other assemblers and/or IDEs.
+
+<P>The FPU instructions used with this example application are (in alphabetical order):
+
+<pre><A HREF="fpuchap11.htm#f2xm1"><B>F2XM1</B></A>     2 to the X power minus 1
+<A HREF="fpuchap8.htm#fadd"><B>FADD</B></A>      Add two floating point values
+<A HREF="fpuchap6.htm#fbstp"><B>FBSTP</B></A>     Store BCD data to memory
+<A HREF="fpuchap8.htm#fchs"><B>FCHS</B></A>      Change the sign of ST(0)
+<A HREF="fpuchap8.htm#fdiv"><B>FDIV</B></A>      Divide two floating point values
+<A HREF="fpuchap9.htm#fidiv"><B>FIDIV</B></A>     Divide ST(0) by an Integer located in memory
+<A HREF="fpuchap5.htm#fild"><B>FILD</B></A>      Load integer from memory
+<A HREF="fpuchap9.htm#fimul"><B>FIMUL</B></A>     Multiply ST(0) by an Integer located in memory
+<A HREF="fpuchap3.htm#finit"><B>FINIT</B></A>     Initialize the FPU
+<A HREF="fpuchap4.htm#fld"><B>FLD</B></A>       Load real number
+<A HREF="fpuchap4.htm#fld1"><B>FLD1</B></A>      Load the value of 1
+<A HREF="fpuchap8.htm#fmul"><B>FMUL</B></A>      Multiply two floating point values
+<A HREF="fpuchap8.htm#frndint"><B>FRNDINT</B></A>   Round ST(0) to an integer
+<A HREF="fpuchap11.htm#fscale"><B>FSCALE</B></A>    Scale ST(0) by ST(1)
+<A HREF="fpuchap4.htm#fstp"><B>FSTP</B></A>      Store real number and pop ST(0)
+<A HREF="fpuchap3.htm#fstsw"><B>FSTSW</B></A>     Store status word
+<A HREF="fpuchap8.htm#fsub"><B>FSUB</B></A>      Subtract two floating point values
+<A HREF="fpuchap3.htm#fwait"><B>FWAIT</B></A>     Wait while FPU is busy
+<A HREF="fpuchap4.htm#fxch"><B>FXCH</B></A>      Exchange the top data register with another data register
+<A HREF="fpuchap11.htm#fyl2xp1"><B>FYL2XP1</B></A>   Y*Log<SUB>2</SUB>(X+1)</pre>
+
+<P><HR size=5 NOSHADE>
+<pre>
+; #######################################################################
+;
+;                    Mortgage payment calculator 
+;            Written with MASM32 by Raymond Filiatreault
+;                           August 2003
+;
+; #######################################################################
+
+      <B>.386</B>                   ; minimum processor needed for 32 bit
+      <B>.model flat, stdcall</B>   ; FLAT memory model & STDCALL calling
+      <B>option casemap :none</B>   ; set code to case sensitive
+
+; #######################################################################
+
+      <B>include \masm32\include\windows.inc
+      include \masm32\include\user32.inc
+      include \masm32\include\kernel32.inc
+      include \masm32\include\comdlg32.inc
+      include \masm32\include\comctl32.inc
+
+      includelib \masm32\lib\user32.lib
+      includelib \masm32\lib\kernel32.lib
+      includelib \masm32\lib\comdlg32.lib
+      includelib \masm32\lib\comctl32.lib</B>
+
+; #########################################################################
+
+      <B>return MACRO arg
+        mov eax, arg
+        ret
+      ENDM
+
+    WndProc PROTO :DWORD,:DWORD,:DWORD,:DWORD</B>
+    
+; #########################################################################
+
+<B>PRINCIPLE   EQU   711
+RATEPCT     EQU   712
+YEARS       EQU   713
+PAYMENT     EQU   714
+COMPUTE     EQU   720
+QUITS       EQU   721
+USABUT      EQU   730
+CANADABUT   EQU   731
+AMERICAN    EQU   0
+
+.data
+      hDlg        dd    0
+      hInstance   dd    0
+
+      mortgage    dd    0
+      months      dd    0
+
+      factor6     dd    6
+      factor10    dd    10
+      factor12    dd    12
+
+      bcdtemp     dt    0
+
+      radiobutton db    0</B>           ;0=USA, 1=Canada
+
+      <B>badinput    db    "Input error",0
+      princerr    db    "Unacceptable input for principle",0
+      raterr      db    "Unacceptable input for rate",0
+      yearerr     db    "Unacceptable input for years",0
+      invalid     db    "Invalid FPU operation detected",0
+
+      buffer1     db    16 dup(0)</B>
+
+; #########################################################################
+
+<B>.code
+
+start:
+
+      invoke GetModuleHandle,NULL
+      mov    hInstance,eax
+      invoke InitCommonControls
+        
+      invoke DialogBoxParam,hInstance,700,NULL,ADDR WndProc,NULL
+
+      invoke ExitProcess,eax</B>
+
+; #########################################################################
+
+<B>WndProc proc hWin   :DWORD,
+             uMsg   :DWORD,
+             wParam :DWORD,
+             lParam :DWORD
+
+      .if uMsg == WM_INITDIALOG
+            push  hWin
+            pop   hDlg</B>        ;save handle in a global variable
+                              ;this avoids having to pass it as a
+                              ;parameter whenever needed outside this proc
+            
+            <B>invoke SendDlgItemMessage,hDlg,PRINCIPLE,EM_SETLIMITTEXT,9,0
+            invoke SendDlgItemMessage,hDlg,RATEPCT,EM_SETLIMITTEXT,9,0
+            invoke SendDlgItemMessage,hDlg,YEARS,EM_SETLIMITTEXT,2,0
+            invoke CheckRadioButton,hDlg,USABUT,CANADABUT,USABUT
+            return TRUE
+
+      .elseif uMsg == WM_COMMAND
+            mov     eax,wParam
+            and     eax,0ffffh
+
+            .if   eax == QUITS</B>            ;Exit button clicked
+                  <B>invoke  EndDialog,hDlg,0
+                  
+            .elseif eax == COMPUTE</B>        ;Compute button clicked
+                  <B>call  maincalc</B>          ;process input and display result
+                  <B>return  TRUE
+                  
+            .elseif eax == USABUT</B>         ;USA radiobutton clicked
+                  <B>mov   radiobutton,0</B>     ;store info
+                  <B>return  TRUE
+                  
+            .elseif eax == CANADABUT</B>      ;Canada radiobutton clicked
+                  <B>mov   radiobutton,1</B>     ;store info
+                  <B>return  TRUE
+            .endif
+
+      .elseif uMsg == WM_CLOSE
+            invoke  EndDialog,hDlg,0
+
+      .endif
+
+      return FALSE</B>        ;use Windows defaults to handle other messages
+
+<B>WndProc endp</B>
+
+; ########################################################################
+
+<B>maincalc:</B>
+
+;*********************************************************
+;*****     Retrieve THE MORTGAGE PRINCIPAL input     *****
+;*********************************************************
+
+      <B>invoke GetDlgItemInt,hDlg,PRINCIPLE,0,0</B>       ;retrieve as an integer
+      <B>mov   mortgage,eax</B>      ;store it
+      <B>or    eax,eax</B>           ;check if input > 0
+      <B>ja    @F</B>                ;jump if OK
+      <B>lea   eax,princerr</B>      ;error message for input of principal
+
+<B>inputerror:
+      invoke  MessageBox,0,eax,ADDR badinput,MB_OK</B>  ;display error message
+      <B>ret</B>
+
+;******************************************************
+;*****     Retrieve the NUMBER OF YEARS input     *****
+;******************************************************
+
+   <B>@@:
+      invoke GetDlgItemInt,hDlg,YEARS,0,0</B>           ;retrieve as an integer
+      <B>mul   factor12</B>          ;convert it to months
+      <B>mov   months,eax</B>        ;store it
+      <B>or    eax,eax</B>           ;check if input > 0
+      <B>ja    @F</B>                ;jump if OK
+      <B>lea   eax,yearerr</B>       ;error message for input of years
+      <B>jmp   inputerror</B>
+
+;**************************************************
+;*****     Retrieve the ANNUAL RATE input     *****
+;**************************************************
+
+   <B>@@:
+      invoke GetDlgItemText,hDlg,RATEPCT,ADDR buffer1,16</B> ;retrieve as string
+      <B>.if   buffer1 == 0</B>      ;buffer1 being a global BYTE variable
+                              ;if there was no input in the EDIT control,
+                              ;the first byte of buffer1 would be 0
+
+<B>badrate:
+          lea   eax,raterr</B>    ;error message for annual rate input
+          <B>jmp   inputerror
+      .endif
+
+      call  atofl</B>             ;convert ASCII string (%) to REAL10 decimal
+                              ;->st(0)=decimal annual rate (if no error)
+
+            ; Note: The "atofl" sub-routine is called only once 
+            ; and its code could have been inserted directly 
+            ; without the need for the "call" instruction. This
+            ; was done for the purpose of clarity in this section.
+
+      <B>or    eax,eax</B>           ;check if error was detected
+      <B>jz    badrate</B>           ;abort and display message if error
+
+;*************************************************************
+;*****     Convert the annual rate to a MONTHLY rate     *****
+;*************************************************************
+
+      <B>.if   radiobutton == AMERICAN
+          fidiv factor12</B>      ;divide the annual rate by 12
+                        ;-> st(0)=monthly rate
+
+      <B>.else
+          fld1</B>          ;-> st(0)=1, st(1)=annual rate
+          <B>fchs</B>          ;-> st(0)=-1, st(1)=annual rate
+          <B>fxch</B>          ;-> st(0)=annual rate, st(1)=-1 scaling factor
+          <B>fscale</B>        ;divide the annual rate by 2^1
+                        ;to get the semi-annual rate
+                        ;(a positive scaling factor will multiply
+                        ;a negative scaling factor will divide)
+          <B>fstp  st(1)</B>   ;overwrite the scaling factor with st(0)
+                        ;and pop the top register
+                        ;-> st(0)=semi-annual rate
+          <B>fld1</B>          ;-> st(0)=1, st(1)=semi-annual rate
+          <B>fidiv factor6</B> ;-> st(0)=1/6, st(1)=semi-annual rate
+          <B>fxch</B>          ;-> st(0)=semi-annual rate, st(1)=1/6
+          <B>fyl2xp1</B>       ;-> st(0)=[log2(semi-annual rate+1)]*1/6
+
+          ;Note: Because of limitations imposed on input for size and sign,
+                ;the (semi-annual rate+1) term will be between 1 and 1.5
+                ;and its log2 will be positive and less than 1. That log2
+                ;is further divided by 6 for a value definitely between
+                ;0 and +1. That value can thus be used directly with
+                ;the next instruction without any need for scaling before
+                ;or after.
+
+          <B>f2xm1</B>         ;-> st(0)=monthly rate (obtained directly
+                        ;because the instruction provides the minus 1)
+                        ;When this monthly rate is compounded 6 times
+                        ; it would be equal to the semi-annual rate
+      <B>.endif</B>
+
+;************************************************
+;*****     Compute the monthly payments     *****
+;************************************************
+
+      <B>fild  months</B>      ;-> st(0)=months, st(1)=monthly rate (R)
+      <B>fld   st(1)</B>       ;-> st(0)=R, st(1)=months, st(2)=R
+      <B>fyl2xp1</B>           ;-> st(0)=log2(1+R)*months, st(1)=R
+      <B>fld   st</B>          ;-> st(0)=log, st(1)=log, st(2)=R
+      <B>frndint</B>           ;-> st(0)=int(log), st(1)=log, st(2)=R
+      <B>fsub  st(1),st</B>    ;-> st(0)=int(log), st(1)=log-int(log), st(2)=R
+      <B>fxch  st(1)</B>       ;-> st(0)=log-int(log), st(1)=int(log), st(2)=R
+      <B>f2xm1</B>             ;-> st(0)=2<SUP>[log-int(log)]</SUP>-1, st(1)=int(log), st(2)=R
+      <B>fld1</B>
+      <B>fadd</B>              ;-> st(0)=2<SUP>[log-int(log)]</SUP>, st(1)=int(log), st(2)=R
+      <B>fscale</B>            ;-> st(0)=(1+R)<SUP>N</SUP>, st(1)=int(log), st(2)=R
+      <B>fstp  st(1)</B>       ;-> st(0)=(1+R)<SUP>N</SUP>, st(1)=R
+      <B>fld   st</B>          ;-> st(0)=(1+R)<SUP>N</SUP>, st(1)=(1+R)<SUP>N</SUP>, st(2)=R
+      <B>fld1</B>              ;-> st(0)=1, st(1)=(1+R)<SUP>N</SUP>, st(2)=(1+R)<SUP>N</SUP>, st(3)=R
+      <B>fsub</B>              ;-> st(0)=(1+R)<SUP>N</SUP>-1, st(1)=(1+R)<SUP>N</SUP>, st(2)=R
+      <B>fdiv</B>              ;-> st(0)=(1+R)<SUP>N</SUP>/[(1+R)<SUP>N</SUP>-1], st(1)=R
+      <B>fmul</B>              ;-> st(0)=R*(1+R)<SUP>N</SUP>/[(1+R)<SUP>N</SUP>-1]
+      <B>fimul mortgage</B>    ;-> st(0)=P*R*(1+R)<SUP>N</SUP>/[(1+R)<SUP>N</SUP>-1]=Monthly payments
+      <B>fimul factor10</B>    ;multiply by 100 to have 2 decimal places as integer
+      <B>fimul factor10</B>    ;-> st(0)=Monthly payments*100
+      <B>fbstp bcdtemp</B>     ;store in memory in BCD format
+                        ;rounded to the closest penny
+
+;*************************************************************************
+; The folowing section of code is not necessary for this application
+; because every precaution was taken to examine the input to insure that
+; the data used in the FPU computations is valid and would not result in
+; any major error. It is merely included to indicate how to check the
+; validity of the end result whenever there may be a risk of invalid data.
+; It also insures that the FBSTP instruction is completed before starting
+; to access the stored packed BCD data.
+;*************************************************************************
+
+      <B>fstsw ax</B>          ;copy to AX the FPU's Status Word
+                        ;containing the exception flags
+      <B>fwait</B>             ;insure the execution is completed
+      <B>shr   eax,1</B>       ;transfer bit0 to the CPU's carry flag
+                        ;That bit would be set if an invalid operation
+                        ;was detected with any of the FPU instructions
+                        ;The final result would then be invalid              
+      <B>jnc   @F</B>          ;continue if no invalid operation flag
+
+      <B>lea   eax,invalid
+      jmp   inputerror</B>  ;display error message and return to WndProc
+
+;****************************************************************
+;*****         Unpack the BCD result and display it         *****
+;
+; The coding used is not suitable as a general purpose unpacking
+; algorithm for at least two reasons: the sign is known to be
+; positive and thus disregarded, and the result was designed to
+; always contain 2 decimal places.
+;***************************************************************
+
+   <B>@@:
+      push  esi</B>               ;preserve ESI and EDI
+      <B>push  edi
+      lea   esi,bcdtemp+8</B>     ;use ESI to point initially
+                              ;to the 2nd most significant byte
+      <B>lea   edi,buffer1</B>       ;use EDI to point to the buffer
+                              ;where the ASCII string will be stored
+      <B>mov   ecx,8</B>             ;use ECX as counter for the number of bytes 
+                              ;possibly containing integer digits
+
+            ;Note: (The BCD format has 10 bytes. The most significant
+                  ;byte contains the sign which is disregarded in this
+                  ;application, and the least significant byte is known
+                  ;to contain two decimal digits.)
+
+;**********************************************************************
+; Search for the most significant byte containing the 1st integer digit
+;**********************************************************************
+
+   <B>@@:
+      movzx eax,byte ptr[esi]</B> ;get next byte in AL zero extended in EAX
+      <B>dec   esi</B>         ;adjust pointer to next byte
+      <B>or    eax,eax</B>     ;check if it contains the 1st integer
+      <B>jnz   @F</B>          ;jump if found
+      <B>dec   ecx</B>         ;decrement counter
+      <B>jnz   @B</B>          ;continue search until all integer bytes checked
+
+;***********************************************
+; If no integer digit is present,
+; place a "0" digit before the decimal delimiter
+;***********************************************
+
+      <B>mov   al,"0"
+      stosb</B>             ;insert the "0" digit
+      <B>jmp   decimals</B>    ;go insert the decimal delimiter and digits
+
+;*******************************************************
+; If that 1st byte contains only 1 integer digit,
+; it has to be processed separately to avoid a leading 0
+;*******************************************************
+
+   <B>@@:
+      test  al,0f0h</B>     ;check the high nibble of AL
+      <B>jnz   @F</B>          ;jump if there are 2 integer digits
+      <B>add   al,"0"</B>      ;convert the digit to ASCII
+      <B>stosb</B>             ;insert that digit
+      <B>jmp   nextdigit</B>   ;process next byte
+
+;*******************************************************************
+; Other bytes contain 2 integer digits each which must be unpacked
+; The high nibble digit must be followed in memory by the low nibble
+;*******************************************************************
+
+   <B>@@:
+      ror   ax,4</B>              ;transfer the high nibble to low nibble of AL
+                              ;and low nibble of AL to high nibble of AH
+      <B>ror   ah,4</B>              ;transfer it to the low nibble of AH
+      <B>add   ax,3030h</B>          ;convert both to ASCII
+      <B>stosw</B>                   ;insert both, AL followed by AH in memory
+
+<B>nextdigit:
+      movzx eax,byte ptr[esi]</B> ;get next byte
+      <B>dec   esi</B>               ;adjust pointer
+      <B>dec   ecx</B>               ;decrement integer byte counter
+      <B>jnz   @B</B>                ;continue with integer digits until completed
+
+<B>decimals:
+      mov   byte ptr[edi],"."</B> ;insert the decimal delimiter
+      <B>inc   edi</B>               ;adjust string pointer
+      <B>ror   ax,4</B>              ;unpack the decimal byte as above
+      <B>ror   ah,4
+      add   ax,3030h
+      stosw
+      mov   byte ptr[edi],0</B>   ;insert the terminating 0
+
+      <B>pop   edi</B>               ;restore the EDI and ESI registers
+      <B>pop   esi</B>
+
+;***********************************************************************
+; Display the result in the dialog box and return control to the WndProc
+;***********************************************************************
+
+      <B>invoke SetDlgItemText,hDlg,PAYMENT,ADDR buffer1
+      ret</B>
+
+;***************************************************************
+;                            atofl
+;
+; This sub-routine is partly general purpose and partly specific
+; for the task. It parses the string for unacceptable characters
+; but also returns an error if the integral portion of the input
+; exceeds 100. It also returns an error for a negative sign.
+;
+; The conversion approach of treating all the numerical digits as
+; being integer digits is sound only because the size of the
+; string was limited to 9 characters in the EDIT control. This
+; guarantees that, in a worse case scenario, the maximum integer
+; value of the input would still fit in a 32-bit register. The
+; final integer value obtained is then corrected according to the
+; count of decimal digits in the input string.
+;
+; Returns with EAX = 0 if error detected.
+;
+; If EAX != 0, the converted annual rate is returned in st(0)
+; already divided by 100.
+;****************************************************************
+
+<B>atofl:
+      push  ebx</B>         ;preserve EBX and ESI
+      <B>push  esi
+
+      lea   esi,buffer1</B> ;use ESI as pointer to text buffer
+      <B>xor   eax,eax
+      xor   ebx,ebx</B>     ;will be used as an accumulator
+      <B>xor   ecx,ecx</B>     ;will be used as a counter
+
+;************************************************
+; Skip leading spaces without generating an error
+;************************************************
+
+   <B>@@:
+      lodsb</B>             ;get next character
+      <B>cmp   al," "</B>      ;check if a space character
+      <B>jz    @B</B>          ;repeat until a non-space character is found
+
+;*********************************************
+; Check 1st non-space character for a +/- sign
+;*********************************************
+
+      <B>cmp   al,"-"</B>      ;is it a "-" sign
+      <B>jnz   @F
+
+atoflerr:
+      xor   eax,eax</B>     ;set EAX to error code
+      <B>pop   esi</B>         ;restore the EBX and ESI registers
+      <B>pop   ebx
+      ret</B>               ;return with error code
+
+   <B>@@:
+      cmp   al,"+"</B>      ;is it a "+" sign
+      <B>jnz   nextchar
+      lodsb</B>             ;disregard a "+" sign and get next character
+
+;***********************************************************
+; From this point, space and sign characters will be invalid
+;***********************************************************
+
+<B>nextchar:
+      cmp   al,0</B>        ;check for end-of-string character
+      <B>jz    endinput</B>    ;exit the string parsing section
+
+      <B>cmp   al,"."</B>      ;is it the "." decimal delimiter
+                        ;other delimiters such as the "," used in some
+                        ;countries could also be allowed but would need
+                        ;additional coding to make it more generalized
+      <B>jnz   @F</B>
+
+;******************************************************************
+; Only one decimal delimiter can be acceptable. The sign bit of ECX
+; is used to keep a record of the first delimiter identified.
+;******************************************************************
+
+      <B>or    ecx,ecx</B>     ;check if a delimiter has already been identified
+      <B>js    atoflerr</B>    ;exit with error code if more than 1 delimiter
+      
+      <B>stc</B>               ;set the carry flag
+      <B>rcr   ecx,1</B>       ;set bit31 of ECX (the sign bit) when
+                        ;the 1st delimiter is identified
+      <B>lodsb</B>             ;get next character
+      <B>jmp   nextchar</B>    ;continue parsing
+
+;***********************************************************************
+; All ASCII characters other than the numerical ones will now be invalid
+;***********************************************************************
+
+   <B>@@:
+      cmp   al,"0"
+      jb    atoflerr
+      cmp   al,"9"
+      ja    atoflerr
+
+      sub   al,"0"</B>      ;convert valid ASCII numerical character to binary
+      <B>xchg  eax,ebx</B>     ;get the accumulated integer value in EAX
+                        ;holding the new digit in EBX
+      <B>mul   factor10</B>    ;multiply the accumulated value by 10
+      <B>add   eax,ebx</B>     ; and add the new digit
+      <B>xchg  eax,ebx</B>     ;store this new accumulated value back in EBX
+
+      <B>or    ecx,ecx</B>     ;check if a decimal delimiter detected yet
+      <B>js    @F</B>          ;jump if decimal digits are being processed
+
+;*************************************
+; Integer digits still being processed
+;*************************************
+
+      <B>cmp   ebx,100</B>     ;verify current value of integer portion
+      <B>ja    atoflerr</B>    ;abort if input for annual rate is > 100%
+      <B>lodsb</B>             ;get next string character
+      <B>jmp   nextchar</B>    ;continue processing string characters
+
+;*******************************************************
+; The CL register is used as a counter of decimal digits
+; after the decimal delimiter has been identified
+;*******************************************************
+
+   <B>@@:
+      inc   cl</B>          ;increment count of decimal digits
+      <B>lodsb</B>             ;get next string character
+      <B>jmp   nextchar</B>    ;continue processing string characters
+
+;***********************************
+; Parsing of the string is completed
+;***********************************
+
+<B>endinput:
+      or    ebx,ebx</B>     ;check if total input was equal to 0
+      <B>jz    atoflerr</B>    ;abort if annual rate input is 0%
+
+      <B>finit</B>             ;initialize FPU
+      <B>push  ebx</B>         ;store value of EBX on stack
+      <B>fild  dword ptr[esp]</B>    ;-> st(0)=EBX
+      <B>add   cl,2</B>        ;increment the number of decimal digits
+                        ;to convert from % rate to a decimal rate
+      <B>shl   ecx,1</B>       ;get rid of the potential sign "flag"
+      <B>shr   ecx,1</B>       ;restore the count of decimal digits
+      <B>fild  factor10</B>    ;-> st(0)=10, st(1)=EBX
+   <B>@@:
+      fdiv  st(1),st</B>    ;-> st(0)=10, st(1)=EBX/10
+      <B>dec   ecx</B>         ;decrement counter of decimal digits
+      <B>jnz   @B</B>          ;continue dividing by 10 until count exhausted
+      <B>fstp  st</B>          ;get rid of the dividing 10 in st(0)
+                        ;-> st(0)=annual rate (as a decimal rate)
+      <B>pop   ebx</B>         ;clean CPU stack
+
+      <B>pop   esi</B>         ;restore the EBX and ESI registers
+      <B>pop   ebx
+      or    al,1</B>        ;insure EAX != 0 (i.e. no error detected)
+      <B>ret</B>
+      
+;*******************************
+
+<B>end start</B></pre>
+
+<P><HR size=5 NOSHADE>
+<pre>;#######################################################################
+;
+;                    Resource script for the Dialog Box  
+;                 to be used with the Mortgage Calculator
+;                               August 2003
+;
+;#######################################################################
+
+<B>#include "\masm32\include\resource.h"
+
+700 DIALOGEX MOVEABLE IMPURE LOADONCALL DISCARDABLE	100, 80, 131, 132, 0
+STYLE DS_MODALFRAME | 0x0004 | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_POPUP
+CAPTION "Mortgage Payments"
+FONT 8, "MS Sans Serif", 700, 0 /*FALSE*/
+BEGIN
+    LTEXT     "Mortgage principle", 701, 4,6,66,10, SS_LEFT, , 0
+    LTEXT     "Annual rate, %", 702, 	4,22,66,10, SS_LEFT, , 0
+    LTEXT     "Number of years", 703, 	4,38,66,10, SS_LEFT, , 0
+    LTEXT     "Monthly payments", 704, 	4,84,66,10, SS_LEFT, , 0
+    EDITTEXT  711,  78, 6,49,11, ES_RIGHT | ES_NUMBER, , 0
+    EDITTEXT  712,  78,22,49,11, ES_RIGHT, , 0
+    EDITTEXT  713, 102,38,25,11, ES_RIGHT | ES_NUMBER, , 0
+    CONTROL   "", 714, "Edit", ES_READONLY | ES_RIGHT, 	78,84,49,11, , 0
+    CONTROL   "Compute", 720, "Button", BS_DEFPUSHBUTTON, 16,111,41,13, , 0
+    CONTROL   "Exit", 721, "Button", 0, 	74,111,41,13, , 0
+    CONTROL   "U.S.A.", 730, "Button", BS_AUTORADIOBUTTON | WS_GROUP, 18,62,44,10, ,0
+    CONTROL   "Canada", 731, "Button", BS_AUTORADIOBUTTON, 75,62,44,10, , 0
+END</B></pre>
+<P><HR size=5 NOSHADE>
+
+<P><BR><CENTER><A HREF="index.html"><B>RETURN TO<B>
+<BR><FONT SIZE="+2">SIMPLY  FPU</FONT>
+<BR><B>CONTENTS<B></A></CENTER><BR>
+
+</BODY>
+</HTML>

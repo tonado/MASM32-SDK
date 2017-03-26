@@ -1,0 +1,116 @@
+
+yesno Script will write to the current position**Insert code at this location ?
+jump nextlabel
+exit
+nextlabel:
+
+input Please enter the name of the main dialog; result is in str0
+
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {comment}{lf}
+text {comment}                         Add In Dialog Template{lf}
+text {comment}{lf}
+text {comment}   Ensure that the following line is included in the file that the dialog{lf}
+text {comment}   will be used in so that the macros that make it work are available.{lf}
+text {comment}{lf}
+text {comment}   include \masm32\include\dialogs.inc{lf}
+text {comment}{lf}
+text {comment}   Uncomment and place the following 2 prototypes with the rest{lf}
+text {comment}   of the prototypes for your application.{lf}
+text {comment}{lf}
+text {comment}   [name]     PROTO :DWORD,:DWORD
+
+selectline
+replace [name]**{str0}
+
+text {lf}
+text {comment}   [name]Proc PROTO :DWORD,:DWORD,:DWORD,:DWORD
+
+selectline
+replace [name]**{str0}
+
+text {lf}
+text {comment}{lf}
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {lf}
+text [name] proc Instance:DWORD,Parent:DWORD
+
+selectline
+replace [name]**{str0}
+
+text {lf}
+text {lf}
+text     Dialog "Blank Dialog Box", \            {comment} caption{lf}
+text            "MS Sans Serif",8, \             {comment} font,pointsize{lf}
+text             WS_OVERLAPPED or \              {comment} styles for{lf}
+text             WS_SYSMENU or DS_CENTER, \      {comment} dialog window{lf}
+text             2, \                            {comment} number of controls{lf}
+text             50,50,190,100, \                {comment} x y co-ordinates{lf}
+text             1024                            {comment} memory buffer size{lf}
+text {lf}
+text     DlgButton "OK",    WS_TABSTOP,140, 5,40,12,IDOK{lf}
+text     DlgButton "Cancel",WS_TABSTOP,140,19,40,12,IDCANCEL{lf}
+text {lf}
+text     CallModalDialog Instance,Parent,[name]Proc,ADDR Instance
+
+selectline
+replace [name]**{str0}
+
+text {lf}
+text {lf}
+text     ret{lf}
+text {lf}
+text [name] endp
+
+selectline
+replace [name]**{str0}
+
+text {lf}
+text {lf}
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {lf}
+text [name]Proc proc hWin:DWORD,uMsg:DWORD,wParam:DWORD,lParam:DWORD
+
+selectline
+replace [name]**{str0}
+
+text {lf}
+text {lf}
+text     .if uMsg == WM_INITDIALOG{lf}
+text       invoke SendMessage,hWin,WM_SETICON,1,{lf}
+text                          FUNC(LoadIcon,NULL,IDI_APPLICATION){lf}
+text     {comment} -------------------------------------{lf}
+text     {comment} return 1 to set focus to 1st control{lf}
+text     {comment} -------------------------------------{lf}
+text       mov eax, 1{lf}
+text       ret{lf}
+text {lf}
+text     .elseif uMsg == WM_COMMAND{lf}
+text       .if wParam == IDOK{lf}
+text     {comment} ------------------------{lf}
+text     {comment} code for OK button here{lf}
+text     {comment} ------------------------{lf}
+text       .elseif wParam == IDCANCEL{lf}
+text         jmp quit_dialog{lf}
+text       .endif{lf}
+text {lf}
+text     .elseif uMsg == WM_CLOSE{lf}
+text       quit_dialog:{lf}
+text       invoke EndDialog,hWin,0{lf}
+text {lf}
+text     .endif{lf}
+text {lf}
+text     {comment} -------------------------------{lf}
+text     {comment} return zero for default action{lf}
+text     {comment} -------------------------------{lf}
+text     xor eax, eax{lf}
+text     ret{lf}
+text {lf}
+text [name]Proc endp
+
+selectline
+replace [name]**{str0}
+
+text {lf}
+text {lf}
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}

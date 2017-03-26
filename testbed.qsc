@@ -1,0 +1,254 @@
+; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+
+    yesno Is the editor empty and set at the right directory ?**Algo Testbed
+    jmp nxt1
+    Exit
+  nxt1:
+    input Enter the file name with NO extension**Type the name here
+
+    fcreate {str0}.asm
+
+fprint {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+fprint 
+fprint       .486                      {comment} create 32 bit code
+fprint       .model flat, stdcall      {comment} 32 bit memory model
+fprint       option casemap :none      {comment} case sensitive
+fprint 
+fprint {comment}     include files
+fprint {comment}     ~~~~~~~~~~~~~
+fprint       include \masm32\include\windows.inc
+fprint       include \masm32\include\masm32.inc
+fprint       include \masm32\include\gdi32.inc
+fprint       include \masm32\include\user32.inc
+fprint       include \masm32\include\kernel32.inc
+fprint       include \masm32\include\Comctl32.inc
+fprint       include \masm32\include\comdlg32.inc
+fprint       include \masm32\include\shell32.inc
+fprint       include \masm32\include\oleaut32.inc
+fprint       include \masm32\include\msvcrt.inc
+fprint       include \masm32\include\dialogs.inc
+fprint       include \masm32\macros\macros.asm
+fprint 
+fprint {comment}     libraries
+fprint {comment}     ~~~~~~~~~
+fprint       includelib \masm32\lib\masm32.lib
+fprint       includelib \masm32\lib\gdi32.lib
+fprint       includelib \masm32\lib\user32.lib
+fprint       includelib \masm32\lib\kernel32.lib
+fprint       includelib \masm32\lib\Comctl32.lib
+fprint       includelib \masm32\lib\comdlg32.lib
+fprint       includelib \masm32\lib\shell32.lib
+fprint       includelib \masm32\lib\oleaut32.lib
+fprint       includelib \masm32\lib\msvcrt.lib
+fprint 
+fprint       DlgProc PROTO :DWORD,:DWORD,:DWORD,:DWORD
+fprint 
+fprint     {comment} -----------------------------
+fprint     {comment} macros for displaying results
+fprint     {comment} -----------------------------
+fprint       SBtext MACRO part,lpString
+fprint         invoke SendMessage,hStatus,SB_SETTEXT,part-1,reparg(lpString)
+fprint       ENDM
+fprint 
+fprint       TBtext MACRO lpString
+fprint         invoke SetWindowText,FUNC(GetActiveWindow),reparg(lpString)
+fprint       ENDM
+fprint 
+fprint       EDtext MACRO lpString
+fprint         invoke SetWindowText,hEdit,reparg(lpString)
+fprint       ENDM
+fprint 
+fprint       EDclear equ <EDtext 0>
+fprint 
+fprint     .data?
+fprint         hWnd      dd ?
+fprint         hInstance dd ?
+fprint         hStatus   dd ?
+fprint         hEdit     dd ?
+fprint 
+fprint     .code
+fprint 
+fprint {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+fprint 
+fprint start:
+fprint     mov hInstance, FUNC(GetModuleHandle,NULL)
+fprint     call main
+fprint     invoke ExitProcess,eax
+fprint 
+fprint {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+fprint 
+fprint main proc
+fprint 
+fprint     invoke InitCommonControls
+fprint 
+fprint     Dialog "   ", \                         {comment} caption
+fprint            "MS Sans Serif",10, \            {comment} font,pointsize
+fprint             WS_OVERLAPPED or \              {comment} styles for
+fprint             WS_SYSMENU or DS_CENTER, \      {comment} dialog window
+fprint             9, \                            {comment} number of controls
+fprint             50,50,250,106, \                {comment} x y co-ordinates
+fprint             1024                            {comment} memory buffer size
+fprint 
+fprint     DlgButton "Test 1",WS_TABSTOP,5, 5,50,13,101
+fprint     DlgButton "Test 2",WS_TABSTOP,5,20,50,13,102
+fprint     DlgButton "Test 3",WS_TABSTOP,5,35,50,13,103
+fprint     DlgButton "Test 4",WS_TABSTOP,5,50,50,13,104
+fprint     DlgButton "Test 5",WS_TABSTOP,5,65,50,13,105
+fprint     DlgButton "Reset",WS_TABSTOP,60,65,50,13,106
+fprint     DlgButton "Close",WS_TABSTOP,192,65,50,13,IDCANCEL
+fprint     DlgStatus 110
+fprint     DlgEdit WS_TABSTOP or ES_MULTILINE or ES_WANTRETURN or \
+fprint             ES_LEFT or WS_BORDER or WS_VSCROLL,60,5,182,58,111
+fprint 
+fprint     CallModalDialog hInstance,0,DlgProc,NULL
+fprint 
+fprint     ret
+fprint 
+fprint main endp
+fprint 
+fprint {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+fprint 
+fprint align 4
+fprint 
+fprint DlgProc proc hWin:DWORD,uMsg:DWORD,wParam:DWORD,lParam:DWORD
+fprint 
+fprint     LOCAL hDC   :DWORD
+fprint     LOCAL ps    :PAINTSTRUCT
+fprint     LOCAL rct   :RECT
+fprint     LOCAL crct  :RECT
+fprint     LOCAL buffer1[260]:BYTE
+fprint     LOCAL buffer2[260]:BYTE
+fprint     LOCAL buffer3[260]:BYTE
+fprint     LOCAL buffer4[260]:BYTE
+fprint 
+fprint     STRING MainTitle,"Algorith Test Bed"
+fprint 
+fprint     Switch uMsg
+fprint       Case WM_INITDIALOG
+fprint         m2m hWnd, hWin
+fprint         invoke SendMessage,hWnd,WM_SETICON,1,
+fprint                            FUNC(LoadIcon,NULL,IDI_ASTERISK)
+fprint         invoke SetWindowText,hWnd,ADDR MainTitle
+fprint 
+fprint         mov hStatus, FUNC(GetDlgItem,hWnd,110)
+fprint         GLOBAL sbarray dd 100,200,300,400,-1
+fprint         invoke SendMessage,hStatus,SB_SETPARTS,5,ADDR sbarray
+fprint 
+fprint         mov hEdit,   FUNC(GetDlgItem,hWnd,111)
+fprint         invoke SendMessage,hEdit,WM_SETFONT,
+fprint                            FUNC(GetStockObject,ANSI_FIXED_FONT),TRUE
+fprint         mov eax, 1
+fprint 
+fprint       Case WM_COMMAND
+fprint         Switch wParam
+fprint           Case 101
+fprint             TBtext "ID 101"
+fprint             SBtext 1,"Test 1"
+fprint             EDtext "You pressed button 1"
+fprint 
+fprint           Case 102
+fprint             TBtext "ID 102"
+fprint             SBtext 2,"Test 2"
+fprint             EDtext "Button 2 was pressed"
+fprint 
+fprint           Case 103
+fprint             TBtext "ID 103"
+fprint             SBtext 3,"Test 3"
+fprint             EDtext "This is button 3"
+fprint 
+fprint           Case 104
+fprint             TBtext "ID 104"
+fprint             SBtext 4,"Test 4"
+fprint             EDtext "The 4th button was pressed"
+fprint 
+fprint           Case 105
+fprint             TBtext "ID 105"
+fprint             SBtext 5,"Test 5"
+fprint             EDtext "OK, you pressed button 5"
+fprint 
+fprint           Case 106
+fprint             EDclear
+fprint             SBtext 1,0
+fprint             SBtext 2,0
+fprint             SBtext 3,0
+fprint             SBtext 4,0
+fprint             SBtext 5,0
+fprint             TBtext ADDR MainTitle
+fprint 
+fprint           Case IDCANCEL
+fprint             jmp quit_dialog
+fprint         Endsw
+fprint 
+fprint       Case WM_PAINT
+fprint         mov hDC, FUNC(BeginPaint,hWin,ADDR ps)
+fprint         invoke GetClientRect,hWin,ADDR rct
+fprint         invoke GetWindowRect,hStatus,ADDR crct
+fprint         mov eax, crct.bottom
+fprint         sub eax, crct.top
+fprint         sub rct.bottom, eax
+fprint         invoke DrawEdge,hDC,ADDR rct,EDGE_ETCHED,BF_RECT
+fprint         invoke EndPaint,hWin,ADDR ps
+fprint 
+fprint       Case WM_CLOSE
+fprint         quit_dialog:
+fprint         invoke EndDialog,hWin,0
+fprint     Endsw
+fprint 
+fprint     xor eax, eax
+fprint     ret
+fprint 
+fprint DlgProc endp
+fprint 
+fprint {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+fprint 
+fprint end start
+
+    fclose
+    fcreate makeit.bat
+
+fprint @echo off
+fprint 
+fprint if not exist rsrc.rc goto over1
+fprint \masm32\bin\rc /v rsrc.rc
+fprint \masm32\bin\cvtres /machine:ix86 rsrc.res
+fprint :over1
+fprint  
+fprint if exist "{str0}.obj" del "{str0}.obj"
+fprint if exist "{str0}.exe" del "{str0}.exe"
+fprint 
+fprint \masm32\bin\ml /c /coff "{str0}.asm"
+fprint if errorlevel 1 goto errasm
+fprint 
+fprint if not exist rsrc.obj goto nores
+fprint 
+fprint \masm32\bin\Link /SUBSYSTEM:WINDOWS "{str0}.obj" rsrc.obj
+fprint  if errorlevel 1 goto errlink
+fprint 
+fprint dir "{str0}.*"
+fprint goto TheEnd
+fprint 
+fprint :nores
+fprint \masm32\bin\Link /SUBSYSTEM:WINDOWS "{str0}.obj"
+fprint if errorlevel 1 goto errlink
+fprint dir "{str0}.*"
+fprint goto TheEnd
+fprint 
+fprint :errlink
+fprint  echo _
+fprint echo Link error
+fprint goto TheEnd
+fprint 
+fprint :errasm
+fprint  echo _
+fprint echo Assembly Error
+fprint goto TheEnd
+fprint 
+fprint :TheEnd
+fprint  
+fprint pause
+
+    fclose
+
+    fileopen {str0}.asm
+
+

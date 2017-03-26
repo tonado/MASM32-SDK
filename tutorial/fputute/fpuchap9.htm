@@ -1,0 +1,236 @@
+<HTML>
+<HEAD>
+<META NAME="Author" CONTENT="Raymond Filiatreault">
+<META NAME="Description" CONTENT="Tutorial on the use of the floating point coprocessor in assembly programming. Chap. 9 Arithmetic instructions - with integer numbers">
+<TITLE>Simply FPU Chap. 9</TITLE>
+</HEAD>
+<BODY TEXT="#402000" LINK="#0000ff" VLINK="#0000ff" ALINK="#0000ff" BACKGROUND="fpufigs/bluewave.gif">
+
+<CENTER><FONT SIZE="+3">SIMPLY  FPU</FONT>
+<BR>by <B>Raymond Filiatreault</B><BR>
+Copyright 2003</CENTER>
+<P>
+<CENTER><B>Chap. 9<BR>Arithmetic instructions - with integer numbers</B></CENTER>
+
+<P><BR>The FPU instructions covered in this chapter perform arithmetic operations with the value in the TOP data register ST(0) and integer numbers located in memory.
+
+<P>The arithmetic instructions covered in this document are (in alphabetical order):
+
+<pre>
+<A HREF="#fiadd"><B>FIADD</B></A>     ADD an Integer located in memory to ST(0)
+
+<A HREF="#fidiv"><B>FIDIV</B></A>     DIVide ST(0) by an Integer located in memory
+
+<A HREF="#fidivr"><B>FIDIVR</B></A>    DIVide an Integer located in memory by ST(0)
+
+<A HREF="#fimul"><B>FIMUL</B></A>     MULtiply ST(0) by an Integer located in memory
+
+<A HREF="#fisub"><B>FISUB</B></A>     SUBtract an Integer located in memory from ST(0)
+
+<A HREF="#fisubr"><B>FISUBR</B></A>    SUBtract ST(0) from an Integer located in memory</pre>
+
+
+<BR><FONT SIZE="+1"><A NAME="fiadd"></A><B>FIADD</B></FONT> (Add an integer located in memory to ST(0)</P>
+
+<pre>Syntax:    <B>fiadd <EM>Src</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Overflow, Precision</pre>
+
+This instruction performs a signed addition of the source (<EM>Src</EM>) integer value and the value of ST(0) and overwrites the content of ST(0) with the result. The source must be the memory address of a 16-bit WORD or a 32-bit DWORD integer value (see Chap.2 for <A HREF="fpuchap2.htm#intmode">addressing modes of integers</A>). <FONT SIZE="-1"><EM>(The <A HREF="fpuchap8.htm#fadd">FADD</A> instruction must be used to add a REAL number to the value in ST(0)).</EM></FONT>
+
+<BLOCKQUOTE><U>Note</U> that a QWORD integer in memory cannot be added directly to ST(0). If such an addition becomes necessary, the QWORD value must first be loaded to the FPU and then added with the FADD or <A HREF="fpuchap8.htm#faddp">FADDP</A> instruction.</BLOCKQUOTE>
+
+An <B>I</B>nvalid operation exception is detected if the TOP data register ST(0) is empty or is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value would then be inserted in ST(0). (A value of <A HREF="fpuchap2.htm#infini">INFINITY</A> in ST(0) will be treated as a valid number and yield an INFINITY result without any exception being detected.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if ST(0) is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when the content of ST(0) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word. The addition would still yield a valid result.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>O</B>verflow exception will be detected if the result exceeds the range limit of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word and the value of INFINITY will overwrite the content of ST(0).
+
+<P>Examples of use:
+
+<pre><B>fiadd dword_var</B>      ;add the <EM>dword_var</EM> integer variable to ST(0)
+<B>fiadd word ptr [eax]</B> ;add the WORD value pointed to by EAX to ST(0)</pre>
+
+If an integer in one of the CPU registers, or an immediate integer value, needs to be added to ST(0), it can be transferred to the stack and used from there. The following code is suggested for adding an immediate value of 100 to ST(0).
+
+<pre>
+<B>pushd 100</B>  ;push the value of 100 on the stack
+<B>fiadd dword ptr[esp]</B> ;add the DWORD located at memory address [esp] to ST(0)
+<B>fxxxx</B>      ;another FPU instruction to insure that the addition instruction
+           ;is completed before removing the integer value from the stack
+<B>pop   <EM>reg</EM></B>  ;pop any CPU register which can be trashed to clean the stack
+           ;or use that reserved space to store a DWORD value from the FPU
+           ;for retrieval into one of the CPU registers or even into memory
+           ;or the stack pointer can be restored with <B>add esp,4</B></pre>
+
+
+<BR><FONT SIZE="+1"><A NAME="fisub"></A><B>FISUB</B></FONT> (Subtract an integer located in memory from ST(0))
+
+<pre>Syntax:    <B>fisub <EM>Src</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Overflow, Precision</pre>
+
+This instruction performs a signed subtraction of the source (<EM>Src</EM>) integer value from the value of ST(0) and overwrites the content of ST(0) with the result. The source must be the memory address of a 16-bit WORD or a 32-bit DWORD integer value (see Chap.2 for <A HREF="fpuchap2.htm#intmode">addressing modes of integers</A>). <FONT SIZE="-1"><EM>(The <A HREF="fpuchap8.htm#fsub">FSUB</A> instruction must be used to subtract a REAL number from the value in ST(0)).</EM></FONT>
+
+<BLOCKQUOTE><U>Note</U> that a QWORD integer in memory cannot be subtracted directly from ST(0). If such a subtraction becomes necessary, the QWORD value must first be loaded to the FPU and then subtracted with the FSUB or <A HREF="fpuchap8.htm#fsubp">FSUBP</A> instruction.</BLOCKQUOTE>
+
+An <B>I</B>nvalid operation exception is detected if the TOP data register ST(0) is empty or is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value would then be inserted in ST(0). (A value of <A HREF="fpuchap2.htm#infini">INFINITY</A> in ST(0) will be treated as a valid number and yield an INFINITY result without any exception being detected.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if ST(0) is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when the content of ST(0) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word. The subtraction would still yield a valid result.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>O</B>verflow exception will be detected if the result exceeds the range limit of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word and the value of INFINITY will overwrite the content of ST(0).
+
+<P>Examples of use:
+
+<pre><B>fisub word_var</B>         ;subtract the <EM>word_var</EM> integer variable from ST(0)
+<B>fisub dword ptr[esi+8]</B> ;subtract the DWORD pointed to by [ESI+8] from ST(0)</pre>
+
+If an integer in one of the CPU registers, or an immediate integer value, needs to be subtracted from ST(0), it can be transferred to the stack and used from there. The following code is suggested for subtracting the content of EAX from ST(0).
+
+<pre><B>push  eax</B>  ;push the content of EAX on the stack
+<B>fisub dword ptr[esp]</B> ;subtract the DWORD at memory address [esp] from ST(0)
+<B>fxxxx</B>      ;another FPU instruction to insure that the subtraction
+           ;is completed before removing the integer value from the stack
+<B>pop   eax</B>  ;or pop any CPU register which can be trashed to clean the stack
+           ;or use that reserved space to store a DWORD value from the FPU
+           ;for retrieval into one of the CPU registers or even into memory</pre>
+
+
+<BR><FONT SIZE="+1"><A NAME="fisubr"></A><B>FISUBR</B></FONT> (Reverse subtraction of ST(0) from an integer located in memory)
+
+<pre>Syntax:    <B>fisubr <EM>Src</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Overflow, Precision</pre>
+
+This instruction performs a signed subtraction of the value of ST(0) from the source (<EM>Src</EM>) integer value and overwrites the content of ST(0) with the result;<U> the value of the source remains unchanged</U>. The source must be the memory address of a 16-bit WORD or a 32-bit DWORD integer value (see Chap.2 for <A HREF="fpuchap2.htm#intmode">addressing modes of integers</A>). <FONT SIZE="-1"><EM>(The <A HREF="fpuchap8.htm#fsubr">FSUBR</A> instruction must be used to subtract the value in ST(0) from a REAL number).</EM></FONT>
+
+<BLOCKQUOTE><U>Note</U> that ST(0) cannot be subtracted directly from a QWORD integer in memory. If such a subtraction becomes necessary, the QWORD value
+must first be loaded to the FPU and then the subtraction performed with the FSUBR or <A HREF="fpuchap8.htm#fsubrp">FSUBRP</A> instruction.</BLOCKQUOTE>
+
+An <B>I</B>nvalid operation exception is detected if the TOP data register ST(0) is empty or is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value would then be inserted in ST(0). (A value of <A HREF="fpuchap2.htm#infini">INFINITY</A> in ST(0) will be treated as a valid number and yield an INFINITY result without any exception being detected.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if ST(0) is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when the content of ST(0) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word. The subtraction would still yield a valid result.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>O</B>verflow exception will be detected if the result exceeds the range limit of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word and the value of INFINITY will overwrite the content of ST(0).
+
+<P>Examples of use:
+
+<pre>
+<B>fisubr word_var</B>     ;subtract ST(0) from the <EM>word_var</EM> integer variable
+                    ;and replace the content of ST(0) with the result
+<B>fisubr dword ptr[esp]</B>  ;subtract ST(0) from the DWORD pointed to by [ESP]
+                    ;and replace the content of ST(0) with the result
+                    ;(see the <A HREF="#fisub">FISUB</A> example for a typical use with [ESP])</pre>
+
+<BR><FONT SIZE="+1"><A NAME="fimul"></A><B>FIMUL</B></FONT> (Multiply ST(0) by an integer located in memory)
+
+<pre>Syntax:    <B>fimul <EM>Src</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Overflow, Precision</pre>
+
+This instruction performs a signed multiplication of the content of ST(0) by the source (<EM>Src</EM>) integer value and overwrites the content of ST(0) with the result. The source must be the memory address of a 16-bit WORD or a 32-bit DWORD integer value (see Chap.2 for <A HREF="fpuchap2.htm#intmode">addressing modes of integers</A>). <FONT SIZE="-1"><EM>(The <A HREF="fpuchap8.htm#fmul">FMUL</A> instruction must be used to multiply the value in ST(0) by a REAL number).</EM></FONT>
+
+<BLOCKQUOTE>	<U>Note</U> that ST(0) cannot be multiplied directly by a QWORD integer in memory. If such a multiplication becomes necessary, the QWORD value must first be loaded to the FPU and then multiplied with the FMUL or <A HREF="fpuchap8.htm#fmulp">FMULP</A> instruction.</BLOCKQUOTE>
+
+An <B>I</B>nvalid operation exception is detected if the TOP data register ST(0) is empty, or is a <A HREF="fpuchap2.htm#nans">NAN</A>, or its value is <A HREF="fpuchap2.htm#infini">INFINITY</A> <U>and</U> the source integer has a value of zero, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value would then be inserted in ST(0). (If the source integer has a non-zero value, a value of INFINITY in ST(0) will be treated as a valid number and yield an INFINITY result without any exception being detected.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if ST(0) is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when the content of ST(0) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word. The multiplication would still yield a valid result.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>O</B>verflow exception will be detected if the result exceeds the range limit of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word and the value of INFINITY will overwrite the content of ST(0).
+
+<P>Examples of use:
+
+<pre><B>fimul dword_var</B>  ;multiply ST(0) by the <EM>dword_var</EM> integer variable
+<B>fimul dword ptr[ebp+12]</B> ;multiply ST(0) by the DWORD pointed to by [EBP+12]
+                 ;this would be typical code generated by the assembler
+                 ;for multiplying ST(0) by a parameter passed to a procedure</pre>
+
+
+<BR><FONT SIZE="+1"><B><A NAME="fidiv"></A>FIDIV</B></FONT> (Divide ST(0) by an integer located in memory)
+
+<pre>Syntax:    <B>fidiv <EM>Src</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Underflow, Precision, Zero divide</pre>
+
+This instruction performs a signed division of the content of ST(0) by the source (<EM>Src</EM>) integer value and overwrites the content of ST(0) with the result. The source must be the memory address of a 16-bit WORD or a 32-bit DWORD integer value (see Chap.2 for <A HREF="fpuchap2.htm#intmode">addressing modes of integers</A>). <FONT SIZE="-1"><EM>(The <A HREF="fpuchap8.htm#fdiv">FDIV</A> instruction must be used to divide the value in ST(0) by a REAL number).</EM></FONT>
+
+<BLOCKQUOTE><U>Note</U> that ST(0) cannot be divided directly by a QWORD integer in memory. If such a division becomes necessary, the QWORD value must first be loaded to the FPU and then the division performed with the FDIV or <A HREF="fpuchap8.htm#fdivp">FDIVP</A> instruction.</BLOCKQUOTE>
+
+An <B>I</B>nvalid operation exception is detected if the TOP data register ST(0) is empty, or is a <A HREF="fpuchap2.htm#nans">NAN</A>, or if the value of both the source integer and ST(0) is zero,  setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value would then be inserted in ST(0). (A value of <A HREF="fpuchap2.htm#infini">INFINITY</A> in ST(0) will be treated as a valid number and yield an INFINITY result without any exception being detected, even if the source integer has a value of zero.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if ST(0) is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when the content of ST(0) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number or the result is a denormalized number, setting the related flag in the Status Word. The division would still yield a valid result.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>U</B>nderflow exception will be detected if the result exceeds the range limit of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word.
+
+<P>A <B>Z</B>ero divide exception will be detected if the source integer has a value of zero, and the value of INFINITY will overwrite the content of ST(0), unless the value of ST(0) is also zero which would be an invalid operation as indicated above. (This exception is not detected if the value of ST(0) is already INFINITY.)
+
+<P>Examples of use:
+
+<pre>
+<B>fidiv word_var</B>     ;divide ST(0) by the <EM>word_var</EM> integer variable
+<B>fidiv dword ptr [ebp-8]</B>   ;divide ST(0) by the DWORD pointed to by [EBP-8]
+                   ;this would be typical code generated by the assembler
+                   ;for dividing ST(0) by a LOCAL dword integer variable</pre>
+
+<BR><FONT SIZE="+1"><A NAME="fidivr"></A><B>FIDIVR</B></FONT> (Reverse division of an integer located in memory by ST(0))
+
+<pre>Syntax:    <B>fidivr <EM>Src</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Overflow, Precision, Zero divide</pre>
+
+This instruction performs a signed division of the source (<EM>Src</EM>) integer value by the content of ST(0) and overwrites the content of ST(0) with the result;<U> the value of the source remains unchanged</U>. The source must be the memory address of a 16-bit WORD or a 32-bit DWORD integer value (see Chap.2 for <A HREF="fpuchap2.htm#intmode">addressing modes of integers</A>). <FONT SIZE="-1"><EM>(The <A HREF="fpuchap8.htm#fdivr">FDIVR</A> instruction must be used to divide a REAL number by the value in ST(0)).</EM></FONT>
+
+<BLOCKQUOTE><U>Note</U> that a QWORD integer in memory cannot be divided directly by ST(0). If such a division becomes necessary, the QWORD value must first be loaded to the FPU and then the division performed with the FDIVR or <A HREF="fpuchap8.htm#fdivrp">FDIVRP</A> instruction.</BLOCKQUOTE>
+
+An <B>I</B>nvalid operation exception is detected if the TOP data register ST(0) is empty, or is a <A HREF="fpuchap2.htm#nans">NAN</A>, or if the value of both the source integer and ST(0) is zero, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value would then be inserted in ST(0). (A value of <A HREF="fpuchap2.htm#infini">INFINITY</A> in ST(0) will be treated as a valid number and yield a zero result without any exception being detected.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if ST(0) is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when the content of ST(0) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word. The division would yield a value of INFINITY, unless the source integer is zero which would yield a value of zero.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>O</B>verflow exception will be detected if the result exceeds the range limit of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word and the value of INFINITY will overwrite the content of ST(0).
+
+<P>A <B>Z</B>ero divide exception will be detected if ST(0) has a value of zero and the value of INFINITY will overwrite the content of ST(0), unless the integer value is also zero which would be an invalid operation as indicated above.
+
+<P>Examples of use:
+
+<pre>
+<B>fidivr dword_var</B>   ;divide the <EM>dword_var</EM> integer variable by ST(0)
+                   ;and replace the content of ST(0) with the result
+<B>fidivr word ptr[esi+ebx]</B> ;divide the WORD located at [ESI+EBX] by ST(0)
+                   ;and replace the content of ST(0) with the result</pre>
+
+<P><BR><CENTER><A HREF="index.html"><B>RETURN TO<B>
+<BR><FONT SIZE="+2">SIMPLY  FPU</FONT>
+<BR><B>CONTENTS<B></A></CENTER><BR>
+
+</BODY>
+</HTML>

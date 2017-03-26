@@ -1,0 +1,30 @@
+#include "\masm32\include\resource.h"
+
+1       ICON  \masm32\vkdebug\dbgwin\icons\eye.ico
+129     BITMAP \masm32\vkdebug\dbgwin\icons\pin.bmp
+130     BITMAP \masm32\vkdebug\dbgwin\icons\delete.bmp
+131     BITMAP \masm32\vkdebug\dbgwin\icons\help.bmp
+132     BITMAP \masm32\vkdebug\dbgwin\icons\open.bmp
+133     BITMAP \masm32\vkdebug\dbgwin\icons\save.bmp
+
+#define DebugWindow                     1101
+#define DebugText                       1102
+#define IDM_SELALL                      1103
+#define IDM_HELP                        1104
+
+DbgWinName DIALOGEX 0, 0, 154, 120 //93
+STYLE WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION |
+    WS_SYSMENU | WS_THICKFRAME
+CAPTION "Debug Window for MASM32"
+CLASS "DbgWinClass"
+FONT 8, "Courier New", 0, 0, 0x1
+BEGIN
+    EDITTEXT        DebugText,7,7,102,46,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL | WS_HSCROLL
+END
+
+HOTKEYS ACCELERATORS
+{
+    "^A", IDM_SELALL
+    VK_F1, IDM_HELP, VIRTKEY
+}

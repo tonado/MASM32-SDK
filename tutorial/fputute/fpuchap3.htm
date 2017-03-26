@@ -1,0 +1,276 @@
+<HTML>
+<HEAD>
+<META NAME="Author" CONTENT="Raymond Filiatreault">
+<META NAME="Description" CONTENT="Tutorial on the use of the floating point coprocessor in assembly programming. Chap. 3 Instructions related to the FPU internals">
+<TITLE>Simply FPU Chap. 3</TITLE>
+</HEAD>
+<BODY TEXT="#402000" LINK="#0000ff" VLINK="#0000ff" ALINK="#0000ff" BACKGROUND="fpufigs/bluewave.gif">
+
+<CENTER><FONT SIZE="+3">SIMPLY  FPU</FONT>
+<BR>by <B>Raymond Filiatreault</B><BR>
+Copyright 2003</CENTER>
+<P>
+<CENTER><B>Chap. 3<BR>Instructions related to the FPU internals</B></CENTER>
+
+<P><BR>The FPU instructions covered in this chapter perform no operation on numerical data. Their main purpose is to exchange information with the FPU or modify some of its settings. Several of them have both a "WAIT" and a "NO WAIT" variant (the latter having the letter "N" inserted immediately following the "F" in the mnemonic).
+
+<P>None of these instructions will raise an exception flag.
+
+<P>The described instructions are (in alphabetical order):
+
+<pre><A HREF="#fclex"><B>FCLEX/FNCLEX</B></A>     CLear EXceptions
+
+<A HREF="#fdecstp"><B>FDECSTP</B></A>          DECrement STack Pointer
+
+<A HREF="#ffree"><B>FFREE</B></A>            FREE a data register
+
+<A HREF="#fincstp"><B>FINCSTP</B></A>          INCrement STack Pointer
+
+<A HREF="#finit"><B>FINIT/FNINIT</B></A>     INITialize the FPU
+
+<A HREF="#fldcw"><B>FLDCW</B></A>            LoaD Control Word
+
+<A HREF="#fldenv"><B>FLDENV</B></A>           LoaD ENVironment
+
+<A HREF="#frstor"><B>FRSTOR</B></A>           ReSTORe all registers
+
+<A HREF="#fsave"><B>FSAVE/FNSAVE</B></A>     SAVE state of FPU
+
+<A HREF="#fstcw"><B>FSTCW/FNSTCW</B></A>     STore Control Word
+
+<A HREF="#fstenv"><B>FSTENV/FNSTENV</B></A>   STore ENVironment
+
+<A HREF="#fstsw"><B>FSTSW/FNSTSW</B></A>     STore Status Word
+
+<A HREF="#fwait"><B>FWAIT</B></A>            WAIT while FPU is busy</pre>
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fwait">FWAIT</A></B></FONT> (CPU waits while FPU is busy)
+
+<pre>Syntax:   <B>fwait</B> (no operand)</pre>
+
+<P>This instruction prevents the CPU from executing its next instruction if the Busy bit of the FPU's Status Word is set.
+
+<P>The FPU does not have direct access to the stream of instructions. It will start executing an instruction only when the CPU detects one in the code bits and transmits the information to the FPU. While the FPU is executing that instruction, the CPU can continue to execute in parallel other instructions which are not related to the FPU. Some of the FPU instructions being relatively slow, the CPU could execute several of its own instructions during that period.
+
+<P>The CPU also has some read/write access to the FPU's Status and Control registers even while the FPU is executing an instruction. In some cases, it may be desirable to read/write these registers without delay. But, in most cases, it is preferable or even necessary to <U>wait</U> until the FPU has completed the current instruction before proceeding with the read/write of these registers.
+
+<P>For example, a comparison by the FPU may require several clock cycles to execute and set the bits in the proper fields of the Status Word register. Waiting until the FPU has completed the operation and effectively updated the Status Word is a necessity if reading that Status Word is to have any meaning.
+
+<P><BLOCKQUOTE><EM>Many of the instructions which read or write to the FPU's Status and Control registers are automatically encoded with the fwait code.</EM></BLOCKQUOTE>
+
+<P>Whenever the FPU is instructed to store a result (such as an integer) intended to be used by a CPU instruction, the latter should be preceded by an explicit FWAIT instruction. <FONT SIZE="-1"><EM>(For example, storing the content of a data register to memory as an integer may take some 30 clock cycles to complete.)</EM></FONT></P>
+
+<P><U>Note:</U> Original versions of MASM were inserting an FWAIT instruction in front of every FPU instruction except those specified as "no-wait". This may have been necessary with the earlier co-processors but not on the more modern ones. Such coding may be observed if some old code is disassembled. The CPU can now poll the Busy bit of the Status Word whenever necessary before sending data processing instructions to the FPU.
+
+<P><BR><FONT SIZE="+1"><B><A NAME="finit">FINIT / FNINIT</A></B></FONT> (Initialize FPU)
+
+<pre>Syntax:   <B>finit</B>  (no operand)
+          <B>fninit</B> (no operand)</pre>
+
+<P><BLOCKQUOTE>The FINIT and FNINIT have exactly the same coding except that the FINIT is automatically preceded by the FWAIT code.</BLOCKQUOTE>
+
+<P>This instruction initializes the FPU by resetting all the registers and flags to their default values. (Refer to <A HREF="fpuchap1.htm">Chap.1</A> Description of FPU Internals for default values.)
+
+<P>Due to some of the restrictions of the FPU, it is good programming practice to take the precaution of initializing it before starting any computation, unless it is known that data has been left in it for further processing. If several sections of code use the FPU and the programmer is careless about not leaving the data registers "empty" in some of them, they can fill up very rapidly.
+
+<P>The "no-wait" variant may become necessary only if the programmer writes exception handling code and an endless wait is to be prevented.
+
+<P><BLOCKQUOTE>Note: The FPU hardware is also used to process MMX/SSE instructions which may render its registers unusable for immediate FPU instructions. Initializing it would insure the clean-up for subsequent FPU instructions. Some of the API functions of Windows XP are also known to use MMX instructions without preserving the FPU registers and restoring them before leaving. <B>Using API functions under Windows XP while some of the FPU registers still contain valuable data must therefore be avoided</B>. </BLOCKQUOTE>
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fstsw">FSTSW / FNSTSW</A></B></FONT> (Store Status Word)
+
+<pre>Syntax:   <B>fstsw  <EM>Dest</EM>
+          fnstsw <EM>Dest</EM></B></pre>
+
+<P><BLOCKQUOTE>The FSTSW and FNSTSW have exactly the same coding except that the FSTSW is automatically preceded by the FWAIT code.</BLOCKQUOTE>
+
+<P>This instruction stores the content of the <A HREF="fpuchap1.htm#sword">Status Word</A> register at a 16-bit WORD memory address (<EM>Dest</EM>). All valid addressing modes are acceptable for this memory destination.  Specifying the size with indirect addressing is not necessary because the WORD size is implicit in this instruction.
+
+<P>Ever since the 80287 co-processor, the destination can also be specified as the CPU's AX register.
+
+<P><BLOCKQUOTE><EM><U>This is the only FPU instruction which can transfer information directly from one of the FPU's registers to one of the CPU's general purpose registers.</U></EM></BLOCKQUOTE>
+
+<P>The "no-wait" variant should only be used in exception handling code when it may be necessary to investigate which of the other flags of the Status Word may have been set. The "wait" variant should be used in most other cases. The remainder of this description will assume that the "wait" variant has been used.
+
+<P>The information in the Status Word is normally used to branch the program based on some result of the previous FPU instruction(s). A subsequent FWAIT instruction should always be included before the testing and/or branching code to insure that the information has effectively reached its specified destination.
+
+<P>If one or more of the exception flags need to be tested (such as for a division by zero and/or for an invalid operation), the related bits of the Status Word must then be tested individually (or in groups). Example code would be:
+
+<pre>
+  <B>stword    dw   ?</B>
+ 
+  <B>fstsw stword</B>      ;copy the status word to the memory variable <EM>stword</EM>
+  <B>fwait</B>             ;wait until the instruction is completed
+  <B>test  stword,4+1</B>  ;tests both the zero divide 
+                    ;and invalid exception flags together
+  <B>jnz   error_code</B>  ;jump to the code section dealing with these exceptions
+                    ;possibly testing further to define which one occurred
+                    ;and issue the appropriate message or take other action</pre>
+
+<P>If the condition bits (C0-C3) need to be examined such as after a comparison, storing the Status Word in the AX register can be most useful. Those condition bits would then all be in the AH register which can be transferred directly into the CPU's flag register with the "sahf" instruction. With such a transfer,
+
+<P> the C0 bit becomes the CF (carry) flag,
+
+<BR> the C2 bit becomes the PF(parity) flag, and
+
+<BR> the C3 bit becomes the ZF (zero) flag.
+
+<BR> (The C1 bit is not associated with any flag.)
+
+<P>A simple conditional jump can then be used (instead of testing for set bits followed by a conditional jump). Example code would be:
+<pre>
+  <B>fstsw ax</B>        ;copy the status word to the AX register
+  <B>fwait</B>           ;wait until the instruction is completed
+  <B>sahf</B>            ;copy the condition bits in the CPU's flag register
+  <B>ja   this_code</B>  ;jump to this code section if CF=C0=0 <U>and</U> ZF=C3=0</pre>
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fstcw">FSTCW / FNSTCW</A></B></FONT> (Store Control Word)
+
+<pre>Syntax:   <B>fstcw  <EM>Dest</EM>
+          fnstcw <EM>Dest</EM></B></pre>
+
+<P><BLOCKQUOTE>The FSTCW and FNSTCW have exactly the same coding except that the FSTCW is automatically preceded by the FWAIT code.</BLOCKQUOTE>
+
+<P>This instruction stores the content of the <A HREF="fpuchap1.htm#cword">Control Word</A> register at a 16-bit WORD memory address (<EM>Dest</EM>). All valid addressing modes are acceptable for this memory destination.  Specifying the size with indirect addressing is not necessary because the WORD size is implicit in this instruction.
+
+<P>The "no-wait" variant could be used almost anytime because the content of the Control Word cannot be changed by any instruction except <A HREF="#finit">FINIT/FNINIT</A> <FONT SIZE="-1">(and <A HREF="#fldcw">FLDCW</A> which would be redundant immediately before an FSTCW instruction)</FONT>. Waiting for the FPU to finish executing its current instruction would thus not have any effect on the information. The "wait" variant should however be used if it immediately follows an FINIT/FNINIT.
+
+<P>Although this Control Word contains some information about the settings of the FPU, the main purpose for getting a copy of it is generally for temporary storage. Some of the settings can then be selectively changed for a sequence of FPU operations, and the previous settings restored afterwards.
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fldcw">FLDCW</A></B></FONT> (Load Control Word)
+
+<pre>Syntax:   <B>fldcw <EM>Src</EM></B></pre>
+
+<P>This instruction loads into the <A HREF="fpuchap1.htm#cword">Control Word</A> register the 16-bit WORD located at the specified memory address (<EM>Src</EM>). All valid addressing modes are acceptable for this memory source.  Specifying the size with indirect addressing is not necessary because the WORD size is implicit in this instruction.
+
+<P>The purpose of this instruction is to modify the current settings of the FPU. The rounding control is probably the one which may need to be modified the most often. The following example code is based on the need to truncate a result before proceeding further, and the current Control Word may contain some other "rounding" mode.
+<pre>
+  <B>oldcw   dw   ?</B>
+
+  <B>fstcw oldcw</B>     ;get the current Control Word to retain all setting bits
+                  ;not related to the rounding control (RC) bits
+  <B>fwait</B>		  ;to insure the storage instruction is completed
+  <B>mov   ax,oldcw</B>
+; <B>and   ax,0F3FFh</B> ;clears only the RC bits, leaving all other bits unchanged
+                  ;not necessary here because both bits will be set
+  <B>or    ax,0C00h</B>  ;this will set both bits of the RC field to the truncating mode
+                  ;without affecting any of the other field's bits
+  <B>push  eax</B>       ;use the stack to store the modified Control Word in memory
+  <B>fldcw [sp]</B>      ;load the modified Control Word
+
+  <B>fxxxx</B>           ;other FPU instruction(s) needing the truncating mode
+
+  <B>fldcw oldcw</B>     ;restore the previous Control Word
+  <B>pop   eax</B>       ;clean-up the stack
+                  ;this could also retrieve a 16-bit or 32-bit integer
+                  ;possibly returned by the "other FPU instruction(s)"</pre>
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fclex">FCLEX / FNCLEX</A></B></FONT> (Clear exceptions)
+
+<pre>Syntax:   <B>fclex</B>  (no operand)
+          <B>fnclex</B> (no operand)</pre>
+
+<P><BLOCKQUOTE>The FCLEX and FNCLEX have exactly the same coding except that the FCLEX is automatically preceded by the FWAIT code.</BLOCKQUOTE>
+
+<P>This instruction clears all the exception bits of the <A HREF="fpuchap1.htm#sword">Status Word</A>.
+
+<P>The "no-wait" variant must be a part of any exception handling routine written by the programmer. Otherwise, if control is returned to the FPU without clearing the exceptions, more interrupts to handle the exception would be generated in an endless loop. <FONT SIZE="-1">(In such exception handling routines, the "wait" variant could generate an endless wait situation!)</FONT>
+
+<P>When all exception handling is left to the FPU, it is still good programming practice to test occasionally the Status Word for some specific exceptions. If one (or more) has been detected which requires some branching in the code, exceptions should then be cleared to prevent future branching due to "old" exceptions.
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fsave">FSAVE / FNSAVE</A></B></FONT> (Save state of FPU)
+
+<pre>Syntax:   <B>fsave  <EM>Dest</EM>
+          fnsave <EM>Dest</EM></B></pre>
+
+<P><BLOCKQUOTE>The FSAVE and FNSAVE have exactly the same coding except that the FSAVE is automatically preceded by the FWAIT code.</BLOCKQUOTE>
+
+<P>This instruction saves the entire state of the FPU at the specified address (<EM>Dest</EM>) and then initializes it as if an FINIT instruction had been executed. The required memory size is 108 bytes and the data will have the following format in 32-bit programming.
+
+<P><center><A NAME="fig31"><img src="fpufigs/fpustate.gif" width="200" height="434" ></A></center>
+
+<P><BLOCKQUOTE><EM><A NAME="note31">Note:</A> In 16-bit programming, the instruction pointer and operand address would have a WORD size. The first 28 bytes would thus be stored in only 14 bytes (7 WORDS without any unused memory) and followed immediately by the 8 TBYTE register data for a total of only 94 bytes.</EM></BLOCKQUOTE>
+
+<P>The "no-wait" variant must be used if an exception handling routine written by the programmer needs the information returned by this instruction. Otherwise, the "wait" variant should be used.
+
+<P>This instruction would normally be used when the content of the FPU must be saved temporarily in order to use the FPU for some other reason. For example, a debugger program would be a typical application making use of this instruction if it needs to display the content of the FPU at a break point. It would then use the FPU to convert the saved floating point values and later restore the previous state of the FPU (with the <A HREF="#frstor">FRSTOR</A> instruction) so that the debugged program could continue to function normally.
+
+<P>This instruction should also be considered if a program must be executed under Windows XP and some of the API functions must be called while useful data is still in FPU registers. The registers can then be restored after the API call.
+
+<P><BR><FONT SIZE="+1"><B><A NAME="frstor">FRSTOR</A></B></FONT> (Restore the state of the FPU)
+
+<pre>Syntax:   <B>frstor <EM>Src</EM></B></pre>
+
+<P>This instruction restores the state of the FPU previously saved in memory (by the <A HREF="#fsave">FSAVE</A> instruction) in the 108 bytes starting at the specified address (<EM>Src</EM>). The format of that data must be as depicted in <A HREF="#fig31">Fig.3.1</A> for 32-bit programming. (For 16-bit programming, see the <A HREF="#note31">Note</A> under Fig.3.1).
+
+<P>Any alteration of that data in memory should generally be avoided. On rare occasions, the opportunity may be taken to modify the Control Word or clear exceptions before restoring the state of the FPU.
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fstenv">FSTENV / FNSTENV</A></B></FONT> (Store environment)
+
+<pre>Syntax:   <B>fstenv  <EM>Dest</EM>
+          fnstenv <EM>Dest</EM></B></pre>
+
+<P><BLOCKQUOTE>The FSTENV and FNSTENV have exactly the same coding except that the FSTENV is automatically preceded by the FWAIT code.</BLOCKQUOTE>
+
+<P>This instruction stores the environment state at the specified memory address (Dest). The required memory size is 28 bytes for 32-bit programming, having the same format as the first 28 bytes depicted in <A HREF="#fig31">Fig.3.1</A>. (For 16-bit programming, see the <A HREF="#note31">Note</A> under Fig.3.1).
+
+<P>The "no-wait" variant must be used if an exception handling routine written by the programmer needs some of the information returned by this instruction. Otherwise, the "wait" variant should be used to insure that the latest information will be made available.
+
+<P>Although the content of the Status Word and the Control Word can be retrieved by other means (<A HREF="#fstsw">FSTSW</A> and <A HREF="#fstcw">FSTCW</A> respectively), the Instruction Pointer and Operand Address of the last instruction processed by the FPU may be useful information when an exception is detected. Some code using this instruction could be inserted during the development phase to better identify potential programming flaws and lead to proper correction. (For example, a sub-routine could convert the data of the environment to alphanumeric and keep a log of each occurrence for later review and analysis).
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fldenv">FLDENV</A></B></FONT> (Load environment)
+
+<pre>Syntax:   <B>fldenv <EM>Src</EM></B></pre>
+
+<P>This instruction loads the environment previously stored in memory (by the <A HREF="#fstenv">FSTENV</A> instruction) in the 28 bytes starting at the specified address (<EM>Src</EM>). The format of that data must be as depicted in the first 28 bytes of <A HREF="#fig31">Fig.3.1</A> for 32-bit programming. (For 16-bit programming, see the <A HREF="#note31">Note</A> under Fig.3.1).
+
+<P>The environment would normally have been stored following the detection of an exception. The opportunity could then be taken to modify the 16-bit registers for various reasons and then load the modified environment.
+
+<P><BR><FONT SIZE="+1"><B><A NAME="ffree">FFREE</A></B></FONT> (Free a data register)
+
+<pre>Syntax:   <B>free <EM>st(x)</EM></B></pre>
+
+<P>This instruction modifies the <A HREF="fpuchap1.htm#tword">Tag Word</A> to indicate that the specified 80-bit data register is now considered as empty. Any data previously in that register becomes unusable. Any attempt to use that data will result in an Invalid exception being detected and an <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value possibly being generated.
+
+<P>Although any of the 8 data registers can be tagged as free with this instruction, the only one which can be of any immediate value is the ST(7) register when all registers are in use and another value must be loaded to the FPU. If the data in that ST(7) is still valuable, other instructions should be used to save it before emptying that register.
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fdecstp">FDECSTP</A></B></FONT> (Decrement stack pointer)
+
+<pre>Syntax:   <B>fdecstp</B> (no operand)</pre>
+
+<P>This instruction simply decrements the value of the <A HREF="fpuchap1.htm#topfield">TOP field</A> of the Status Word. If that value was 0, it becomes 7. The contents of the data registers and of the Tag Word are not changed.
+
+<P>From the programmer's point of view, this instruction would cause the content of ST(7) to become the content of the top register and thus become ST(0). The data previously at the top in ST(0) would shift to ST(1), and so on for the other registers.
+
+<P>All data processing instructions for the FPU must use at least the top register as an operand. The main feature of this FDECSTP instruction (and of its counterpart FINCSTP) is to be able to "<A HREF="fpuchap1.htm#fig11">rotate the barrel</A>" in order to bring any of the data registers to the top, without changing the content nor their relative order in those registers.
+
+<P>This instruction (or its counterpart FINCSTP) could also be used to bring a free register to the ST(7) position in order to load it with another value. For example, if all registers are full and the value in ST(5) has become useless, the following code could be used.
+<pre>
+  <B>ffree st(5)</B>    ;tags the ST(5) register as empty
+  <B>fdecstp</B>        ;brings the empty ST(5) register to the ST(6) position
+  <B>fdecstp</B>        ;brings it now to the ST(7) position
+                 ;where it could be loaded with some new data
+                 ;<EM>(all the other data has also been shifted two positions)</EM></pre>
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fincstp">FINCSTP</A></B></FONT> (Increment stack pointer)
+
+<pre>Syntax:   <B>fincstp</B> (no operand)</pre>
+
+<P>This instruction simply increments the value of the <A HREF="fpuchap1.htm#topfield">TOP field</A> of the Status Word. If that value was 7, it becomes 0. The contents of the data registers and of the Tag Word are not changed.
+
+<P>From the programmer's point of view, this instruction would cause the content of ST(1) to become the content of the top register and thus become ST(0). The data previously in ST(2) would shift to ST(1), and so on for the other registers, the content of ST(0) becoming ST(7).
+
+<P>All data processing instructions for the FPU must use at least the top register as an operand. The main feature of this FINCSTP instruction (and of its counterpart FDECSTP) is to be able to "<A HREF="fpuchap1.htm#fig11">rotate the barrel</A>" in order to bring any of the data registers to the top, without changing the content nor their relative order in those registers.
+
+<P>For example, if some operation using the content of both ST(1) and ST(3) is required, the following code could be used if the operation does not affect the location of other registers.
+<pre>
+  <B>fincstp</B>         ;brings ST(1) as ST(0), and ST(3) as ST(2)
+  <B>fxxxx st,st(2)</B>  ;perform required operation
+  <B>fdecstp</B>         ;returns all registers to their original position</pre>
+
+<P><BR><CENTER><A HREF="index.html"><B>RETURN TO<B>
+<BR><FONT SIZE="+2">SIMPLY  FPU</FONT>
+<BR><B>CONTENTS<B></A></CENTER><BR>
+
+</BODY>
+</HTML>

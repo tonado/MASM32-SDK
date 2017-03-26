@@ -1,0 +1,80 @@
+<HTML>
+<HEAD>
+<META NAME="Author" CONTENT="Raymond Filiatreault">
+<META NAME="Description" CONTENT="Tutorial on the use of the floating point coprocessor in assembly programming. Contents and introduction">
+<META NAME="Keywords" CONTENT="FPU, instructions, coprocessor, co-processor, tutorial, floating point, assembler, assembly, programming">
+<TITLE>Simply FPU - Intro</TITLE>
+</HEAD>
+<BODY TEXT="#402000" LINK="#0000ff" VLINK="#0000ff" ALINK="#0000ff" BACKGROUND="fpufigs/bluewave.gif">
+
+<CENTER><FONT SIZE="+3">SIMPLY  FPU</FONT>
+<BR>by <B>Raymond Filiatreault</B><BR>
+Copyright 2003</CENTER>
+<P><BR><CENTER><B>CONTENTS</B></CENTER>
+<P>
+<P><pre><FONT SIZE="+1">            <A HREF="#intro"><B>Introduction</B></A>
+
+Chap. 1     <A HREF="fpuchap1.htm"><B>Description of FPU Internals</B></A>
+
+Chap. 2     <A HREF="fpuchap2.htm"><B>Data types used by the FPU and addressing modes</B></A>
+
+Chap. 3     <A HREF="fpuchap3.htm"><B>Instructions related to the FPU internals</B></A>
+
+Chap. 4     <A HREF="fpuchap4.htm"><B>Data transfer instructions - REAL numbers</B></A>
+
+Chap. 5     <A HREF="fpuchap5.htm"><B>Data transfer instructions - integers</B></A>
+
+Chap. 6     <A HREF="fpuchap6.htm"><B>Data transfer instructions - packed decimals</B></A>
+
+Chap. 7     <A HREF="fpuchap7.htm"><B>Comparison instructions</B></A>
+
+Chap. 8     <A HREF="fpuchap8.htm"><B>Arithmetic instructions - with REAL numbers</B></A>
+
+Chap. 9     <A HREF="fpuchap9.htm"><B>Arithmetic instructions - with integer numbers</B></A>
+
+Chap. 10    <A HREF="fpuchap10.htm"><B>Trigonometric instructions</B></A>
+
+Chap. 11    <A HREF="fpuchap11.htm"><B>Logarithmic and exponential instructions</B></A>
+
+Chap. 12    <A HREF="fpuchap12.htm"><B>Other instructions</B></A>
+
+Chap. 13    <A HREF="fpuchap13.htm"><B>Commented example</B></A>
+
+Appendix 1  <A HREF="appen1.htm"><B>Alphabetical list of FPU instructions</B></FONT></A></pre>
+
+<P><BR><B><A NAME="intro"> INTRODUCTION</A></B>
+<P>The FPU, also known as a co-processor, used to be an option when the first PCs came
+on the market. Modern PCs are now all provided with a co-processor. Although the
+original PC-XT has evolved considerably over the years, the FPU itself has not changed
+appreciably during that same period. Apart from a few minor instructions having been
+added, the main improvement has been the extended range of some of the existing
+instructions.
+<P>The entire set of assembler instructions for the FPU is relatively small and could be
+memorized rapidly. Learning which parameter(s) can be used with each instruction
+should take only slightly longer. The main difficulty is in developing sound programming
+techniques to avoid some of the pitfalls peculiar to the FPU.
+<P>The main purpose of this document is to show that using the FPU can be relatively easy
+with minimal effort. Once the basics have been mastered, any computation however
+complex can be performed.
+<P>The first chapter describes the internals of the FPU and how they function. Some of this
+knowledge is an absolute necessity to use the FPU properly or help later in
+understanding the outcome of some of the instructions. This is followed by a chapter
+describing the various data types which can be used with some of the instructions,
+including a detailed review of the floating point data formats.
+<P>The FPU instructions are then discussed in detail in the following chapters which
+regroup them according to some "biased" criteria. Although some description of each
+instruction is available in the Fphelp.hlp file provided with MASM32, a more in-depth
+review is provided with more tangible examples of their usage.
+<P>The final chapter provides a fully commented example of a semi-complex computation.
+<P>It should be noted that this document has been prepared according to the syntax used
+by MASM. Although most other assemblers/compilers should have a similar syntax for
+the FPU instruction mnemonics, their syntax may differ for the addressing mode of
+memory variables. It is also known that some of the instructions used without explicit
+parameters are not supported by some of the other assemblers/compilers.
+<P>Any comment or suggestion aimed at improving this document will be given due
+consideration. Those can be sent to:
+<P>rayfil@hotmail.com
+<P>Please use "Simply FPU" in the subject line to help its retrieval from the ever increasing
+SPAM.
+</BODY>
+</HTML>

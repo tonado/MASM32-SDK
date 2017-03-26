@@ -1,0 +1,1 @@
+fn MessageBox,0,str$(eax),"Title",MB_OK

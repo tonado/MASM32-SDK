@@ -1,0 +1,38 @@
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+    INTEGER hFile
+    INTEGER flen
+    INTEGER void
+
+    STRING pattern
+    STRING fname
+    STRING txtdata
+    STRING pMem
+    STRING mbText
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+    cstr pattern "All Files\0*.*\0Text Files\0*.txt\0\0"
+    fileopen "Load File ..." pattern
+    fname = $0
+    if$ fname == ""                         ; if user clicked "cancel"
+    goto endlbl                             ; exit the script
+
+    hFile = fopen fname                     ; open existing file
+    flen  = fsize hFile                     ; get its length
+    pMem  = alloc$ flen                     ; allocate a memory buffer of that size
+    txtdata = fread hFile flen              ; read file into memory buffer
+    void = fclose hFile                     ; close the file
+
+    cstr mbText "Do you wish to load this file into the\neditor at the current insertion point ?"
+
+    msgbox mbText "Question" MB_YESNO       ; display the message box
+    if #0 == IDNO                           ; if user pressed NO
+    goto endlbl                             ; exit the script
+
+    text txtdata                            ; insert text into editor
+
+  endlbl:
+    end
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤

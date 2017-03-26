@@ -1,0 +1,15 @@
+ Assembling: F:\masm32\m32lib\filesizeW.asm
+
+*************
+UNICODE Build
+*************
+
+ Volume in drive F is quad_f
+ Volume Serial Number is 9616-0D1F
+
+ Directory of F:\masm32\m32lib
+
+11/23/2011  10:26 PM             1,011 filesizeW.asm
+11/23/2011  10:26 PM               418 filesizeW.obj
+               2 File(s)          1,429 bytes
+               0 Dir(s)  257,834,573,824 bytes free

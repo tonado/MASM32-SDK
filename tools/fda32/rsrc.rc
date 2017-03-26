@@ -1,0 +1,22 @@
+// いいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいい
+
+#ifndef mainrc
+
+  #include "\masm32\INCLUDE\Resource.h"
+
+#endif
+
+// いいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいい
+
+5000 DIALOGEX MOVEABLE IMPURE LOADONCALL DISCARDABLE	10, 10, 296, 239, 0
+STYLE DS_MODALFRAME | 0x0004 | DS_CENTER | WS_CAPTION | WS_VISIBLE | WS_POPUP
+CAPTION " About"
+FONT 8, "MS Sans Serif", 700, 0 /*FALSE*/
+BEGIN
+    LTEXT           "img", 999,0,0,12,10, SS_LEFT, , 0
+    ICON            500, 998 15,35,18,20, ,0
+    LTEXT           "Text", 997, 51,35,228,172, SS_LEFT, , 0
+    PUSHBUTTON      "OK", 1, 230,212,50,14, 0, , 0
+END
+
+// いいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいい

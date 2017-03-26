@@ -1,0 +1,6 @@
+ Assembling: C:\masm32\VKDEBUG\EXAMPLE\DEMO1\dbdemo.asm
+MASM : fatal error A1000: cannot open file : C:\masm32\VKDEBUG\EXAMPLE\DEMO1\dbdemo.asm
+Microsoft (R) Incremental Linker Version 5.12.8078
+Copyright (C) Microsoft Corp 1992-1998. All rights reserved.
+
+LINK : fatal error LNK1181: cannot open input file "C:\masm32\VKDEBUG\EXAMPLE\DEMO1\dbdemo.obj"

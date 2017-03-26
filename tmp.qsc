@@ -1,0 +1,20 @@
+text {comment} ------------------------------------------------------------{lf}
+text : This batch file creates a response file for both ML and LINK{lf}
+text {comment} ------------------------------------------------------------{lf}
+text @echo off{lf}
+text cls{lf}
+text echo.{lf}
+text echo    ** Assembling default.lib library modules.{lf}
+text echo.{lf}
+text dir /b *.asm > _tmp.rsp{lf}
+text \masm32\bin\ml /c /coff @_tmp.rsp{lf}
+text echo.{lf}
+text echo    ** Linking default.lib{lf}
+text echo.{lf}
+text dir /b *.obj > _lnk.rsp{lf}
+text \masm32\bin\link -lib @_lnk.rsp "/out:default.lib" {lf}
+text dir *.lib{lf}
+text del *.obj{lf}
+text del _tmp.rsp{lf}
+text del _lnk.rsp{lf}
+text pause{lf}

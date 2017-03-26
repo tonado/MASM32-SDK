@@ -1,0 +1,295 @@
+; --------------------------------------------------------------------------------------------------
+;                           dnsapi.inc Copyright The MASM32 SDK 1998-2010
+; --------------------------------------------------------------------------------------------------
+
+IFNDEF DNSAPI_INC
+DNSAPI_INC equ <1>
+
+BreakRecordsIntoBlob PROTO STDCALL :DWORD,:DWORD,:DWORD
+CombineRecordsInBlob PROTO STDCALL :DWORD,:DWORD
+
+DnsAcquireContextHandle_A PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  DnsAcquireContextHandle_ equ <DnsAcquireContextHandle_A>
+ENDIF
+
+DnsAcquireContextHandle_W PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  DnsAcquireContextHandle_ equ <DnsAcquireContextHandle_W>
+ENDIF
+
+DnsAddRecordSet_A PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  DnsAddRecordSet_ equ <DnsAddRecordSet_A>
+ENDIF
+
+DnsAddRecordSet_UTF8 PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+
+DnsAddRecordSet_W PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  DnsAddRecordSet_ equ <DnsAddRecordSet_W>
+ENDIF
+
+DnsAllocateRecord PROTO STDCALL :DWORD
+DnsApiAlloc PROTO STDCALL :DWORD
+DnsApiFree PROTO STDCALL :DWORD
+DnsApiHeapReset PROTO STDCALL :DWORD,:DWORD,:DWORD
+DnsApiRealloc PROTO STDCALL :DWORD,:DWORD
+DnsApiSetDebugGlobals PROTO STDCALL :DWORD
+DnsAsyncRegisterHostAddrs PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+DnsAsyncRegisterInit PROTO STDCALL :DWORD
+DnsAsyncRegisterTerm PROTO STDCALL
+DnsCopyStringEx PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+DnsCreateReverseNameStringForIpAddress PROTO STDCALL :DWORD
+DnsCreateStandardDnsNameCopy PROTO STDCALL :DWORD,:DWORD,:DWORD
+DnsCreateStringCopy PROTO STDCALL :DWORD,:DWORD
+DnsDhcpSrvRegisterHostName PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+DnsDhcpSrvRegisterInit PROTO STDCALL
+DnsDhcpSrvRegisterInitialize PROTO STDCALL :DWORD
+DnsDhcpSrvRegisterTerm PROTO STDCALL
+DnsDowncaseDnsNameLabel PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+DnsExtractRecordsFromMessage_UTF8 PROTO STDCALL :DWORD,:DWORD,:DWORD
+
+DnsExtractRecordsFromMessage_W PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  DnsExtractRecordsFromMessage_ equ <DnsExtractRecordsFromMessage_W>
+ENDIF
+
+DnsFindAuthoritativeZone PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+DnsFlushResolverCache PROTO STDCALL
+
+DnsFlushResolverCacheEntry_A PROTO STDCALL :DWORD
+IFNDEF __UNICODE__
+  DnsFlushResolverCacheEntry_ equ <DnsFlushResolverCacheEntry_A>
+ENDIF
+
+DnsFlushResolverCacheEntry_UTF8 PROTO STDCALL :DWORD
+
+DnsFlushResolverCacheEntry_W PROTO STDCALL :DWORD
+IFDEF __UNICODE__
+  DnsFlushResolverCacheEntry_ equ <DnsFlushResolverCacheEntry_W>
+ENDIF
+
+DnsFree PROTO STDCALL :DWORD,:DWORD
+DnsFreeConfigStructure PROTO STDCALL :DWORD,:DWORD
+DnsGetBufferLengthForStringCopy PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+DnsGetCacheDataTable PROTO STDCALL :DWORD
+DnsGetDnsServerList PROTO STDCALL :DWORD
+DnsGetIpAddressInfoList PROTO STDCALL :DWORD
+DnsGetLastFailedUpdateInfo PROTO STDCALL :DWORD
+DnsGetLocalAddrArray PROTO STDCALL
+DnsGetLocalAddrArrayDirect PROTO STDCALL
+
+DnsGetPrimaryDomainName_A PROTO STDCALL
+IFNDEF __UNICODE__
+  DnsGetPrimaryDomainName_ equ <DnsGetPrimaryDomainName_A>
+ENDIF
+
+DnsGlobals PROTO C :VARARG
+DnsIpv6AddressToString PROTO STDCALL :DWORD,:DWORD
+DnsIpv6StringToAddress PROTO STDCALL :DWORD,:DWORD,:DWORD
+DnsIsStringCountValidForTextType PROTO STDCALL :DWORD,:DWORD
+
+DnsModifyRecordSet_A PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  DnsModifyRecordSet_ equ <DnsModifyRecordSet_A>
+ENDIF
+
+DnsModifyRecordSet_UTF8 PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+
+DnsModifyRecordSet_W PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  DnsModifyRecordSet_ equ <DnsModifyRecordSet_W>
+ENDIF
+
+DnsModifyRecordsInSet_A PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  DnsModifyRecordsInSet_ equ <DnsModifyRecordsInSet_A>
+ENDIF
+
+DnsModifyRecordsInSet_UTF8 PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+
+DnsModifyRecordsInSet_W PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  DnsModifyRecordsInSet_ equ <DnsModifyRecordsInSet_W>
+ENDIF
+
+DnsNameCompareEx_A PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  DnsNameCompareEx_ equ <DnsNameCompareEx_A>
+ENDIF
+
+DnsNameCompareEx_UTF8 PROTO STDCALL :DWORD,:DWORD,:DWORD
+
+DnsNameCompareEx_W PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  DnsNameCompareEx_ equ <DnsNameCompareEx_W>
+ENDIF
+
+DnsNameCompare_A PROTO STDCALL :DWORD,:DWORD
+IFNDEF __UNICODE__
+  DnsNameCompare_ equ <DnsNameCompare_A>
+ENDIF
+
+DnsNameCompare_UTF8 PROTO STDCALL :DWORD,:DWORD
+
+DnsNameCompare_W PROTO STDCALL :DWORD,:DWORD
+IFDEF __UNICODE__
+  DnsNameCompare_ equ <DnsNameCompare_W>
+ENDIF
+
+DnsNameCopy PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+DnsNameCopyAllocate PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+DnsNotifyResolver PROTO STDCALL :DWORD,:DWORD
+DnsNotifyResolverClusterIp PROTO STDCALL :DWORD,:DWORD
+DnsNotifyResolverEx PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+DnsQueryConfig PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+DnsQueryConfigAllocEx PROTO STDCALL :DWORD,:DWORD,:DWORD
+DnsQueryConfigDword PROTO STDCALL :DWORD,:DWORD
+
+DnsQueryExA PROTO STDCALL :DWORD
+IFNDEF __UNICODE__
+  DnsQueryEx equ <DnsQueryExA>
+ENDIF
+
+DnsQueryExUTF8 PROTO STDCALL :DWORD
+
+DnsQueryExW PROTO STDCALL :DWORD
+IFDEF __UNICODE__
+  DnsQueryEx equ <DnsQueryExW>
+ENDIF
+
+DnsQuery_A PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  DnsQuery_ equ <DnsQuery_A>
+ENDIF
+
+DnsQuery_UTF8 PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+
+DnsQuery_W PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  DnsQuery_ equ <DnsQuery_W>
+ENDIF
+
+DnsRecordBuild_UTF8 PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+
+DnsRecordBuild_W PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  DnsRecordBuild_ equ <DnsRecordBuild_W>
+ENDIF
+
+DnsRecordCompare PROTO STDCALL :DWORD,:DWORD
+DnsRecordCopyEx PROTO STDCALL :DWORD,:DWORD,:DWORD
+DnsRecordListFree PROTO STDCALL :DWORD,:DWORD
+DnsRecordSetCompare PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+DnsRecordSetCopyEx PROTO STDCALL :DWORD,:DWORD,:DWORD
+DnsRecordSetDetach PROTO STDCALL :DWORD
+DnsRecordStringForType PROTO STDCALL :DWORD
+DnsRecordStringForWritableType PROTO STDCALL :DWORD
+DnsRecordTypeForName PROTO STDCALL :DWORD,:DWORD
+DnsRegisterClusterAddress PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+DnsReleaseContextHandle PROTO STDCALL :DWORD
+DnsRemoveRegistrations PROTO STDCALL
+
+DnsReplaceRecordSetA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  DnsReplaceRecordSet equ <DnsReplaceRecordSetA>
+ENDIF
+
+DnsReplaceRecordSetUTF8 PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+
+DnsReplaceRecordSetW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  DnsReplaceRecordSet equ <DnsReplaceRecordSetW>
+ENDIF
+
+DnsSetConfigDword PROTO STDCALL :DWORD,:DWORD,:DWORD
+DnsStringCopyAllocateEx PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+DnsUpdate PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+
+DnsUpdateTest_A PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  DnsUpdateTest_ equ <DnsUpdateTest_A>
+ENDIF
+
+DnsUpdateTest_UTF8 PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+
+DnsUpdateTest_W PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  DnsUpdateTest_ equ <DnsUpdateTest_W>
+ENDIF
+
+DnsValidateName_A PROTO STDCALL :DWORD,:DWORD
+IFNDEF __UNICODE__
+  DnsValidateName_ equ <DnsValidateName_A>
+ENDIF
+
+DnsValidateName_UTF8 PROTO STDCALL :DWORD,:DWORD
+
+DnsValidateName_W PROTO STDCALL :DWORD,:DWORD
+IFDEF __UNICODE__
+  DnsValidateName_ equ <DnsValidateName_W>
+ENDIF
+
+DnsValidateUtf8Byte PROTO STDCALL :DWORD,:DWORD
+DnsWriteQuestionToBuffer_UTF8 PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+
+DnsWriteQuestionToBuffer_W PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  DnsWriteQuestionToBuffer_ equ <DnsWriteQuestionToBuffer_W>
+ENDIF
+
+DnsWriteReverseNameStringForIpAddress PROTO STDCALL :DWORD,:DWORD
+Dns_AddRecordsToMessage PROTO STDCALL :DWORD,:DWORD,:DWORD
+Dns_AllocateMsgBuf PROTO STDCALL :DWORD
+Dns_BuildPacket PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+Dns_CacheSocketCleanup PROTO STDCALL
+Dns_CacheSocketInit PROTO STDCALL :DWORD
+Dns_CleanupWinsock PROTO STDCALL
+Dns_CloseConnection PROTO STDCALL :DWORD
+Dns_CloseHostFile PROTO STDCALL :DWORD
+Dns_CloseSocket PROTO STDCALL :DWORD
+Dns_CreateMulticastSocket PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+Dns_CreateSocket PROTO STDCALL :DWORD,:DWORD,:DWORD
+Dns_CreateSocketEx PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+Dns_FindAuthoritativeZoneLib PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+Dns_GetIpAddresses PROTO STDCALL :DWORD,:DWORD
+Dns_GetLocalIpAddressArray PROTO STDCALL
+Dns_GetRandomXid PROTO STDCALL :DWORD
+Dns_InitQueryTimeouts PROTO STDCALL
+Dns_InitializeMsgRemoteSockaddr PROTO STDCALL :DWORD,:DWORD
+Dns_InitializeWinsock PROTO STDCALL
+Dns_OpenHostFile PROTO STDCALL :DWORD
+Dns_OpenTcpConnectionAndSend PROTO STDCALL :DWORD,:DWORD,:DWORD
+Dns_ParseMessage PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+Dns_ParsePacketRecord PROTO STDCALL :DWORD,:DWORD,:DWORD
+Dns_PingAdapterServers PROTO STDCALL :DWORD
+Dns_ReadHostFileLine PROTO STDCALL :DWORD
+Dns_ReadRecordStructureFromPacket PROTO STDCALL :DWORD,:DWORD,:DWORD
+Dns_RecvTcp PROTO STDCALL :DWORD
+Dns_ResetNetworkInfo PROTO STDCALL :DWORD
+Dns_SendAndRecvUdp PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+Dns_SendEx PROTO STDCALL :DWORD,:DWORD,:DWORD
+Dns_SetRecordDatalength PROTO STDCALL :DWORD,:DWORD
+Dns_SkipToRecord PROTO STDCALL :DWORD,:DWORD,:DWORD
+Dns_UpdateLib PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+Dns_UpdateLibEx PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+Dns_WriteQuestionToMessage PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+Dns_WriteRecordStructureToPacketEx PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+GetCurrentTimeInSeconds PROTO STDCALL
+GetRecordsForLocalName PROTO STDCALL :DWORD
+NetInfo_Build PROTO STDCALL :DWORD
+NetInfo_Clean PROTO STDCALL :DWORD,:DWORD
+NetInfo_Copy PROTO STDCALL :DWORD
+NetInfo_Free PROTO STDCALL :DWORD
+NetInfo_IsForUpdate PROTO STDCALL :DWORD
+NetInfo_ResetServerPriorities PROTO STDCALL :DWORD,:DWORD
+QueryDirectEx PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+Query_Main PROTO STDCALL :DWORD
+Reg_ReadGlobalsEx PROTO STDCALL :DWORD,:DWORD
+
+ELSE
+  echo -----------------------------------------
+  echo WARNING duplicate include file dnsapi.inc
+  echo -----------------------------------------
+ENDIF

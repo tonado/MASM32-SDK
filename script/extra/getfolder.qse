@@ -1,0 +1,37 @@
+; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+
+    STRING path$
+    STRING buf$
+    STRING title$
+    STRING subttl$
+    INTEGER rv
+    INTEGER plen
+
+; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+
+    title$ = "SE Script Engine 'getfolder' Demo"
+    subttl$ = "Either select or create a folder"
+
+    path$ = getfolder title$ subttl$
+    if$ path$ = ""
+    end
+
+    chdir path$                     ; change to user selected directory
+
+    buf$ = alloc$ 260              ; allocate a 260 byte zero filled buffer
+
+    rv = dll "kernel32" "GetCurrentDirectoryA" 260 buf$
+
+    buf$ = ztrim$ buf$              ; remove trailing zero bytes
+
+    msgbox buf$ "Current Directory" MB_OK
+
+    plen = len buf$                 ; get the length of the trimmed buffer
+
+    num2str plen $2                 ; convert it to string
+
+    msgbox "Current directory path length" $2 MB_OK
+
+    end
+
+; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл

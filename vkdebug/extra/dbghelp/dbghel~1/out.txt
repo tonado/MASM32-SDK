@@ -1,0 +1,5 @@
+ Assembling: dbghelp.asm
+Microsoft (R) Incremental Linker Version 5.12.8078
+Copyright (C) Microsoft Corp 1992-1998. All rights reserved.
+
+   Creating library dbghelp.lib and object dbghelp.exp

@@ -1,0 +1,271 @@
+
+; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+
+    yesno Is the editor empty and ready for a new source file ?**Large Testbed
+    jmp nxt1
+    Exit
+  nxt1:
+
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {lf}
+text       .486                      {comment} create 32 bit code{lf}
+text       .model flat, stdcall      {comment} 32 bit memory model{lf}
+text       option casemap :none      {comment} case sensitive {lf}
+text   {lf}
+text {comment}     include files{lf}
+text {comment}     ~~~~~~~~~~~~~{lf}
+text       include \masm32\include\windows.inc{lf}
+text       include \masm32\include\masm32.inc{lf}
+text       include \masm32\include\gdi32.inc{lf}
+text       include \masm32\include\user32.inc{lf}
+text       include \masm32\include\kernel32.inc{lf}
+text       include \masm32\include\Comctl32.inc{lf}
+text       include \masm32\include\comdlg32.inc{lf}
+text       include \masm32\include\shell32.inc{lf}
+text       include \masm32\include\oleaut32.inc{lf}
+text       include \masm32\include\dialogs.inc{lf}
+text       include \masm32\include\msvcrt.inc{lf}
+text       include \masm32\macros\macros.asm{lf}
+text {lf}
+text {comment}     libraries{lf}
+text {comment}     ~~~~~~~~~{lf}
+text       includelib \masm32\lib\masm32.lib{lf}
+text       includelib \masm32\lib\gdi32.lib{lf}
+text       includelib \masm32\lib\user32.lib{lf}
+text       includelib \masm32\lib\kernel32.lib{lf}
+text       includelib \masm32\lib\Comctl32.lib{lf}
+text       includelib \masm32\lib\comdlg32.lib{lf}
+text       includelib \masm32\lib\shell32.lib{lf}
+text       includelib \masm32\lib\oleaut32.lib{lf}
+text       includelib \masm32\lib\msvcrt.lib{lf}
+text {lf}
+text       DlgProc PROTO :DWORD,:DWORD,:DWORD,:DWORD {lf}
+text {lf}
+text     {comment} ---------------{lf}
+text     {comment} status bar text{lf}
+text     {comment} ---------------{lf}
+text       SBtext MACRO part,lpString{lf}
+text         invoke SendMessage,hStatus,SB_SETTEXT,part-1,reparg(lpString){lf}
+text       ENDM{lf}
+text {lf}
+text     {comment} --------------{lf}
+text     {comment} title bar text{lf}
+text     {comment} --------------{lf}
+text       TBtext MACRO lpString{lf}
+text         invoke SetWindowText,FUNC(GetActiveWindow),reparg(lpString){lf}
+text       ENDM{lf}
+text {lf}
+text     {comment} -----------------{lf}
+text     {comment} edit control text{lf}
+text     {comment} -----------------{lf}
+text       EDtext MACRO lpString{lf}
+text         invoke SetWindowText,hEdit,reparg(lpString){lf}
+text       ENDM{lf}
+text {lf}
+text     {comment} ---------------------------{lf}
+text     {comment} append text to edit control{lf}
+text     {comment} ---------------------------{lf}
+text       EDappend MACRO lpstring{lf}
+text         invoke SetFocus,hEdit{lf}
+text         invoke SendMessage,hEdit,WM_KEYDOWN,VK_END,0{lf}
+text         invoke SendMessage,hEdit,EM_REPLACESEL,TRUE,reparg(lpstring){lf}
+text         invoke SendMessage,hEdit,EM_REPLACESEL,TRUE,chr$(13,10){lf}
+text       ENDM{lf}
+text {lf}
+text     {comment} --------------------------------------{lf}
+text     {comment} copy edit control content to clipboard{lf}
+text     {comment} --------------------------------------{lf}
+text       EDcopy MACRO{lf}
+text         invoke SetFocus,hEdit{lf}
+text         invoke SendMessage,hEdit,EM_SETSEL,0,rv(GetWindowTextLength,hEdit){lf}
+text         invoke SendMessage,hEdit,WM_COPY,0,0{lf}
+text       ENDM{lf}
+text {lf}
+text       EDclear equ <EDtext 0>{lf}
+text {lf}
+text     .data?{lf}
+text         hWnd      dd ?{lf}
+text         hInstance dd ?{lf}
+text         hStatus   dd ?{lf}
+text         hEdit     dd ?{lf}
+text {lf}
+text     .code{lf}
+text {lf}
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {lf}
+text start: {lf}
+text       mov hInstance, FUNC(GetModuleHandle,NULL){lf}
+text     call main{lf}
+text     invoke ExitProcess,eax{lf}
+text {lf}
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {lf}
+text main proc{lf}
+text {lf}
+text     invoke InitCommonControls{lf}
+text {lf}
+text     Dialog "   ", \                         {comment} caption{lf}
+text            "MS Sans Serif",10, \            {comment} font,pointsize{lf}
+text             WS_OVERLAPPED or \              {comment} styles for{lf}
+text             WS_SYSMENU or DS_CENTER, \      {comment} dialog window{lf}
+text             15, \                           {comment} number of controls{lf}
+text             50,50,300,185, \                {comment} x y co-ordinates{lf}
+text             1024                            {comment} memory buffer size{lf}
+text {lf}
+text     DlgButton "Test 1",WS_TABSTOP,5, 5,70,13,101{lf}
+text     DlgButton "Test 2",WS_TABSTOP,5,20,70,13,102{lf}
+text     DlgButton "Test 3",WS_TABSTOP,5,35,70,13,103{lf}
+text     DlgButton "Test 4",WS_TABSTOP,5,50,70,13,104{lf}
+text     DlgButton "Test 5",WS_TABSTOP,5,65,70,13,105{lf}
+text     DlgButton "Test 6",WS_TABSTOP,5,80,70,13,106{lf}
+text     DlgButton "Test 7",WS_TABSTOP,5,95,70,13,107{lf}
+text     DlgButton "Test 8",WS_TABSTOP,5,110,70,13,108{lf}
+text     DlgButton "Test 9",WS_TABSTOP,5,125,70,13,109{lf}
+text     DlgButton "Test 10",WS_TABSTOP,5,140,70,13,110{lf}
+text {lf}
+text     DlgButton "Reset",WS_TABSTOP,80,140,50,13,120{lf}
+text     DlgButton "Copy",WS_TABSTOP,162,140,50,13,121{lf}
+text     DlgButton "Close",WS_TABSTOP,243,140,50,13,IDCANCEL{lf}
+text {lf}
+text {lf}
+text     DlgStatus 130{lf}
+text     DlgEdit WS_TABSTOP or ES_MULTILINE or ES_WANTRETURN or \{lf}
+text             ES_LEFT or WS_BORDER or WS_VSCROLL,80,5,213,132,111{lf}
+text {lf}
+text     CallModalDialog hInstance,0,DlgProc,NULL{lf}
+text {lf}
+text     ret{lf}
+text {lf}
+text main endp{lf}
+text {lf}
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {lf}
+text align 4{lf}
+text {lf}
+text DlgProc proc hWin:DWORD,uMsg:DWORD,wParam:DWORD,lParam:DWORD {lf}
+text   {lf}
+text     LOCAL hDC   :DWORD {lf}
+text       LOCAL ps    :PAINTSTRUCT {lf}
+text       LOCAL rct   :RECT {lf}
+text       LOCAL crct  :RECT {lf}
+text       LOCAL buffer1[260]:BYTE {lf}
+text       LOCAL buffer2[260]:BYTE {lf}
+text       LOCAL buffer3[260]:BYTE {lf}
+text       LOCAL buffer4[260]:BYTE {lf}
+text   {lf}
+text     STRING MainTitle,"Large Algorith Test Bed"{lf}
+text {lf}
+text     switch uMsg{lf}
+text       case WM_INITDIALOG{lf}
+text         m2m hWnd, hWin{lf}
+text         invoke SendMessage,hWnd,WM_SETICON,1,{lf}
+text                            FUNC(LoadIcon,NULL,IDI_ASTERISK){lf}
+text         invoke SetWindowText,hWnd,ADDR MainTitle{lf}
+text {lf}
+text         mov hStatus, FUNC(GetDlgItem,hWnd,130){lf}
+text         GLOBAL sbarray dd 50,100,150,200,250,300,350,400,450,-1{lf}
+text {lf}
+text         invoke SendMessage,hStatus,SB_SETPARTS,10,ADDR sbarray{lf}
+text         mov hEdit,   FUNC(GetDlgItem,hWnd,111){lf}
+text         invoke SendMessage,hEdit,WM_SETFONT,{lf}
+text                            FUNC(GetStockObject,ANSI_FIXED_FONT),TRUE{lf}
+text         mov eax, 1{lf}
+text {lf}
+text       case WM_COMMAND{lf}
+text         switch wParam{lf}
+text           case 101{lf}
+text             TBtext "ID 101"{lf}
+text             SBtext 1,"tst 1"{lf}
+text             EDtext "You pressed button 1"{lf}
+text {lf}
+text           case 102{lf}
+text             TBtext "ID 102"{lf}
+text             SBtext 2,"tst 2"{lf}
+text             EDtext "You pressed button 2"{lf}
+text {lf}
+text           case 103{lf}
+text             TBtext "ID 103"{lf}
+text             SBtext 3,"tst 3"{lf}
+text             EDtext "You pressed button 3"{lf}
+text {lf}
+text           case 104{lf}
+text             TBtext "ID 104"{lf}
+text             SBtext 4,"tst 4"{lf}
+text             EDtext "You pressed button 4"{lf}
+text {lf}
+text           case 105{lf}
+text             TBtext "ID 105"{lf}
+text             SBtext 5,"tst 5"{lf}
+text             EDtext "You pressed button 5"{lf}
+text {lf}
+text           case 106{lf}
+text             TBtext "ID 106"{lf}
+text             SBtext 6,"tst 6"{lf}
+text             EDtext "You pressed button 6"{lf}
+text {lf}
+text           case 107{lf}
+text             TBtext "ID 107"{lf}
+text             SBtext 7,"tst 7"{lf}
+text             EDtext "You pressed button 7"{lf}
+text {lf}
+text           case 108{lf}
+text             TBtext "ID 108"{lf}
+text             SBtext 8,"tst 8"{lf}
+text             EDtext "You pressed button 8"{lf}
+text {lf}
+text           case 109{lf}
+text             TBtext "ID 109"{lf}
+text             SBtext 9,"tst 9"{lf}
+text             EDtext "You pressed button 9"{lf}
+text {lf}
+text           case 110{lf}
+text             TBtext "ID 110"{lf}
+text             SBtext 10,"tst 10"{lf}
+text             EDtext "You pressed button 10"{lf}
+text {lf}
+text           case 120{lf}
+text             EDclear{lf}
+text             SBtext 1,0{lf}
+text             SBtext 2,0{lf}
+text             SBtext 3,0{lf}
+text             SBtext 4,0{lf}
+text             SBtext 5,0{lf}
+text             SBtext 6,0{lf}
+text             SBtext 7,0{lf}
+text             SBtext 8,0{lf}
+text             SBtext 9,0{lf}
+text             SBtext 10,0{lf}
+text             TBtext ADDR MainTitle{lf}
+text {lf}
+text           case 121{lf}
+text             EDcopy{lf}
+text {lf}
+text           case IDCANCEL{lf}
+text             jmp quit_dialog{lf}
+text         endsw{lf}
+text {lf}
+text       case WM_PAINT{lf}
+text         mov hDC, FUNC(BeginPaint,hWin,ADDR ps){lf}
+text         invoke GetClientRect,hWin,ADDR rct{lf}
+text         invoke GetWindowRect,hStatus,ADDR crct{lf}
+text         mov eax, crct.bottom{lf}
+text         sub eax, crct.top{lf}
+text         sub rct.bottom, eax{lf}
+text         invoke DrawEdge,hDC,ADDR rct,EDGE_ETCHED,BF_RECT{lf}
+text         invoke EndPaint,hWin,ADDR ps{lf}
+text {lf}
+text       case WM_CLOSE{lf}
+text         quit_dialog: {lf}
+text           invoke EndDialog,hWin,0{lf}
+text     endsw{lf}
+text {lf}
+text     xor eax, eax{lf}
+text     ret{lf}
+text {lf}
+text DlgProc endp{lf}
+text {lf}
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {lf}
+text end start{lf}
+
+starttext

@@ -1,0 +1,457 @@
+<HTML>
+<HEAD>
+<META NAME="Author" CONTENT="Raymond Filiatreault">
+<META NAME="Description" CONTENT="Tutorial on the use of the floating point coprocessor in assembly programming. Chap. 7 Comparison instructions">
+<TITLE>Simply FPU Chap. 7</TITLE>
+</HEAD>
+<BODY TEXT="#402000" LINK="#0000ff" VLINK="#0000ff" ALINK="#0000ff" BACKGROUND="fpufigs/bluewave.gif">
+
+<CENTER><FONT SIZE="+3">SIMPLY  FPU</FONT>
+<BR>by <B>Raymond Filiatreault</B><BR>
+Copyright 2003</CENTER>
+<P>
+<CENTER><B>Chap. 7<BR>Comparison instructions</B></CENTER>
+
+<P><BR>The FPU instructions covered in this chapter perform no mathematical operation on numerical data. Their main purpose is simply to compare the value in the FPU's top data register ST(0) to the value in another FPU data register, to floating point values in memory, to integer values in memory, to +0.0, or to examine its content.
+
+<P>The comparison instructions covered in this document are (in alphabetical order):
+
+<pre><A HREF="#fcom"><B>FCOM</B></A>        COMpare ST(0) to a floating point value
+
+<A HREF="#fcomi"><B>FCOMI</B></A>       COMpare ST(0) to ST(<EM>i</EM>) and set CPU flags
+
+<A HREF="#fcomip"><B>FCOMIP</B></A>      COMpare ST(0) to ST(<EM>i</EM>) and set CPU flags and Pop ST(0)
+
+<A HREF="#fcomp"><B>FCOMP</B></A>       COMpare ST(0) to a floating point value and Pop ST(0)
+
+<A HREF="#fcompp"><B>FCOMPP</B></A>      COMpare ST(0) to ST(1) and Pop both registers
+
+<A HREF="#ficom"><B>FICOM</B></A>       COMpare ST(0) to an integer value
+
+<A HREF="#ficomp"><B>FICOMP</B></A>      COMpare ST(0) to an integer value and Pop ST(0)
+
+<A HREF="#ftst"><B>FTST</B></A>        TeST ST(0) by comparing it to +0.0
+
+<A HREF="#fucom"><B>FUCOM</B></A>       Unordered COMpare ST(0) to a floating point value
+
+<A HREF="#fucomi"><B>FUCOMI</B></A>      Unordered COMpare ST(0) to ST(<EM>i</EM>) and set CPU flags
+
+<A HREF="#fucomip"><B>FUCOMIP</B></A>     Unordered COMpare ST(0) to ST(<EM>i</EM>) and set CPU flags and Pop ST(0)
+
+<A HREF="#fucomp"><B>FUCOMP</B></A>      Unordered COMpare ST(0) to a floating point value and Pop ST(0)
+
+<A HREF="#fucompp"><B>FUCOMPP</B></A>     Unordered COMpare ST(0) to ST(1) and Pop both registers
+
+<A HREF="#fxam"><B>FXAM</B></A>        eXAMine the content of ST(0)</pre>
+
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fcom"></A>FCOM</B></FONT> (Compare ST(0) to a floating point value)
+
+<pre>Syntax:    <B>fcom</B> (no operand)
+           <B>fcom <EM>Src</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value</pre>
+
+This instruction performs a signed comparison between the value in the TOP data register ST(0) and the floating point value from the specified source (<EM>Src</EM>). The source can be one of the FPU's data registers or the memory address of a REAL4 or REAL8 value (see Chap.2 for <A HREF="fpuchap2.htm#realmode">addressing modes of real numbers</A>). If no operand is specified, the value in ST(0) is compared to the value in ST(1). <FONT SIZE="-1"><EM>(The <A HREF="#ficom">FICOM</A> instruction must be used to compare the value in ST(0) to an integer in memory).</EM></FONT>
+
+<BLOCKQUOTE>	<U>Note</U> that ST(0) cannot be compared to a REAL10 in memory. If that becomes necessary, the REAL10 value must first be loaded to the FPU.</BLOCKQUOTE>
+
+The values of ST(0) and of the source are not modified by this instruction.
+
+<P>The result of the comparison is reported in the condition codes field of the <A HREF="fpuchap1.htm#sword">Status Word</A> as follows (the C1 bit is not used and the C2 bit was not used in early FPUs):
+<pre>                           <B>C3   C2   C0</B>
+     If ST(0) &gt; source      0    0    0
+     If ST(0) &lt; source      0    0    1
+     If ST(0) = source      1    0    0
+     If ST(0) ? source      1    1    1</pre>
+
+An <B>I</B>nvalid operation exception is detected if ST(0) is empty, or if a data register specified as the source is empty, or if one of the two values is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the Status Word. The result would then be indeterminate and return C3=1, C2=1 and C0=1 as indicated above. (Values of <A HREF="fpuchap2.htm#infini">INFINITY</A> will be treated as valid operands and yield a valid result without any exception being detected.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if ST(0) (or a data register specified as the source) is empty, setting the related flag in the Status Word.
+
+<P>When either of the two values being compared is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, a <B>D</B>enormal exception is detected, setting the related flag in the Status Word. The comparison would still yield a valid result.
+
+<P>The signed comparison means that positive values are larger than negative values, including the values of INFINITY which can be positive or negative. The lowest of all valid values would thus be -INFINITY and the greatest would be +INFINITY when used in comparisons.
+
+<P>When the source is a <A HREF="fpuchap2.htm#real4">REAL4</A> or <A HREF="fpuchap2.htm#real8">REAL8</A> in memory, it is first converted to the <A HREF="fpuchap2.htm#real10">REAL10</A> format before the comparison. Because of the rounding being performed before storing REAL4 and REAL8 values in memory, comparing ST(0) to its stored value may rarely yield the "=" result (see the latter part of the <A HREF="fpuchap4.htm#fld">FLD</A> instruction for further explanation). If a computed value must be stored and used for subsequent comparisons, it should be stored as a REAL10 for maximum accuracy.
+
+<P>When the Status Word containing the result of the comparison is stored in AX, the C3, C2 and C0 bits can be transferred to the CPU's flag register (using the <B>sahf</B> instruction) as the ZF, PF and CF flags respectively. This makes it easier for branching based on the result. Following would be typical code after a comparison with a memory variable.
+
+<pre><A NAME="fcomex"></A> <B>fcom  real8_var</B>   ;compare ST(0) with the value of the <EM>real8_var</EM> variable
+ <B>fstsw ax</B>          ;copy the Status Word containing the result to AX
+ <B>fwait</B>             ;insure the previous instruction is completed
+ <B>sahf</B>              ;transfer the condition codes to the CPU's flag register
+ <B>jpe error_handler</B> ;the comparison was indeterminate
+                   ;this condition should be verified first
+                   ;then only two of the next three conditional jumps
+                   ;should become necessary, in whatever order is preferred,
+                   ;the third jump being replaced by code to handle that case
+ <B>ja    st0_greater</B> ;when all flags are 0
+ <B>jb    st0_lower</B>   ;only the C0 bit (CF flag) would be set if no error
+ <B>jz    both_equal</B>  ;only the C3 bit (ZF flag) would be set if no error</pre>
+
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fcomp"></A>FCOMP</B></FONT> (Compare ST(0) to a floating point value and POP ST(0))
+
+<pre>Syntax:    <B>fcomp</B> (no operand)
+           <B>fcomp <EM>Src</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value</pre>
+
+This instruction is the same as the FCOM instruction with the only difference that the top data register is popped after the comparison is completed. This instruction is used when the value in ST(0) would no longer be needed for further computation after the comparison has been performed. See the <A HREF="#fcom">FCOM</A> instruction for other details. <FONT SIZE="-1"><EM>(The <A HREF="#ficomp">FICOMP</A> instruction must be used to compare the value in ST(0) to an integer in memory and POP the TOP data register).</EM></FONT>
+
+<P>The popped value is not stored anywhere. The FPU simply modifies the tag of the current TOP register to "empty" in the <A HREF="fpuchap1.htm#tword">Tag Word</A>, and increments the TOP field in the <A HREF="fpuchap1.htm#sword">Status Word</A>.
+
+<P>An example of using the FCOMP instruction would be when a temporary value has been stored as a REAL10 for later use in comparisons. Memory values in that format are not available for direct comparison like the REAL4 and REAL8 values and must be loaded to the FPU. If a comparison between that temporary value and the value in ST(2) would be required,
+
+<pre> <B>fld temp_var</B> ;load the REAL10 value of <EM>temp_var</EM>
+              ;<EM>temp_var</EM> now located in ST(0)
+ <B>fcomp st(3)</B>  ;compare it to the value in ST(3)
+              ;which was formerly ST(2) before loading <EM>temp_var</EM>
+              ;and then discard the <EM>temp_var</EM> value from the FPU and
+              ;re-establish the previous order of values in the FPU registers
+ <B>fstsw ax</B>     ;retrieve result and proceed as required
+              ;(see the FCOM <A HREF="#fcomex">example code</A>)</pre>
+
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fcompp"></A>FCOMPP</B></FONT> (Compare ST(0) to ST(1) and POP both registers)
+
+<pre>Syntax:    <B>fcompp</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value</pre>
+
+This instruction is the same as the <A HREF="#fcom">FCOM</A> and <A HREF="#fcomp">FCOMP</A> instructions with the following two differences:
+
+<BR>- ST(0) can only be compared to ST(1) and
+
+<BR>- both ST(0) and ST(1) are popped after the comparison is completed.
+
+<P>This instruction is used when both the values in ST(0) and in ST(1) would no longer be needed in FPU registers for further computation.
+
+<P>An example of using the FCOMPP instruction would be when a recursive computation is performed until the difference between the current value and the previous one must meet a given criteria. The following typical code assumes global variables for the criteria and for the temporary storage of previous values. It also assumes that the current value is in ST(0).
+
+<pre><B>.data</B>
+
+   <B>criteria   dt 3.3333e-15</B> ;could be initialized or set by the program
+   <B>temp_var   dt ?</B>          ;could be initialized or set by the program
+
+<B>.code</B>
+
+   <B>fld   temp_var</B>    ;load previous value
+                     ;=> ST(0)=previous value, ST(1)=current value
+   <B>fsub  st,st(1)</B>    ;difference with current value
+   <B>fabs</B>              ;get the absolute value of the difference
+   <B>fld   criteria</B>    ;load the criteria
+                     ;=> ST(0)=criteria, ST(1)=abs(difference), ST(2)=current value
+   <B>fcompp</B>            ;compare the criteria to the difference
+                     ;and discard both values from the FPU
+                     ;=> ST(0)=current value
+   <B>fstsw ax</B>          ;retrieve comparison result in the AX register
+   <B>fwait</B>             ;insure the previous instruction is completed
+   <B>sahf</B>              ;transfer the condition codes to the CPU's flag register
+
+;In this type of code, the computed values should already have been verified
+;to be valid numbers. Their difference should thus be a valid number, as well
+;as the criteria. Therefore no need to check for an indeterminate comparison.
+
+   <B>ja    criteria_greater</B> ;criteria was ST(0) for comparison
+   <B>jb    criteria_lower</B>
+   <B>jz    criteria_equal</B></pre>
+
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fucom"></A>FUCOM</B></FONT> (Unordered Compare ST(0) to a floating point value)
+
+<pre>Syntax:    <B>fucom</B> (no operand)
+           <B>fucom <EM>Src</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value</pre>
+
+This instruction is identical to the FCOM instruction with the only difference that the Invalid operation exception will be detected only if one or both operands are an SNAN type of <A HREF="fpuchap2.htm#othernans">NAN</A>. The QNANs would not result in an invalid operation but would still set the C0, C1 and C3 condition bits of the <A HREF="fpuchap1.htm#sword">Status Word</A> to 1 (undefined comparison). See the <A HREF="#fcom">FCOM</A> instruction for other details.
+
+<P>This specialized instruction could be of use for advanced programming only if SNANs and QNANs features were implemented. A similar advanced instruction is not available for comparing ST(0) with integer values.
+
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fucomp"></A>FUCOMP</B></FONT> (Unordered Compare ST(0) to a floating point value and POP ST(0))
+
+<pre>Syntax:    <B>fucomp</B> (no operand)
+           <B>fucomp <EM>Src</EM></B>
+
+Exception flags: Invalid operation, Denormalized value</pre>
+
+This instruction is identical to the FCOMP instruction with the only difference that the Invalid operation exception will be detected only if one or both operands are an SNAN type of <A HREF="fpuchap2.htm#othernans">NAN</A>. The QNANs would not result in an invalid operation but would still set the C0, C1 and C3 condition bits of the <A HREF="fpuchap1.htm#sword">Status Word</A> to 1 (undefined comparison). See the <A HREF="#fcomp">FCOMP</A> instruction for other details.
+
+<P>This specialized instruction could be of use for advanced programming only if SNANs and QNANs features were implemented. A similar advanced instruction is not available for comparing ST(0) with integer values.
+
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fucompp"></A>FUCOMPP</B></FONT> (Unordered Compare ST(0) to ST(1) and POP both registers)
+
+<pre>Syntax:    <B>fucompp</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value</pre>
+
+This instruction is identical to the FCOMPP instruction with the only difference that the Invalid operation exception will be detected only if one or both operands are an SNAN type of <A HREF="fpuchap2.htm#othernans">NAN</A>. The QNANs would not result in an invalid operation but would still set the C0, C1 and C3 condition bits of the <A HREF="fpuchap1.htm#sword">Status Word</A> to 1 (undefined comparison). See the <A HREF="#fcompp">FCOMPP</A> instruction for other details.
+
+<P>This specialized instruction could be of use for advanced programming only if SNANs and QNANs features were implemented.
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fcomi"></A>FCOMI</B></FONT> (Compare ST(0) to ST(<EM>i</EM>) and set CPU flags)
+
+
+<pre>Syntax:    <B>fcomi <EM>st,st(i)</EM></B>
+
+Exception flags: Stack Fault, Invalid operation
+
+Encoding:  DB  F0+i</pre>
+
+<BLOCKQUOTE><B>Note:</B> This instruction is valid only for the Pentium Pro and subsequent processors. It may not be supported by some assemblers (for MASM, the .686 directive must be used). The encoding is provided to facilitate hard-coding of this instruction if it is not supported by the assembler.</BLOCKQUOTE>
+
+This instruction compares the content of ST(0) and <EM>ST(i)</EM>, and then sets the ZF, PF and CF flags of the CPU's flag register according to the result of the comparison as follows:
+
+<pre>                          <B>ZF   PF   CF</B>
+     If ST(0) &gt; ST(<EM>i</EM>)      0    0    0
+     If ST(0) &lt; ST(<EM>i</EM>)      0    0    1
+     If ST(0) = ST(<EM>i</EM>)      1    0    0
+     If ST(0) ? ST(<EM>i</EM>)      1    1    1</pre>
+
+
+The condition codes field of the Status Word is not modified.
+
+<P>An <B>I</B>nvalid operation exception is detected if either register is empty or contains a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The result would be indeterminate and return ZF=1, PF=1 and CF=1 as indicated above. (Values of <A HREF="fpuchap2.htm#infini">INFINITY</A> will be treated as valid operands and yield a valid result without any exception being detected.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if ST(0) (or the data register specified as the source) is empty, setting the related flag in the Status Word.
+
+<P>Compared to the <A HREF="#fcom">FCOM</A> instruction, FCOMI eliminates the need to transfer the Status Word to AX, and then transfer the condition codes from AH to the CPU's flag register prior to conditional jumps. However, FCOMI does not allow comparisons between ST(0) and values in memory.
+
+<P>The following example hard-codes the instruction for comparing ST(0) to ST(2).
+
+<pre> <B>db   0dbh, 0f0h+2</B>  ;encoding for <B>fcomi st,st(2)</B>
+                    ;when not supported by the assembler
+ <B>fwait</B>              ;insure the instruction is completed
+ <B>jpe  error_handler</B> ;the comparison was indeterminate
+                    ;this condition should be verified first
+                    ;then only two of the next three conditional jumps
+                    ;should become necessary, in whatever order is preferred,
+                    ;the third one being replaced by code to handle that case
+ <B>ja  st0_greater</B>    ;when all flags are 0
+ <B>jb  st0_lower</B>      ;only the CF flag would be set if no error
+ <B>jz  both_equal</B>     ;only the ZF flag would be set if no error</pre>
+
+If these newer instructions are not supported by the assembler, macros could be prepared to hard-code them as above. An example of such a macro would be as follows:
+
+<pre>   <B>fcomist MACRO i</B>
+      <B>db    0dbh,0f0h+i</B>
+   <B>ENDM</B></pre>
+
+which could then be used in the above example code as follows:
+
+<pre>   <B>fcomist 2</B></pre>
+
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fcomip"></A>FCOMIP</B></FONT> (Compare ST(0) to ST(i) and set CPU flags and Pop ST(0))
+
+<pre>Syntax:    <B>fcomip</B> <B><EM>st,st(i)</EM></B>
+
+Exception flags: Stack Fault, Invalid operation
+
+Encoding:  DF  F0+i</pre>
+
+<BLOCKQUOTE><B>Note:</B> This instruction is valid only for the Pentium Pro and subsequent processors. It may not be supported by some assemblers (for MASM, the .686 directive must be used). The encoding is provided to facilitate hard-coding of this instruction if it is not supported by the assembler.</BLOCKQUOTE>
+
+This instruction is the same as the FCOMI instruction with the only difference that the top data register is popped after the comparison is completed. This instruction is used when the value in ST(0) would no longer be needed for further computation after the comparison has been performed. See the <A HREF="#fcomi">FCOMI</A> instruction for other details.
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fucomi"></A>FUCOMI</B></FONT> (Unordered Compare ST(0) to ST(i) and set CPU flags)
+
+
+<pre>Syntax:    <B>fucomi</B> <B><EM>st,st(i)</EM></B>
+
+Exception flags: Stack Fault, Invalid operation
+
+Encoding:  DB E8+i</pre>
+
+<BLOCKQUOTE><B>Note:</B> This instruction is valid only for the Pentium Pro and subsequent processors. It may not be supported by some assemblers (for MASM, the .686 directive must be used). The encoding is provided to facilitate hard-coding of this instruction if it is not supported by the assembler.</BLOCKQUOTE>
+
+This instruction is the same as the FCOMI instruction with the only difference that the Invalid operation exception will be detected only if one or both operands are an SNAN type of <A HREF="fpuchap2.htm#othernans">NAN</A>. The QNANs would not result in an invalid operation but would still set the ZF, PF and CF flags of the CPU's flag register (undefined comparison). See the <A HREF="#fcomi">FCOMI</A> instruction for other details.
+
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fucomip"></A>FUCOMIP</B></FONT> (Unordered Compare ST(0) to ST(i) and set CPU flags and Pop ST(0))
+
+<pre>Syntax:    <B>fucomip</B> <B><EM>st,st(i)</EM></B>
+
+Exception flags: Stack Fault, Invalid operation
+
+Encoding:  DF E8+i</pre>
+
+<BLOCKQUOTE><B>Note:</B> This instruction is valid only for the Pentium Pro and subsequent processors. It may not be supported by some assemblers (for MASM, the .686 directive must be used). The encoding is provided to facilitate hard-coding of this instruction if it is not supported by the assembler.</BLOCKQUOTE>
+
+This instruction is the same as the FUCOMI instruction with the only difference that the top data register is popped after the comparison is completed. This instruction is used when the value in ST(0) would no longer be needed for further computation after the comparison has been performed. See the <A HREF="#fucomi">FUCOMI</A> instruction for other details.
+
+<P><BR><FONT SIZE="+1"><B><A NAME="ficom"></A>FICOM</B></FONT> (Compare ST(0) to an integer in memory)
+
+<pre>Syntax:    <B>ficom <EM>Src</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value</pre>
+
+This instruction performs a signed comparison between the value in the TOP data register ST(0) and the integer value from the specified source (<EM>Src</EM>). The source can be the memory address of either a 16-bit WORD or a 32-bit DWORD integer value (see Chap.2 for <A HREF="fpuchap2.htm#intmode">addressing modes of integers</A>). <FONT SIZE="-1"><EM>(The <A HREF="#fcom">FCOM</A> instruction must be used to compare the value in ST(0) to floating point values).</EM></FONT>
+
+<BLOCKQUOTE><U>Note</U> that ST(0) cannot be compared to a 64-bit QWORD integer in memory. If that becomes necessary, the QWORD integer value must first be loaded to the FPU and the FCOM or <A HREF="#fcomp">FCOMP</A> instruction used.</BLOCKQUOTE>
+
+The values of ST(0) and of the source are not modified by this instruction.
+
+<P>The result of the comparison is reported in the condition codes field of the <A HREF="fpuchap1.htm#sword">Status Word</A> as follows (the C1 bit is not used and the C2 bit was not used in early FPUs):
+<pre>                           <B>C3   C2   C0</B>
+     If ST(0) &gt; source      0    0    0
+     If ST(0) &lt; source      0    0    1
+     If ST(0) = source      1    0    0
+     If ST(0) ? source      1    1    1</pre>
+
+An <B>I</B>nvalid operation exception is detected if ST(0) is empty, or if its value is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the Status Word. The result would be indeterminate and return C3=1, C2=1 and C0=1 as indicated above. (Values of <A HREF="fpuchap2.htm#infini">INFINITY</A> in ST(0) will be treated as valid operands and yield a valid result without any exception being detected.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if ST(0) is empty, setting the related flag in the Status Word.
+
+<P>When the value in ST(0) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, a <B>D</B>enormal exception is detected, setting the related flag in the Status Word. The comparison would still yield a valid result.
+
+<P>The signed comparison means that positive values are larger than negative values, including the values of INFINITY which can be positive or negative. The lowest of all valid values in ST(0) would thus be -INFINITY and the greatest would be +INFINITY when used in comparisons.
+
+<P>When the Status Word containing the result of the comparison is stored in AX, the C3, C2 and C0 bits can be transferred to the CPU's flag register (using the <B>sahf</B> instruction) as the ZF, PF and CF flags respectively. This makes it easier for branching based on the result. Following would be typical code after a comparison with an integer in memory. This example makes use of the possibility of pushing immediate values on the
+stack.
+
+<pre> <B>pushd 125</B>         ;push the immediate value as a DWORD
+ <B>ficom dword ptr[esp]</B> ;compare ST(0) to the integer value on the stack
+ <B>fstsw [esp]</B>       ;overwrite the pushed value with the Status Word
+ <B>fwait</B>             ;insure the previous instruction is completed
+ <B>pop  eax</B>          ;retrieve the Status Word in AX and clean the stack
+ <B>sahf</B>              ;transfer the condition codes to the CPU's flag register
+ <B>jpe error_handler</B> ;the comparison was indeterminate
+                   ;this condition should be verified first
+                   ;then only two of the next three conditional jumps
+                   ;should become necessary, in whatever order is preferred,
+                   ;the third jump being replaced by code to handle that case
+ <B>ja    st0_greater</B> ;when all flags are 0
+ <B>jb    st0_lower</B>   ;only the C0 bit (CF flag) would be set if no error
+ <B>jz    both_equal</B>  ;only the C3 bit (ZF flag) would be set if no error</pre>
+
+
+<P><BR><FONT SIZE="+1"><B><A NAME="ficomp"></A>FICOMP</B></FONT> (Compare ST(0) to an integer in memory and POP ST(0))
+
+<pre>Syntax:    <B>ficomp <EM>Src</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value</pre>
+
+This instruction is the same as the FICOM instruction with the only difference that the top data register is popped after the comparison is completed. This instruction is used when the value in ST(0) would no longer be needed for further computation after the comparison has been performed. See the <A HREF="#ficom">FICOM</A> instruction for other details. <FONT SIZE="-1"><EM>(The <A HREF="#fcomp">FCOMP</A> instruction must be used to compare the value in ST(0) to a floating point value and POP the TOP data register).</EM></FONT>
+
+<P>The popped value is not stored anywhere. The FPU simply modifies the tag of the current TOP register to "empty" in the <A HREF="fpuchap1.htm#tword">Tag Word</A>, and increments the TOP field in the <A HREF="fpuchap1.htm#sword">Status Word</A>.
+
+
+<P><BR><FONT SIZE="+1"><B><A NAME="ftst"></A>FTST</B></FONT> (Test ST(0) by comparing it to +0.0)
+
+<pre>Syntax:    <B>ftst</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value</pre>
+
+This instruction performs a signed comparison between the value in the TOP data register ST(0) and +0.0. The value of ST(0) is not modified by this instruction.
+
+<P>The result of the comparison is reported in the condition codes field of the <A HREF="fpuchap1.htm#sword">Status Word</A> as follows (the C1 bit is not used and the C2 bit was not used in early FPUs):
+<pre>                      <B>C3   C2   C0</B>
+     If ST(0) &gt; 0      0    0    0
+     If ST(0) &lt; 0      0    0    1
+     If ST(0) = 0      1    0    0
+     If ST(0) ? 0      1    1    1</pre>
+
+An <B>I</B>nvalid operation exception is detected if ST(0) is empty, or if its value is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the Status Word. The result would be indeterminate and return C3=1, C2=1 and C0=1 as indicated above. (Values of <A HREF="fpuchap2.htm#infini">INFINITY</A> will be treated as valid operands and yield a valid result without any exception being detected.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if ST(0) is empty, setting the related flag in the Status Word.
+
+<P>When the value of ST(0) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, a <B>D</B>enormal exception is detected, setting the related flag in the Status Word. The comparison would still yield a valid result.
+
+<P>A value of -0.0 in ST(0)would be treated as equal to a +0.0 value.
+
+<P>This instruction is used primarily to determine if the value in ST(0) is positive, or negative, or equal to zero, if it is a valid floating point value. For example,  such a test should be performed before attempting to compute the logarithm of a number or extract its square root. Following would be typical code with this instruction. 
+
+<pre> <B>ftst</B>              ;compare the value of ST(0) to +0.0
+ <B>fstsw ax</B>          ;copy the Status Word containing the result to AX
+ <B>fwait</B>             ;insure the previous instruction is completed
+ <B>sahf</B>              ;transfer the condition codes to the CPU's flag register
+ <B>jpe error_handler</B> ;the comparison was indeterminate
+                   ;this condition should be verified first
+                   ;then only two of the next three conditional jumps
+                   ;should become necessary, in whatever order is preferred,
+                   ;the third jump being replaced by code to handle that case
+ <B>ja   st0_positive</B> ;when all flags are 0
+ <B>jb   st0_negative</B> ;only the C0 bit (CF flag) would be set if no error
+ <B>jz   st0_zero</B>     ;only the C3 bit (ZF flag) would be set if no error</pre>
+
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fxam"></A>FXAM</B></FONT> (Examine the content of ST(0))
+
+<pre>Syntax:    <B>fxam</B> (no operand)
+
+Exception flags: None</pre>
+
+This instruction examines the content of ST(0) and the type of value is reported in the condition codes C3, C2 and C0 of the <A HREF="fpuchap1.htm#sword">Status Word</A> as indicated below. In addition, the C1 bit would be the same as the sign bit of the value in ST(0).
+
+<pre><B>    Content of ST(0)       C3        C2        C0</B>
+      Unsupported           0         0         0
+          NAN               0         0         1
+   Normal finite number     0         1         0
+        Infinity            0         1         1
+          Zero              1         0         0
+         Empty              1         0         1
+   Denormalized number      1         1         0</pre>
+
+<P>The following example code would examine the content of a temporary variable to determine the action required by the ensuing code according to the result. The condition codes are transferred to the CPU's flag register for the main conditional jumps (C3=ZF, C2=PF, C0=CF). The action required for each case will then depend on the purpose of the examination and is left blank. In most cases, only a few of the cases may require special action.
+
+<pre><B>   fld   temp_var</B> ;load the temporary variable to the FPU
+   <B>fxam</B>           ;examine it
+   <B>fstsw ax</B>       ;copy the content of the Status Word to AX
+   <B>fwait</B>          ;insure the last instruction is completed
+   <B>sahf</B>           ;copy the C3/C2/C0 condition codes to the ZF/PF/CF flags
+   <B>jz    C3is1</B>    ;either Zero, Empty or Denormalized if C3=1
+   <B>jpe   C2is1</B>    ;either normal or infinity if C3=0 and C2=1
+   <B>jc    isNAN</B>    ;would be NAN if C3=0, C2=0 and C0=1
+   ..........</B>     ;code for the case of Unsupported, no need to check sign
+
+<B>isNAN:</B>
+   ..........</B>     ;code for the case of a NAN, no need to check the sign
+
+<B>C2is1:</B>
+   <B>jc    isINFINITY</B> ;would be Infinity if C3=0, C2=1 and C0=1
+                  ;this leaves the case for a Normal finite number
+   <B>test  ah,2</B>     ;test for the sign which is in bit1 of AH
+   <B>jnz   negNORMAL</B>
+   <B>..........</B>     ;code for the case of a positive Normal finite number
+
+<B>negNORMAL:</B>
+   <B>..........</B>     ;code for the case of a negative Normal finite number
+
+<B>isINFINITY:</B>
+   <B>test  ah,2</B>     ;test for the sign which is in bit1 of AH
+   <B>jnz   negINFINITY</B>
+   <B>..........</B>     ;code for the case of a positive Infinity
+
+<B>negINFINITY:</B>
+   <B>..........</B>     ;code for the case of a negative Infinity
+
+<B>C3is1:</B>
+   <B>jc    isEMPTY</B>  ;would be Empty if C3=1 and C0=1
+   <B>jpe   isDENORMAL</B> ;would be a Denormalized number if C3=1, C0=0 and C2=1
+                  ;this leaves the case for a Zero value
+   <B>..........</B>     ;code for the case of a Zero value, no need to check sign
+
+<B>isEMPTY:</B>
+   <B>..........</B>     ;code for the case of an Empty register
+                  ;which does not apply in this example because
+                  ;ST(0) was loaded with a value from memory
+
+<B>isDENORMAL:</B>
+   <B>test ah,2</B>     ;test for the sign which is in bit1 of AH
+   <B>jnz   negDENORMAL</B>
+   <B>..........</B>    ;code for the case of a positive Denormalized number
+
+<B>negDENORMAL:</B>
+   <B>..........</B>    ;code for the case of a negative Denormalized number</pre>
+
+<P><BR><CENTER><A HREF="index.html"><B>RETURN TO<B>
+<BR><FONT SIZE="+2">SIMPLY  FPU</FONT>
+<BR><B>CONTENTS<B></A></CENTER><BR>
+
+</BODY>
+</HTML>

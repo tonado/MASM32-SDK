@@ -1,0 +1,118 @@
+<HTML>
+<HEAD>
+<META NAME="Author" CONTENT="Raymond Filiatreault">
+<META NAME="Description" CONTENT="Tutorial on the use of the floating point coprocessor in assembly programming. Chap. 5 Data transfer instructions - Integer numbers">
+<TITLE>Simply FPU Chap. 5</TITLE>
+</HEAD>
+<BODY TEXT="#402000" LINK="#0000ff" VLINK="#0000ff" ALINK="#0000ff" BACKGROUND="fpufigs/bluewave.gif">
+
+<CENTER><FONT SIZE="+3">SIMPLY  FPU</FONT>
+<BR>by <B>Raymond Filiatreault</B><BR>
+Copyright 2003</CENTER>
+<P>
+<CENTER><B>Chap. 5<BR>Data transfer instructions - Integer numbers</B></CENTER>
+
+<P><BR>The FPU instructions covered in this chapter perform no mathematical operation on numerical data. Their main purpose is simply to transfer integer data between the FPU's 80-bit data registers and memory. <FONT SIZE="-1"><EM>(Other instructions must be used to transfer <A HREF="fpuchap4.htm">floating point</A> and
+<A HREF="fpuchap6.htm">BCD</A> data).</EM></FONT>
+
+<P><center>Integer data cannot be transferred directly between the CPU and FPU registers.</center>
+
+<P>The integer data transfer instructions are:
+
+<pre><A HREF="#fild"><B>FILD</B></A>    Integer LoaD from memory
+
+<A HREF="#fist"><B>FIST</B></A>    Integer STore to memory
+
+<P><A HREF="#fistp"><B>FISTP</B></A>   Integer STore to memory and Pop the top data register</pre>
+
+<BLOCKQUOTE><EM>Note that all FPU instructions using Integer data as an operand have an "I" immediately following the "F" in the mnemonic to distinguish them from instructions using other data types.</EM></BLOCKQUOTE>
+
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fild">FILD</A></B></FONT> (Load integer number from memory)</P>
+
+<pre>Syntax:    <B>fild <EM>Src</EM></B><EM></EM>
+
+Exception flags: Stack Fault, Invalid operation</pre>
+
+This instruction decrements the TOP register pointer in the <A HREF="fpuchap1.htm#sword">Status Word</A> and loads the integer value from the specified source (<EM>Src</EM>) in the new TOP data register ST(0) after converting it to the 80-bit <A HREF="fpuchap2.htm#real10">REAL10</A> format. The source must be the memory address of a signed 16-bit WORD integer, a signed 32-bit DWORD integer, or a signed 64-bit QWORD integer.
+
+<P>If the ST(7) data register which would become the new ST(0) is not empty, both a <B>S</B>tack <B>F</B>ault <U>and</U> an <B>I</B>nvalid operation exceptions are detected, setting both flags in the Status Word. The TOP register pointer in the Status Word would still be decremented and the new value in ST(0) would be the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> NAN.
+
+<P>The content of the <A HREF="fpuchap1.htm#tword">Tag Word</A> for the new TOP register will be modified according to the result of the operation.
+
+<P>Examples of using this instruction:
+
+<pre><B>fild word ptr[ebx+8]</B>  ;loads the 5<SUP>th</SUP> WORD of an integer array addressed by EBX
+
+<B>fild int_var</B>          ;loads the value of the integer variable <EM>int_var</EM>
+                      ;according to its declared size
+
+<B>fild dword ptr[ebp+12]</B>   ;typical assembler coding to load the value of a
+                      ;dword integer passed on the stack as a parameter to a
+                      ;procedure (the source file may have referred to it
+                      ;using the name of a variable)</pre>
+
+<BLOCKQUOTE>(See <A HREF="fpuchap2.htm#ints">Chap.2</A> for integer data types, their addressing modes, and examples of using integer values from CPU registers.)</BLOCKQUOTE>
+
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fist">FIST</A></B></FONT> (Store an integer number to memory)
+
+<pre>Syntax:    <B>fist <EM>Dest</EM></B><EM></EM>
+
+Exception flags: Stack Fault, Invalid operation, Precision</pre>
+
+This instruction rounds the value of the TOP data register ST(0) to the nearest integer according to the rounding mode of the RC field in the <A HREF="fpuchap1.htm#cword">Control Word</A>, and stores it at the specified destination (<EM>Dest</EM>). The destination can be the memory address of a 16-bit WORD or of a 32-bit DWORD.
+
+<BLOCKQUOTE><EM>This instruction <U>cannot</U> store the value of ST(0) as a 64-bit QWORD integer; see the <A HREF="#fistp">FISTP</A> instruction for such an operation.</EM></BLOCKQUOTE>
+
+If the ST(0) data register is empty, both a <B>S</B>tack <B>F</B>ault <U>and</U> an <B>I</B>nvalid operation exceptions are detected, setting both flags in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The value of 8000h would be stored at the specified destination if a WORD type, or 80000000h if a DWORD type.
+
+<P>If the rounded value of ST(0) would be larger than acceptable for the integer type of the destination, an <B>I</B>nvalid operation exception is detected, setting the related flag in the Status Word. The value of 8000h would be stored at the specified destination if a WORD type, or 80000000h if a DWORD type.
+
+<BLOCKQUOTE><U>Note:</U> Although these 8000h and 80000000h integer values are stored as "error" codes, the FPU will be treat them as -2<SUP><FONT SIZE="-1">15</FONT></SUP> and -2<SUP><FONT SIZE="-1">31</FONT></SUP> respectively if loaded back in a data register or used in comparison and arithmetic instructions.</BLOCKQUOTE>
+
+<P>If the value in ST(0) would contain a binary fraction, some precision would be lost and a <B>P</B>recision exception would be detected, setting the related flag in the Status Word.
+
+<P>The actual value in ST(0) does <U>not</U> change with this instruction.
+
+<P>Examples of using this instruction:
+
+<pre><B>fist  word ptr [edi+ebx]</B> ;stores the rounded value of ST(0) as a WORD
+                         ;at the memory address indicated by EDI+EBX
+
+<B>fist  integer_var</B>        ;stores the rounded value of ST(0)
+                         ;at the memory variable <EM>integer_var</EM>
+                         ;according to its declared integer data type.</pre>
+
+<BLOCKQUOTE>(See <A HREF="fpuchap2.htm#ints">Chap.2</A> for integer data types, their addressing modes, and examples of transferring integer values to CPU registers.)</BLOCKQUOTE>
+
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fistp">FISTP</A></B></FONT> (Store an integer number to memory and Pop the top data register)
+
+<pre>Syntax:    <B>fistp <EM>Dest</EM></B><EM></EM>
+
+Exception flags: Stack Fault, Invalid operation, Precision</pre>
+
+This instruction is the same as the FIST instruction except for the following two additions:
+
+<P>- it allows storing the ST(0) value to memory as a 64-bit QWORD integer, and
+
+<BR>- the ST(0) register is <A HREF="fpuchap1.htm#pop">POPped</A> after the transfer is completed, modifying the <A HREF="fpuchap1.htm#tword">Tag Word</A> and incrementing the TOP register pointer of the <A HREF="fpuchap1.htm#sword">Status Word</A>.
+
+<P>If an invalid exception is detected when attempting to store a QWORD, a value of 8000000000000000h would be stored at the specified destination.
+
+<P>This instruction would be used when the final result of a computation must be stored in memory as an integer, liberating the FPU's TOP data register for future use.
+
+<pre><B>fistp  int_var</B>  ;stores the rounded value of ST(0)
+                ;at the memory variable <EM>int_var</EM>
+                ;according to its declared integer data type
+                ;and POPs the FPU's TOP data register</pre>
+
+<BLOCKQUOTE>(See <A HREF="fpuchap2.htm#ints">Chap.2</A> for integer data types, their addressing modes, and examples of transferring integer values to CPU registers.)</BLOCKQUOTE>
+
+<P><BR><CENTER><A HREF="index.html"><B>RETURN TO<B>
+<BR><FONT SIZE="+2">SIMPLY  FPU</FONT>
+<BR><B>CONTENTS<B></A></CENTER><BR>
+
+</BODY>
+</HTML>

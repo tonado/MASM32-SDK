@@ -1,0 +1,40 @@
+; --------------------------------------------------------------------------------------------------
+;                            tcpip.inc Copyright The MASM32 SDK 1998-2010
+; --------------------------------------------------------------------------------------------------
+
+IFNDEF TCPIP_INC
+TCPIP_INC equ <1>
+
+FreeIprBuff PROTO STDCALL :DWORD
+GetIFAndLink PROTO STDCALL :DWORD,:DWORD,:DWORD
+IPAddInterface PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IPAllocBuff PROTO STDCALL :DWORD,:DWORD
+IPDelInterface PROTO STDCALL :DWORD,:DWORD
+IPDelayedNdisReEnumerateBindings PROTO STDCALL :DWORD,:DWORD
+IPDeregisterARP PROTO STDCALL :DWORD
+IPDisableSniffer PROTO STDCALL :DWORD
+IPEnableSniffer PROTO STDCALL :DWORD,:DWORD
+IPFreeBuff PROTO STDCALL :DWORD
+IPGetAddrType PROTO STDCALL :DWORD
+IPGetBestInterface PROTO STDCALL :DWORD,:DWORD
+IPGetInfo PROTO STDCALL :DWORD,:DWORD
+IPInjectPkt PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IPProxyNdisRequest PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IPRegisterARP PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IPRegisterProtocol PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IPSetIPSecStatus PROTO STDCALL :DWORD
+IPTransmit PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+LookupRoute PROTO STDCALL :DWORD,:DWORD
+LookupRouteInformation PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+LookupRouteInformationWithBuffer PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+SendICMPErr PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+SetIPSecPtr PROTO STDCALL :DWORD
+UnSetIPSecPtr PROTO STDCALL :DWORD
+UnSetIPSecSendPtr PROTO STDCALL :DWORD
+tcpxsum PROTO STDCALL :DWORD,:DWORD,:DWORD
+
+ELSE
+  echo ----------------------------------------
+  echo WARNING duplicate include file tcpip.inc
+  echo ----------------------------------------
+ENDIF

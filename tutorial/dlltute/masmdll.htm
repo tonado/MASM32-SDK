@@ -1,0 +1,397 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html><head>
+
+
+   
+  
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+
+   
+  
+  <meta name="Author" content="hutch">
+
+
+   
+  
+  <meta name="GENERATOR" content="Mozilla/4.8 [en] (Win98; U) [Netscape]"><title>Building DLLs in MASM32</title></head>
+
+<body style="color: rgb(204, 204, 204); background-color: rgb(0, 0, 0);" alink="#ff0000" link="#ffffff" vlink="#ffffff">
+
+<table style="text-align: left; width: 100%;" border="2" cellpadding="0" cellspacing="0">
+
+  <tbody>
+
+    <tr>
+
+      <td style="background-color: rgb(51, 51, 51);"><small><small><small><small>      </small></small></small></small><big style="color: rgb(255, 102, 102);"><big><big><span style="font-weight: bold;"><br>
+  How to build a DLL in MASM32<br>
+      <small><small><small><small><small>    </small></small></small></small></small></span></big></big></big></td>
+
+    </tr>
+
+  
+  </tbody>
+</table>
+
+
+
+
+
+<p><b><font color="#990000"><a href="http://website.masm32.com/dlltute/dlltute.zip">Get the example code</a></font></b>
+</p>
+
+<p style="color: rgb(255, 102, 102);"><big><b><font size="+1"><big>Short History</big></font></b>
+</big></p>
+
+<p><big>A long time ago in the days of early 16 bit Windows the available computer
+hardware required to run it was a 286 with 1 meg of memory. This was a
+very ambitious task for such a humble device yet the code design was so
+efficient that it could run a graphics user interface in as little as 1
+meg of memory.
+</big></p>
+
+<p><big>A 286 only allowed what was called "task switching" which was effectively
+only running one program at a time but from the 386 onwards, the software
+simulated multitasking so that more than 1 program could run at a time.
+To get such an interface to run on such limited hardware, the operating
+system had to conserve memory and also find alternatives so that the machine
+could run.
+</big></p>
+
+<p><big>Virtual memory was disk space that was counted as memory so that non
+running programs could be swapped out to disk while others continued to
+run in the actual memory available but another method was also used that
+made it possible to run programs that were far bigger than the available
+memory in the computer, this was the Dynamic Link Library.
+</big></p>
+
+<p><big>In comparison a DOS program was a monolith, it was usually loaded complete
+into memory and was therefore limited to the available memory that was
+available in DOS which was 640k minus all of the loaded device drivers
+that DOS used. There were a few attempts to solve this problem in DOS by
+using what was called "overlays" and a language like Quick Basic used a
+runtime EXE file if the EXE was compiled with that option but generally
+they did not have the power or flexibility that early 16 bit Windows had.
+</big></p>
+
+<p><big>A Dynamic Link Library was very similar to an executable file with one
+exception, it did not have a starting point like a normal executable file
+because it was designed to perform a different function. An executable
+file must have a start so that it can be loaded by the operating system
+and run in the normal manner.
+</big></p>
+
+<p><big>A DLL is executable code that is loaded into memory on demand and different
+parts of the executable code can be called and run by the calling program.
+A DLL can also be called by more than one program at a time which is primarily
+how the large operating system DLLs work. This made it possible for many
+programs to use the same code from the operating system insteads of having
+to duplicate it every time a program ran. It also allowed programmers to
+standardise the interface of programs so that users did not have to learn
+a new interface every time they started a new program.
+</big></p>
+
+<p><big>In modern versions of Windows a DLL can still be loaded in a couple
+of ways, it can be loaded when the program starts and remain in memory
+as long as the program that loads it runs or it can be loaded on demand,
+used then unloaded when it is finished.</big>
+</p>
+
+<p style="color: rgb(255, 102, 102);"><big><b><font size="+1"><big>How do you write a DLL ?</big></font></b>
+</big></p>
+
+<p><big>The form of a DLL is determined by the operating system and there are
+a number of considerations when laying out the basic DLL code.
+</big></p>
+
+<p><big>The code entry point must conform to a particular specification which
+is 3 DWORD parameters passed in the normal manner on the stack and for
+the DLL to continue loading once this address has received the parameters,
+it must return TRUE in the EAX register.
+</big></p>
+
+<p><big>At the bare minimum you would write a starting procedure like follows,</big></p>
+
+<p><tt>;
+«««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««</tt>
+</p>
+
+<p style="color: rgb(204, 204, 204);"><b><tt>LibMain proc parameter1:DWORD,
+parameter2:DWORD,
+parameter3:DWORD</tt></b></p>
+
+<p style="color: rgb(204, 204, 204);"><b><tt>    mov
+eax, TRUE</tt></b>
+<br>
+
+<b><tt>    ret</tt></b>
+</p>
+
+<p style="color: rgb(204, 204, 204);"><b><tt>LibMain endp</tt></b>
+</p>
+
+<p><tt>;
+«««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««</tt></p>
+
+<p><big>If the starting procedure is not in the form shown, you will usually
+get the following warning/error from the linker.</big>
+</p>
+
+<p><b><tt>warning LNK4086:</tt></b>
+<br>
+
+<b><tt>entrypoint "_XXXXX" is not __stdcall with 12 bytes of arguments;
+image may not run</tt></b>
+</p>
+
+<p>The _XXXXX is the name of the first procedure or first label in the
+code.
+</p>
+
+<p><big>The LibMain is in fact a lot more useful than this, it can be used to
+initialise data at startup and it can be used to do cleanups at shutdown
+because of the information that is passed to it at startup. In the DLL_PROCESS_ATTACH
+constant in the following .IF block, you can set global values like the
+instance handle, start a memory mapped file if you need to share data in
+that manner, allocate memory for later tasks while the DLL is running or
+anything that you need to have set up at startup.
+</big></p>
+
+<p><big>A fuller LibMain looks like the following,</big>
+</p>
+
+<p style="color: rgb(204, 204, 204);"><tt>;
+«««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««</tt>
+</p>
+
+<p style="color: rgb(204, 204, 204);"><b><tt>LibMain proc hInstDLL:DWORD,
+reason:DWORD,
+unused:DWORD</tt></b>
+</p>
+
+<p style="color: rgb(204, 204, 204);"><b><tt>    .if reason == DLL_PROCESS_ATTACH</tt></b>
+<br>
+
+<b><tt>      mov
+eax, TRUE</tt></b>
+</p>
+
+<p style="color: rgb(204, 204, 204);"><b><tt>    .elseif reason == DLL_PROCESS_DETACH</tt></b>
+<br>
+
+<b><tt>      ; ---------------------------------------</tt></b>
+<br>
+
+<b><tt>      ; perform
+any exit code you require here</tt></b>
+<br>
+
+<b><tt>      ; ---------------------------------------</tt></b>
+</p>
+
+<p style="color: rgb(204, 204, 204);"><b><tt>    .elseif reason == DLL_THREAD_ATTACH</tt></b>
+</p>
+
+<p style="color: rgb(204, 204, 204);"><b><tt>    .elseif reason == DLL_THREAD_DETACH</tt></b>
+</p>
+
+<p style="color: rgb(204, 204, 204);"><b><tt>    .endif</tt></b>
+</p>
+
+<p style="color: rgb(204, 204, 204);"><b><tt>    ret</tt></b>
+</p>
+
+<p style="color: rgb(204, 204, 204);"><b><tt>LibMain endp</tt></b>
+</p>
+
+<p style="color: rgb(204, 204, 204);"><tt>;
+«««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««</tt>
+</p>
+
+<p><big>When the DLL is shut down you can process the DLL_PROCESS_DETACH member
+of the .IF block to deallocate memory or flush files to disk or any other
+task where you need to clean up after the program has finished.
+</big></p>
+
+<p><big>The first parameter "hInstDLL" passed to the LibMain is the Instance
+handle of the DLL which is the actual starting address of the DLL in memory
+and this is useful among other things if the DLL is going to have resources
+as the DLL instance handle is necessary to access the resources.
+</big></p>
+
+<p><big>The second parameter "reason" determines how the DLL is being called
+and whether it is the startup call or the shutdown call. This is how you
+can organise to initialise data at startup and do the cleanup at shutdown.
+</big></p>
+
+<p><big>After the LibMain is where you write the procedures that you need to
+have in the DLL but importantly, after all of the procedures you must terminate
+all of the code with a directive si that MASM know where the end of the
+source file is.</big>
+</p>
+
+<p style="color: rgb(255, 102, 102);"><big><b><font size="+1"><big>Terminating the code</big></font></b>
+</big></p>
+
+<p><big>While a normal EXE file has a label to tell it where to start, A DLL
+must be written with a procedure at the start so if the procedure name
+is,</big>
+</p>
+
+<p style="color: rgb(204, 204, 204);"><b><tt>LibMain</tt></b>
+</p>
+
+<p><big>You must terminate the code with,</big>
+</p>
+
+<p><b style="color: rgb(204, 204, 204);"><tt>end LibMain</tt></b><span style="color: rgb(204, 204, 204);">
+</span><br>
+
+ 
+</p>
+
+<p style="color: rgb(255, 102, 102);"><big><b><font size="+1"><big>Exporting procedures from the
+DLL</big></font></b>
+</big></p>
+
+<p><big>Procedures are no different to normal code in MASM but the programmer
+has the choice of what can be accessed in the DLL and what is an internal
+procedure. This is more or less the normal organisation of any program
+and the programmer has control of what is visible and what is not.
+</big></p>
+
+<p><big>This is done with the DEFINITION file that is used by the linker to
+determine what procedure are exported. The syntax for a definition file
+is very simple, you must tell the linker what the internal name of the
+DLL will be then you must tell the linker what the name of each exported
+procedure will be.
+</big></p>
+
+<p><big>This is the content of the definition file for the example that accompanies
+this tutorial.</big>
+</p>
+
+<p style="color: rgb(204, 204, 204);"><b><tt>LIBRARY dlltute</tt></b>
+<br>
+
+<b><tt>EXPORTS MessageBoxSTD</tt></b>
+<br>
+
+<b><tt>EXPORTS MessageBoxCC</tt></b>
+<br>
+
+<b><tt>EXPORTS MessageBoxFC</tt></b>
+</p>
+
+<p><big>When the library is built and subsequently read and displayed by a program
+like DumpPE, you get this information,</big>
+</p>
+
+<p style="color: rgb(204, 204, 204);"> <b><tt>Exp Addr Hint   Ord Export
+Name by dlltute.dll - Thu Jun  5 00:00:34 2003</tt></b>
+<br>
+
+<b><tt> -------- ---- ----- ---------------------------------------------------------</tt></b>
+<br>
+
+<b><tt> 00001080    0    
+1 MessageBoxCC</tt></b>
+<br>
+
+<b><tt> 000010D8    1    
+2 MessageBoxFC</tt></b>
+<br>
+
+<b><tt> 00001026    2    
+3 MessageBoxSTD</tt></b>
+</p>
+
+<p><big>This is the interface within the DLL that allows the calling program
+to call the exported procedures within the DLL.</big>
+</p>
+
+<p style="color: rgb(255, 102, 102);"><big><b><font size="+1"><big>How do you build a DLL ?</big></font></b>
+</big></p>
+
+<p><big>Assembling the DLL code is identical to a normal EXE file and it is
+done as normal with the following line.</big>
+</p>
+
+<p style="color: rgb(204, 204, 204);"><b><tt>\masm32\bin\ml /c /coff dlltute.asm</tt></b>
+</p>
+
+<p><big>The option "<b>/c</b>" means only assemble the file into an object module.
+The "<b>/coff</b>" for version 6.14 of ML.EXE means build the object module
+as a "coff" type module, not the older OMF format.
+</big></p>
+
+<p><big>Linking a DLL is different to building an EXE file.</big>
+</p>
+
+<p style="color: rgb(204, 204, 204);"><b><tt>\masm32\bin\Link /SUBSYSTEM:WINDOWS /DLL
+/DEF:dlltute.def dlltute.obj</tt></b>
+</p>
+
+<p><big>The linker options are as follows, the option "<b><tt>/DLL</tt></b>"
+tells the linker to place the correct startup code for a DLL at the beginning
+of the DLL, the line "<b><tt>/DEF:dlltute.def</tt></b>" tells the linker
+where to find the list of exported procedures and the internal name of
+the Dynamic Link Library.
+</big></p>
+
+<p><big>If you are using resources in the DLL, you can either add the compiled
+resources in the RES file as the last item on the link line or you can
+convert the RES file directly to an object file with the utility CVTRES.EXE
+and add the resource object file to the end of the link line.</big>
+</p>
+
+<p style="color: rgb(255, 102, 102);"><big><b><font size="+1"><big>Using the DLL from the calling
+program</big></font></b>
+</big></p>
+
+<p><big>With the two methods that can be used, the choice is based on what is
+the most efficient for the application. If the code is to be used for short
+duration it is worth dynamically loading it by using the 3 API functions
+<b><tt>LoadLibrary()</tt></b>,
+<b><tt>GetProcAddress()</tt></b>
+and <b><tt>FreeLibrary()</tt></b>. This allows you to keep your memory
+usage down and while this may not matter with small applications, if you
+are writing very large DLLs, the combined memory usage of more than one
+DLL at a time can restrict the final functionality of the program if memory
+become low because of the number of DLLs loaded.
+</big></p>
+
+<p><big>If the application needs the functionality of the DLL for its full running
+time, the DLL should be loaded when the program starts. The linker when
+it builds a DLL also builds an EXPORT library that is designed to be linked
+into both MASM and Microsoft C/C++ programs so that the DLL can be used
+at startup. What you would normally do is write a prototype for each exported
+procedure in your DLL and put them in an include file so that when you
+want to use the DLL in your program, all you need to do is include the
+prototypes and the library and have the DLL where your program can find
+it.</big>
+</p>
+
+<center>
+<p><b>---------- o ----------</b></p>
+
+</center>
+
+
+
+<p><br>
+
+
+<br>
+
+
+<br>
+
+
+<br>
+
+
+</p>
+
+</body></html>

@@ -1,0 +1,129 @@
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+;                   create a new dynamic link library
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+    INTEGER hFile
+    INTEGER rv
+
+    STRING path$
+    STRING proj$
+    STRING def$
+    STRING asm$
+    STRING qt$
+    STRING txt$
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+    path$ = getfolder "Set or create a folder for your new dynamic link library" "Ensure you do not overwrite an existing project"
+    if$ path$ = ""
+    end
+
+    chdir path$     ; change directory to the new location
+
+    qt$ = chr$ 34
+
+    gettext "Type the DLL project name" "Ensure you do NOT enter a file extension" "mydll"
+    if$ $0 = ""
+    end
+
+    proj$ = $0
+
+; ¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤
+; ¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤
+
+    hFile = fcreate "makeit.bat"
+
+    rv = fprint hFile "@echo off"
+    rv = fprint hFile "if exist " proj$ ".obj del " proj$ ".obj"
+    rv = fprint hFile "if exist " proj$ ".dll del " proj$ ".dll"
+    rv = fprint hFile "\masm32\bin\ml /c /coff " proj$ ".asm"
+    rv = fprint hFile "\masm32\bin\Link /SUBSYSTEM:WINDOWS /DLL /DEF:" proj$ ".def " proj$ ".obj "
+    rv = fprint hFile "del " proj$ ".obj"
+    rv = fprint hFile "del " proj$ ".exp"
+    rv = fprint hFile "dir " proj$ ".*"
+    rv = fprint hFile "pause"
+
+    rv = fclose hFile
+
+; ¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤
+; ¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤
+
+    def$ = cat$ proj$ ".def"
+    hFile = fcreate def$
+
+    rv = fprint hFile "LIBRARY " proj$
+    rv = fprint hFile " ; EXPORTS [your_exported_proc_name]"
+
+    rv = fclose hFile
+
+; ¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤
+; ¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤
+
+    asm$ = cat$ proj$ ".asm"
+    hFile = fcreate asm$
+
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile "    include \masm32\include\masm32rt.inc"
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile ""
+    rv = fprint hFile "    ; -------------------------------------------"
+    rv = fprint hFile "    ; Build this DLL with the provided MAKEIT.BAT"
+    rv = fprint hFile "    ; -------------------------------------------"
+    rv = fprint hFile ""
+    rv = fprint hFile "      .data?"
+    rv = fprint hFile "        hInstance dd ?"
+    rv = fprint hFile ""
+    rv = fprint hFile "      .code"
+    rv = fprint hFile ""
+    rv = fprint hFile "; «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««"
+    rv = fprint hFile ""
+    rv = fprint hFile "LibMain proc instance:DWORD,reason:DWORD,unused:DWORD "
+    rv = fprint hFile ""
+    rv = fprint hFile "    .if reason == DLL_PROCESS_ATTACH"
+    rv = fprint hFile "      mrm hInstance, instance       ; copy local to global"
+    rv = fprint hFile "      mov eax, TRUE                 ; return TRUE so DLL will start"
+    rv = fprint hFile ""
+    rv = fprint hFile "    .elseif reason == DLL_PROCESS_DETACH"
+    rv = fprint hFile ""
+    rv = fprint hFile "    .elseif reason == DLL_THREAD_ATTACH"
+    rv = fprint hFile ""
+    rv = fprint hFile "    .elseif reason == DLL_THREAD_DETACH"
+    rv = fprint hFile ""
+    rv = fprint hFile "    .endif"
+    rv = fprint hFile ""
+    rv = fprint hFile "    ret"
+    rv = fprint hFile ""
+    rv = fprint hFile "LibMain endp"
+    rv = fprint hFile ""
+    rv = fprint hFile "; «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««"
+    rv = fprint hFile ""
+    rv = fprint hFile "  comment * -----------------------------------------------------"
+    rv = fprint hFile "          You should add the procedures your DLL requires AFTER"
+    rv = fprint hFile "          the LibMain procedure. For each procedure that you"
+    rv = fprintc hFile "          wish to EXPORT you must place its name in the \q" proj$ ".def\q\r\n"
+    rv = fprint hFile "          file so that the linker will know which procedures to"
+    rv = fprint hFile "          put in the EXPORT table in the DLL. Use the following"
+    rv = fprint hFile "          syntax AFTER the LIBRARY name on the 1st line."
+    rv = fprint hFile "          LIBRARY " proj$
+    rv = fprint hFile "          EXPORTS YourProcName"
+    rv = fprint hFile "          EXPORTS AnotherProcName"
+    rv = fprint hFile "          ------------------------------------------------------- *"
+    rv = fprint hFile ""
+    rv = fprint hFile "; «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««"
+    rv = fprint hFile ""
+    rv = fprint hFile "end LibMain"
+
+    rv = fclose hFile
+
+; ¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤
+; ¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤=÷=¤
+
+    txt$ = cat$ "Open " qt$ proj$ ".asm" qt$ " to edit your new DLL, build it with MAKEIT.BAT"
+
+    msgbox txt$ "Done" MB_OK
+
+    openfile
+
+    end
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤

@@ -1,0 +1,572 @@
+<HTML>
+<HEAD>
+<META NAME="Author" CONTENT="Raymond Filiatreault">
+<META NAME="Description" CONTENT="Tutorial on the use of the floating point coprocessor in assembly programming. Chap. 8 Arithmetic instructions - with REAL numbers">
+<TITLE>Simply FPU Chap. 8</TITLE>
+</HEAD>
+<BODY TEXT="#402000" LINK="#0000ff" VLINK="#0000ff" ALINK="#0000ff" BACKGROUND="fpufigs/bluewave.gif">
+
+<CENTER><FONT SIZE="+3">SIMPLY  FPU</FONT>
+<BR>by <B>Raymond Filiatreault</B><BR>
+Copyright 2003</CENTER>
+<P>
+<CENTER><B>Chap. 8<BR>Arithmetic instructions - with REAL numbers</B></CENTER>
+
+<P><BR>The FPU instructions covered in this chapter perform arithmetic operations on floating point values. The value in the FPU's TOP data register ST(0) <U>must</U> always be one of the operands, whether explicitly or implicitly.
+
+<P>The arithmetic instructions covered in this document are (in alphabetical order):
+
+<pre>
+<A HREF="#fabs"><B>FABS</B></A>     ABSolute value of ST(0) 
+
+<A HREF="#fadd"><B>FADD</B></A>     ADD two floating point values
+
+<A HREF="#faddp"><B>FADDP</B></A>    ADD two floating point values and Pop ST(0)
+
+<A HREF="#fchs"><B>FCHS</B></A>     CHange the Sign of ST(0)
+
+<A HREF="#fdiv"><B>FDIV</B></A>     DIVide two floating point values
+
+<A HREF="#fdivp"><B>FDIVP</B></A>    DIVide two floating point values and Pop ST(0)
+
+<A HREF="#fdivr"><B>FDIVR</B></A>    DIVide in Reverse two floating point values
+
+<A HREF="#fdivrp"><B>FDIVRP</B></A>   DIVide in Reverse two floating point values and Pop ST(0)
+
+<A HREF="#fmul"><B>FMUL</B></A>     MULtiply two floating point values
+
+<A HREF="#fmulp"><B>FMULP</B></A>    MULtiply two floating point values and Pop ST(0)
+
+<A HREF="#frndint"><B>FRNDINT</B></A>  RouND ST(0) to an INTeger
+
+<A HREF="#fsqrt"><B>FSQRT</B></A>    Square RooT of ST(0)
+
+<A HREF="#fsub"><B>FSUB</B></A>     SUBtract two floating point values
+
+<A HREF="#fsubp"><B>FSUBP</B></A>    SUBtract two floating point values and Pop ST(0)
+
+<A HREF="#fsubr"><B>FSUBR</B></A>    SUBtract in Reverse two floating point values
+
+<A HREF="#fsubrp"><B>FSUBRP</B></A>   SUBtract in Reverse two floating point values and Pop ST(0)</pre>
+
+
+<BR><FONT SIZE="+1"><B><A NAME="fadd"></A>FADD</B></FONT> (Add two floating point values)
+
+<pre>Syntax:    <B>fadd <EM>Src</EM></B>
+           <B>fadd <EM>Dest,Src</EM></B></pre>
+
+<BLOCKQUOTE>Note: FADD without operands can also be used with the MASM assembler but such an instruction is coded as <A HREF="#faddp">FADDP</A> ST(1),ST(0).</BLOCKQUOTE>
+
+<pre>Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Overflow, Underflow, Precision</pre>
+
+<P>This instruction performs a signed addition of the floating point values from the source (<EM>Src</EM>) and the destination (<EM>Dest</EM>) and overwrites the content of the destination data register with the result. If only the source is specified, the TOP data register ST(0) is the implied destination and the source must be the memory address of a <A HREF="fpuchap2.htm#real4">REAL4</A> or <A HREF="fpuchap2.htm#real8">REAL8</A> value (see Chap.2 for <A HREF="fpuchap2.htm#realmode">addressing modes of real numbers</A>). If both the source and destination are specified, they must both be FPU data registers and one of them must be the TOP data register ST(0). <FONT SIZE="-1"><EM>(The <A HREF="fpuchap9.htm#fiadd">FIADD</A> instruction must be used to add an integer located in memory to the value in ST(0)).</EM></FONT>
+
+<BLOCKQUOTE><U>Note</U> that a <A HREF="fpuchap2.htm#real10">REAL10</A> in memory cannot be added directly to ST(0). If such an addition becomes necessary, the REAL10 value must first be loaded to the FPU.</BLOCKQUOTE>
+
+An <B>I</B>nvalid operation exception is detected if a specified data register is empty, or if either of the two values is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The destination register would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value. (Values of <A HREF="fpuchap2.htm#infini">INFINITY</A> will be treated as valid numbers and yield an INFINITY result without any exception being detected, unless both values are INFINITY of opposite sign.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if a data register specified as an operand is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when either of the two operands is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word. The addition would still yield a valid result.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>O</B>verflow or <B>U</B>nderflow exception will be detected if the result exceeds the range limits of REAL10 numbers, setting the related flag in the Status Word and the value of INFINITY will overwrite the content of the destination register in case of overflow.
+
+<P>If a REAL4 or REAL8 value in memory is specified as the source, it is first converted to the REAL10 format before the addition. If that value is not an exact number in binary, the precision of the result will only be equivalent to the precision of the source.
+
+ <P>Examples of use:
+
+<pre><B>fadd real8_var</B>       ;add the value of the <EM>real8_var</EM> variable to ST(0)
+<B>fadd dword ptr [eax]</B> ;add the REAL4 value pointed to by EAX to ST(0)
+<B>fadd st,st</B>           ;double the value of ST(0)
+<B>fadd st,st(3)</B>        ;add the values of ST(0) and ST(3), result in ST(0)
+<B>fadd st(3),st</B>        ;add the values of ST(0) and ST(3), result in ST(3)</pre>
+
+
+<BR><FONT SIZE="+1"><B><A NAME="faddp"></A>FADDP</B></FONT> (Add two floating point values and Pop ST(0))
+
+<pre>Syntax:    <B>faddp <EM>st(i),st</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Overflow, Underflow, Precision</pre>
+
+This instruction performs a signed addition of the content from the ST(i) and ST(0) registers. The result then  overwrites the content of the ST(i) register and the TOP data register is popped.
+
+<P>An <B>I</B>nvalid operation exception is detected if a specified data register is empty, or if its value is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The destination register would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value. (Values of <A HREF="fpuchap2.htm#infini">INFINITY</A> will be treated as valid numbers and yield an INFINITY result without any exception being detected, unless both values are INFINITY of opposite sign.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if a data register specified as an operand is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when either of the two operands is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word. The addition would still yield a valid result.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>O</B>verflow or <B>U</B>nderflow exception will be detected if the result exceeds the range limits of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word and the value of INFINITY will overwrite the content of the destination register in case of overflow
+
+<P>This instruction is used when the value in ST(0) would no longer be needed for further computation. Examples of use could be as follows.
+
+<P>Example 1: Adding to ST(0) a temporary REAL10 value located in memory which needs to be loaded to the FPU for such an operation.
+
+<pre>
+<B>fld   real10_var</B>  ;load the temporary value
+                  ;-&gt; ST(0)=real10_var, ST(1)=previous ST(0)
+<B>faddp st(1),st</B>    ;add the previous ST(0) and the real10_var and discard it
+                  ;-&gt; ST(0)=(previous ST(0) + real10_var)</pre>
+
+<BLOCKQUOTE>Note that MASM would also accept <B>fadd</B> (no operand) instead of the 
+<B>faddp st(1),st</B> instruction.</BLOCKQUOTE>
+
+Example 2: Computing a sum of squares from an array of REAL8 values
+
+<pre>
+<B>lea   edx,real8_array</B> ;use EDX as a pointer to the array
+<B>mov   ecx,array_items</B> ;use ECX as counter for the number of items to process
+<B>fldz</B>                  ;initialize a register to accumulate the squared values
+                      ;-&gt; ST(0)=accumulator=0
+<B>@@:</B>
+<B>fld   qword ptr [edx]</B> ;load the next REAL8 value
+                      ;-&gt; ST(0)=REAL value, ST(1)=accumulator
+<B>fmul  st,st</B>           ;square it
+                      ;-&gt; ST(0)=REAL value squared, ST(1)=accumulator
+<B>faddp st(1),st</B>        ;add to the accumulator and discard the squared value
+                      ;-&gt; ST(0)=accumulator+squared REAL value
+<B>add   edx,8</B>           ;adjust the pointer to the next REAL8 item
+<B>dec   ecx</B>             ;decrement the counter
+<B>jnz   @B</B>              ;continue until all items are processed
+
+                      ;-&gt; ST(0)=the sum of squares</pre>
+
+
+<BR><FONT SIZE="+1"><B><A NAME="fmul"></A>FMUL</B></FONT> (Multiply two floating point values)
+
+<pre>Syntax:    <B>fmul <EM>Src</EM></B>
+           <B>fmul <EM>Dest,Src</EM></B></pre>
+
+<BLOCKQUOTE>Note: FMUL without operands can also be used with the MASM assembler but such an instruction is coded as <A HREF="#fmulp">FMULP</A> ST(1),ST(0).</BLOCKQUOTE>
+
+<pre>Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Overflow, Underflow, Precision</pre>
+
+This instruction performs a signed multiplication of the floating point values from the source (<EM>Src</EM>) and the destination (<EM>Dest</EM>) and overwrites the content of the destination data register with the result; the value of the source remains unchanged. If only the source is specified, the TOP data register ST(0) is the implied destination and the source must be the memory address of a <A HREF="fpuchap2.htm#real4">REAL4</A> or <A HREF="fpuchap2.htm#real8">REAL8</A> value (see Chap.2 for <A HREF="fpuchap2.htm#realmode">addressing modes of real numbers</A>). If both the source and destination are specified, they must both be FPU data registers and one of them must be the TOP data register ST(0). <FONT SIZE="-1"><EM>(The <A HREF="fpuchap9.htm#fimul">FIMUL</A> instruction must be used to multiply an integer located in memory with the value in ST(0)).</EM></FONT>
+
+<BLOCKQUOTE><U>Note</U> that a <A HREF="fpuchap2.htm#real10">REAL10</A> in memory cannot be multiplied directly with ST(0). If such an multiplication becomes necessary, the REAL10 value must first be loaded to the FPU.</BLOCKQUOTE>
+
+An <B>I</B>nvalid operation exception is detected if a specified data register is empty, or if either of the two values is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The destination register would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value. (Values of <A HREF="fpuchap2.htm#infini">INFINITY</A> will be treated as valid numbers and yield an INFINITY result without any exception being
+detected, unless the other operand has a value of zero.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if a data register specified as an operand is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when either of the two operands is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word. The multiplication would still yield a valid result.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>O</B>verflow or <B>U</B>nderflow exception will be detected if the result exceeds the range limits of REAL10 numbers, setting the related flag in the Status Word and the value of INFINITY will overwrite the content of the destination register in case of overflow.
+
+<P>If a REAL4 or REAL8 value in memory is specified as the source, it is first converted to the REAL10 format before the addition. If that value is not an exact number in binary, the precision of the result will only be equivalent to the precision of the source.
+
+<P>Examples of use:
+
+<pre><B>fmul real8_var</B>         ;multiply ST(0) by the <EM>real8_var</EM> variable
+<B>fmul dword ptr [eax]</B>   ;multiply ST(0) by the REAL4 pointed to by EAX
+<B>fmul qword ptr [esi+8]</B> ;multiply ST(0) by the REAL8 pointed to by ESI+8
+<B>fmul st,st</B>             ;square the value of ST(0)
+<B>fmul st,st(3)</B>          ;multiply ST(3) and ST(0), result in ST(0)
+<B>fmul st(3),st</B>          ;multiply ST(3) and ST(0), result in ST(3)</pre>
+
+
+<BR><FONT SIZE="+1"><B><A NAME="fmulp"></A>FMULP</B></FONT> (Multiply two floating point values and Pop ST(0))
+
+<pre>Syntax:    <B>fmulp <EM>st(i),st</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Overflow, Underflow, Precision</pre>
+
+This instruction performs a signed multiplication of the contents from the ST(i) and ST(0) data registers. The result then  overwrites the content of the ST(i) register and the TOP data register is popped.
+
+<P>An <B>I</B>nvalid operation exception is detected if a specified data register is empty, or if its value is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The destination register would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value. (Values of <A HREF="fpuchap2.htm#infini">INFINITY</A> will be treated as valid numbers and yield an INFINITY result without any exception being detected, unless the other operand has a value of zero.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if a data register specified as an operand is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when either of the two operands is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word. The multiplication would still yield a valid result.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>O</B>verflow or <B>U</B>nderflow exception will be detected if the result exceeds the range limits of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word and the value of INFINITY will overwrite the content of the destination register in case of overflow.
+
+<P>This instruction is used when the value in ST(0) would no longer be needed for further computation. An example would be when the value of a data register needs to be multiplied by a temporary REAL10 located in memory (or by one of the constants hard-coded on the FPU). The following code assumes that the value in ST(2) needs to be multiplied by the value of PI.
+
+<pre>
+<B>fldpi</B>          ;load the hard-coded PI constant with 64 bits of precision
+               ;-&gt; ST(0)=PI, ST(3)=previous ST(2)
+<B>fmulp st(3),st</B> ;multiply, overwrite ST(3) with result, then discard PI
+               ;-&gt; ST(2)=previous ST(2) multiplied by PI</pre>
+
+<BLOCKQUOTE>Note that MASM would also accept <B>fmul</B> (no operand) instead of an <B>fmulp st(1),st</B> instruction.</BLOCKQUOTE>
+
+
+<BR><FONT SIZE="+1"><B><A NAME="fsub"></A>FSUB</B></FONT> (Subtract two floating point values)
+
+<pre>Syntax:    <B>fsub <EM>Src</EM></B>
+           <B>fsub <EM>Dest,Src</EM></B></pre>
+
+<BLOCKQUOTE>Note: FSUB without operands can also be used with the MASM assembler but such an instruction is coded as <A HREF="#fsubp">FSUBP</A> ST(1),ST(0).</BLOCKQUOTE>
+
+<pre>Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Overflow, Underflow, Precision</pre>
+
+This instruction performs a signed subtraction of the floating point value of the source (<EM>Src</EM>) operand from the value of the destination (<EM>Dest</EM>) register operand and overwrites the content of the destination data register with the result; the value of the source remains unchanged. If only the source is specified, the TOP data register ST(0) is the implied destination and the source must be the memory address of a <A HREF="fpuchap2.htm#real4">REAL4</A> or <A HREF="fpuchap2.htm#real8">REAL8</A> value (see Chap.2 for <A HREF="fpuchap2.htm#realmode">addressing modes of real numbers</A>). If both the source and destination are specified, they must both be FPU data registers and one of them must be the TOP data register ST(0). <FONT SIZE="-1"><EM>(The <A HREF="fpuchap9.htm#fisub">FISUB</A> instruction must be used to subtract an integer located in memory from the value in ST(0)).</EM></FONT>
+
+<BLOCKQUOTE><U>Note</U> that a <A HREF="fpuchap2.htm#real10">REAL10</A> in memory cannot be subtracted directly from ST(0). If such a subtraction becomes necessary, the REAL10 value must first be loaded to the FPU.</BLOCKQUOTE>
+
+An <B>I</B>nvalid operation exception is detected if a specified data register is empty, or if either of the two values is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The destination register would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value. (Values of <A HREF="fpuchap2.htm#infini">INFINITY</A> will be treated as valid numbers and yield a signed INFINITY result without any exception being detected, unless both values are INFINITY of the same sign.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if a data register specified as an operand is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when either of the two operands is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word. The subtraction would still yield a valid result.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>O</B>verflow or <B>U</B>nderflow exception will be detected if the result exceeds the range limits of REAL10 numbers, setting the related flag in the Status Word and the value of INFINITY will overwrite the content of the destination register in case of overflow.
+
+<P>If a REAL4 or REAL8 value in memory is specified as the source, it is first converted to the REAL10 format before the subtraction. If that value is not an exact number in binary, the precision of the result will only be equivalent to the precision of the source.
+
+<P>Examples of use:
+
+<pre>
+<B>fsub real8_var</B>      ;subtract the value of the <EM>real8_var</EM> variable from ST(0)
+<B>fsub dword ptr[eax]</B> ;subtract the REAL4 value pointed to by EAX from ST(0)
+<B>fsub st,st</B>          ;would result in a value of 0.0 in ST(0)
+<B>fsub st,st(3)</B>       ;subtract the value of ST(3) from ST(0), result in ST(0)
+<B>fsub st(3),st</B>       ;subtract the value of ST(0) from ST(3), result in ST(3)</pre>
+
+
+<BR><FONT SIZE="+1"><B><A NAME="fsubp"></A>FSUBP</B></FONT> (Subtract two floating point values and pop ST(0))
+
+<pre>Syntax:    <B>fsubp <EM>st(i),st</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Overflow, Underflow, Precision</pre>
+
+<P>This instruction performs a signed subtraction of the content of the ST(0) data register from the content of the ST(i) data register. The result then  overwrites the content  of the ST(i) register and the TOP data register is popped.
+
+<P>An <B>I</B>nvalid operation exception is detected if a specified data register is empty, or if either of the two values is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The destination register would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value. (Values of <A HREF="fpuchap2.htm#infini">INFINITY</A> will be treated as valid numbers and yield a signed INFINITY result without any exception being detected, unless both values are INFINITY of the same sign.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if a data register specified as an operand is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when either of the two operands is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word. The subtraction would still yield a valid result.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>O</B>verflow or <B>U</B>nderflow exception will be detected if the result exceeds the range limits of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word and the value of INFINITY will overwrite the content of the destination register in case of overflow.
+
+<P>This instruction is used when the value in ST(0) would no longer be needed for further computation. An example of use could be when subtracting from ST(0) a temporary REAL10 value located in memory which needs to be loaded to the FPU for such an operation.
+
+<pre>
+<B>fld   real10_var</B> ;load the temporary value
+                 ;-&gt; ST(0)=real10_var, ST(1)=original ST(0)
+<B>fsubp st(1),st</B>   ;subtract real10_var from the original ST(0) and discard it, 
+                 ;-&gt; ST(0)=(original ST(0) - real10_var)</pre>
+
+<BLOCKQUOTE>	Note that MASM would also accept <B>fsub</B> (no operand) instead of the <B>fsubp st(1),st</B> instruction.</BLOCKQUOTE>
+
+
+<BR><FONT SIZE="+1"><B><A NAME="fsubr"></A>FSUBR</B></FONT> (Subtract in reverse two floating point values)
+
+<pre>Syntax:    <B>fsubr <EM>Src</EM></B>
+           <B>fsubr <EM>Dest,Src</EM></B></pre>
+
+<BLOCKQUOTE>Note: FSUBR without operands can also be used with the MASM
+assembler but such an instruction is coded as <A HREF="#fsubrp">FSUBRP</A> ST(1),ST(0).</BLOCKQUOTE>
+
+<pre>Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Overflow, Underflow, Precision</pre>
+
+This instruction performs a signed subtraction of the content of the destination (<EM>Dest</EM>) register operand from the content of the source (<EM>Src</EM>) operand and overwrites the content  of the destination data register with the result; <U>the value of the source remains unchanged</U>. If only the source is specified, the TOP data register ST(0) is the implied destination and the source must be the memory address of a <A HREF="fpuchap2.htm#real4">REAL4</A> or <A HREF="fpuchap2.htm#real8">REAL8</A> value (see Chap.2 for <A HREF="fpuchap2.htm#realmode">addressing modes of real numbers</A>). If both the source and destination are specified, they must both be FPU data registers and one of them must be the TOP data register ST(0). <FONT SIZE="-1"><EM>(The <A HREF="fpuchap9.htm#fisubr">FISUBR</A> instruction must be used to subtract ST(0) from the value of an integer located in memory).</EM></FONT>
+
+<BLOCKQUOTE><U>Note</U> that a <A HREF="fpuchap2.htm#real10">REAL10</A> located in memory cannot be used with this instruction. If such an subtraction becomes necessary, the REAL10 value must first be loaded to the FPU.</BLOCKQUOTE>
+
+An <B>I</B>nvalid operation exception is detected if a specified data register is empty, or if either of the two values is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The destination register would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value. (Values of <A HREF="fpuchap2.htm#infini">INFINITY</A> will be treated as valid numbers and yield a signed INFINITY result without any exception being detected, unless both values are INFINITY of the same sign.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if a data register specified as an operand is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when either of the two operands is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word. The subtraction would still yield a valid result.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>O</B>verflow or <B>U</B>nderflow exception will be detected if the result exceeds the range limits of REAL10 numbers, setting the related flag in the Status Word and the value of INFINITY will overwrite the content of the destination register in case of overflow.
+
+<P>If a REAL4 or REAL8 value in memory is specified as the source, it is first converted to the REAL10 format before the subtraction. If that value is not an exact number in binary, the precision of the result will only be equivalent to the precision of the source.
+
+<P>Examples of use:
+
+<pre>
+<B>fsubr real8_var</B>      ;subtract ST(0) from the value of the <EM>real8_var</EM> variable
+                     ;and store the result in ST(0)
+<B>fsubr dword ptr[eax]</B> ;subtract ST(0) from the REAL4 value pointed to by EAX
+                     ;and store the result in ST(0)
+<B>fsubr st,st</B>          ;would result in a value of 0.0 in ST(0)
+<B>fsubr st,st(3)</B>       ;subtract the value of ST(0) from ST(3), result in ST(0)
+                     ;ST(3) remains unchanged
+<B>fsubr st(3),st</B>       ;subtract the value of ST(3) from ST(0), result in ST(3)
+                     ;ST(0) remains unchanged</pre>
+
+<BR><FONT SIZE="+1"><B><A NAME="fsubrp"></A>FSUBRP</B></FONT> (Subtract in reverse two floating point values and pop ST(0))
+
+<pre>Syntax:    <B>fsubrp <EM>st(i),st</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Overflow, Underflow, Precision</pre>
+
+<P>This instruction performs a signed subtraction of the content of the ST(i) data register from the content of ST(0) and overwrites the content  of the ST(i) register with the result. The TOP data register is then popped.
+
+<P>An <B>I</B>nvalid operation exception is detected if a specified data register is empty, or if either of the two values is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The destination register would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value. (Values of <A HREF="fpuchap2.htm#infini">INFINITY</A> will be treated as valid numbers and yield a signed INFINITY result without any exception being detected, unless both values are INFINITY of the same sign.)
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if a data register specified as an operand is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when either of the two operands is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word. The subtraction would still yield a valid result.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>O</B>verflow or <B>U</B>nderflow exception will be detected if the result exceeds the range limits of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word and the value of INFINITY will overwrite the content of the destination register in case of overflow.
+
+<P>This instruction is used when the value in ST(0) would no longer be needed for further computation. An example of use could be when a subtraction of ST(0) from a temporary REAL10 value located in memory is needed, which requires loading it to the FPU for such an operation.
+
+<pre><B>fld   real10_var</B> ;load the temporary value
+                 ;-&gt; ST(0)=real10_var, ST(1)=original ST(0)
+<B>fsubrp st(1),st</B>  ;subtract the original ST(0) from real10_var and discard it 
+                 ;-&gt; ST(0)=(temporary value - original ST(0))</pre>
+
+<BLOCKQUOTE>Note that MASM would also accept <B>fsubr</B> (no operand) instead of the <B>fsubrp st(1),st</B> instruction.</BLOCKQUOTE>
+
+
+<BR><FONT SIZE="+1"><B><A NAME="fdiv"></A>FDIV</B></FONT> (Divide two floating point values)
+
+<pre>Syntax:    <B>fdiv <EM>Src</EM></B>
+           <B>fdiv <EM>Dest,Src</EM></B></pre>
+
+<BLOCKQUOTE>	Note: FDIV without operands can also be used with the MASM assembler but such an instruction is coded as <A HREF="#fdivp">FDIVP</A> ST(1),ST(0).</BLOCKQUOTE>
+
+<pre>Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Overflow, Underflow, Precision, Zero divide</pre>
+
+This instruction performs a signed division of the content of the destination (<EM>Dest</EM>) register operand by the content of the source (<EM>Src</EM>) operand and overwrites the content of the destination data register with the result; the value of the source remains unchanged. If only the source is specified, the TOP data register ST(0) is the implied destination and the source must be the memory address of a <A HREF="fpuchap2.htm#real4">REAL4</A> or <A HREF="fpuchap2.htm#real8">REAL8</A> value (see Chap.2 for <A HREF="fpuchap2.htm#realmode">addressing modes of real numbers</A>). If both the source and destination are specified, they must both be FPU data registers and one of them must be the TOP data register ST(0). <FONT SIZE="-1"><EM>(The <A HREF="fpuchap9.htm#fidiv">FIDIV</A> instruction must be used to divide the value in ST(0) by an integer located in memory).</EM></FONT>
+
+<BLOCKQUOTE><U>Note</U> that ST(0) cannot be divided directly by a <A HREF="fpuchap2.htm#real10">REAL10</A> in memory. If such a division becomes necessary, the REAL10 value must first be loaded to the FPU.</BLOCKQUOTE>
+
+An <B>I</B>nvalid operation exception is detected if a specified data register is empty, if either of the two values is a <A HREF="fpuchap2.htm#nans">NAN</A>, if the content of the destination register is INFINITY, or if both values are zero, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The destination register would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value. (A value of <A HREF="fpuchap2.htm#infini">INFINITY</A> will be treated as a valid number for the source and yield a signed zero result without any exception being detected, unless both values are INFINITY regardless of sign).
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if a data register specified as an operand is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when either of the two operands is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word. The division would still yield a valid result.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>O</B>verflow or <B>U</B>nderflow exception will be detected if the result exceeds the range limits of REAL10 numbers, setting the related flag in the Status Word and the value of INFINITY will overwrite the content of the destination register in case of overflow.
+
+<P>A <B>Z</B>ero divide exception will be detected if the value of the source operand is zero. It would yield a signed INFINITY result (unless the value of the destination is also zero which would be an invalid operation).
+
+<P>If a REAL4 or REAL8 value in memory is specified as the source, it is first converted to the REAL10 format before the subtraction. If that value is not an exact number in binary, the precision of the result will only be equivalent to the precision of the source.
+
+<P>Examples of use:
+
+<pre>
+<B>fdiv real8_var</B>       ;divide ST(0) by the value of the <EM>real8_var</EM> variable
+<B>fdiv dword ptr [eax]</B> ;divide ST(0) by the REAL4 value pointed to by EAX
+<B>fdiv st,st</B>           ;would result in a value of 1.0 in ST(0)
+<B>fdiv st,st(3)</B>        ;divide ST(0) by the value of ST(3), result in ST(0)
+<B>fdiv st(3),st</B>        ;divide ST(3) by the value of ST(0), result in ST(3)</pre>
+
+
+<BR><FONT SIZE="+1"><B><A NAME="fdivp"></A>FDIVP</B></FONT> (Divide two floating point values and pop ST(0))
+
+<pre>Syntax:    <B>fdivp <EM>st(i),st</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Overflow, Underflow, Precision, Zero divide</pre>
+
+This instruction performs a signed division of the content of the ST(i) data register by the content of the ST(0) data register. The result then  overwrites the content  of the ST(i) register and the TOP data register is popped.
+
+<P>An <B>I</B>nvalid operation exception is detected if a specified data register is empty, if either of the two values is a <A HREF="fpuchap2.htm#nans">NAN</A>, if the content of the ST(i) register is INFINITY, or if both values are zero, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The ST(i) register would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value. (A value of <A HREF="fpuchap2.htm#infini">INFINITY</A> will be treated as a valid number for ST(0) and yield a signed zero result without any exception being detected, unless both values are INFINITY regardless of sign).
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if a data register specified as an operand is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when either of the two operands is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word. The division would still yield a valid result.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>O</B>verflow or <B>U</B>nderflow exception will be detected if the result exceeds the range limits of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word and the value of INFINITY will overwrite the content of the destination register in case of overflow.
+
+<P>A <B>Z</B>ero divide exception will be detected if the value of ST(0) is zero. It would yield a signed INFINITY result (unless the value of ST(i) is also zero which would be an invalid operation).
+
+<P>This instruction is used when the value in ST(0) would no longer be needed for further computation. An example of use could be when a division of ST(0) by a temporary REAL10 value located in memory is needed, which requires loading it to the FPU for such an operation.
+
+<pre><B>fld   real10_var</B> ;load the temporary value
+                 ;-&gt; ST(0)=real10_var, ST(1)=original ST(0)
+<B>fdivp st(1),st</B>   ;divide the original ST(0) by real10_var and discard it 
+                 ;-&gt; ST(0)=(original ST(0) ÷ temporary value)</pre>
+
+<BLOCKQUOTE>Note that MASM would also accept <B>fdiv</B> (no operand) instead of the <B>fdivp st(1),st</B> instruction.</BLOCKQUOTE>
+
+
+<BR><FONT SIZE="+1"><B><A NAME="fdivr"></A>FDIVR</B></FONT> (Reverse divide two floating point values)</P>
+
+<pre>Syntax:    <B>fdivr <EM>Src</EM></B>
+           <B>fdivr <EM>Dest,Src</EM></B></pre>
+
+<BLOCKQUOTE>	Note: FDIVR without operands can also be used with the MASM assembler but such an instruction is coded as <A HREF="#fdivrp">FDIVRP</A> ST(1),ST(0).</BLOCKQUOTE>
+
+<pre>Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Overflow, Underflow, Precision, Zero divide</pre>
+
+This instruction performs a signed division of the content of the source (<EM>Src</EM>) operand by the content of the destination (<EM>Dest</EM>) register operand and overwrites the content of the destination data register with the result; <U>the value of the source remains unchanged</U>. If only the source is specified, the TOP data register ST(0) is the implied destination and the source must be the memory address of a <A HREF="fpuchap2.htm#real4">REAL4</A> or <A HREF="fpuchap2.htm#real8">REAL8</A> value (see Chap.2 for <A HREF="fpuchap2.htm#realmode">addressing modes of real numbers</A>). If both the source and destination are specified, they must both be FPU data registers and one of them must be the TOP data register ST(0). <FONT SIZE="-1"><EM>(The <A HREF="fpuchap9.htm#fidivr">FIDIVR</A> instruction must be used to divide the value of an integer located in memory by ST(0)).</EM></FONT>
+
+<BLOCKQUOTE><U>Note</U> that a <A HREF="fpuchap2.htm#real10">REAL10</A> in memory cannot be used directly as the source operand. If such a division becomes necessary, the REAL10 value must first be loaded to the FPU.</BLOCKQUOTE>
+
+An <B>I</B>nvalid operation exception is detected if a specified data register is empty, if either of the two values is a <A HREF="fpuchap2.htm#nans">NAN</A>, if the content of the source operand is INFINITY, or if both values are zero, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The destination register would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value. (A value of <A HREF="fpuchap2.htm#infini">INFINITY</A> will be treated as a valid number for the destination register and yield a signed zero result without any exception being detected, unless both values are INFINITY regardless of sign).
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if a data register specified as an operand is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when either of the two operands is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word. The division would still yield a valid result.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>O</B>verflow or <B>U</B>nderflow exception will be detected if the result exceeds the range limits of REAL10 numbers, setting the related flag in the Status Word and the value of INFINITY will overwrite the content of the destination register in case of overflow.
+
+<P>A <B>Z</B>ero divide exception will be detected if the value of the destination register is zero. It would yield a signed INFINITY result (unless the value of the source operand is also zero which would be an invalid operation).
+
+<P>If a REAL4 or REAL8 value in memory is specified as the source, it is first converted to the REAL10 format before the subtraction. If that value is not an exact number in binary, the precision of the result will only be equivalent to the precision of the source.
+
+<P>Examples of use:
+
+<pre>
+<B>fdivr real8_var</B>       ;divide the value of the <EM>real8_var</EM> variable by ST(0)
+                      ;and store the result in ST(0)
+<B>fdivr dword ptr [eax]</B> ;divide the REAL4 value pointed to by EAX by ST(0)
+                      ;and store the result in ST(0)
+<B>fdivr st,st</B>           ;would result in a value of 1.0 in ST(0)
+<B>fdivr st,st(3)</B>        ;divide ST(3) by the value of ST(0), result in ST(0)
+                      ;ST(3) remains unchanged
+<B>fdivr st(3),st</B>        ;divide ST(0) by the value of ST(3), result in ST(3)
+                      ;ST(0) remains unchanged</pre>
+
+
+<BR><FONT SIZE="+1"><B><A NAME="fdivrp"></A>FDIVRP</B></FONT> (Reverse divide two floating point values and pop ST(0))
+
+<pre>Syntax:    <B>fdivrp <EM>st(i),st</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Overflow, Underflow, Precision, Zero divide</pre>
+
+This instruction performs a signed division of the content of the ST(0) data register by the content of the ST(i) data register. The result then  overwrites the content  of the ST(i) register and the TOP data register is popped.
+
+<P>An <B>I</B>nvalid operation exception is detected if a specified data register is empty, if one of the two values is a <A HREF="fpuchap2.htm#nans">NAN</A>, if the content of the ST(0) register is INFINITY, or if both values are zero, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The ST(i) register would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value. (A value of <A HREF="fpuchap2.htm#infini">INFINITY</A> will be treated as a valid number for ST(i) and yield a signed zero result without any exception being detected, unless both values are INFINITY regardless of sign).
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if a data register specified as an operand is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when either of the two operands is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word. The division would still yield a valid result.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>O</B>verflow or <B>U</B>nderflow exception will be detected if the result exceeds the range limits of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word and the value of INFINITY will overwrite the content of the destination register in case of overflow.
+
+<P>A <B>Z</B>ero divide exception will be detected if the value of ST(i) is zero. It would yield a signed INFINITY result (unless the value of ST(0) is also zero which would be an invalid operation).
+
+<P>This instruction is used when the value in ST(0) would no longer be needed for further computation. An example of use could be when the content of one of the data registers needs to be replaced by its reciprocal. ST(2) is used for the following code example.
+
+<pre>
+<B>fld1</B>             ;load the hard-coded FPU constant 1.0
+                 ;-&gt; ST(0)=1, ST(3)=original ST(2)
+<B>fdivrp st(3),st</B>  ;divide 1 by the original ST(2) and discard the constant 
+                 ;-&gt; ST(2)=(1 ÷ original ST(2))</pre>
+
+<BLOCKQUOTE>	Note that MASM would also accept <B>fdivr</B> (no operand) instead of the <B>fdivrp st(1),st</B> instruction.</BLOCKQUOTE>
+
+
+<BR><FONT SIZE="+1"><B><A NAME="fabs"></A>FABS</B></FONT> (Absolute value of ST(0))
+
+<pre>Syntax:    <B>fabs</B> (No operand)
+
+Exception flags: Stack Fault, Invalid operation</pre>
+
+This instruction simply clears the sign bit of the value in ST(0), insuring a positive value, i.e. the absolute value.
+
+<P>An <B>I</B>nvalid operation exception and a <B>S</B>tack <B>F</B>ault exception are detected if ST(0) is empty, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>, and inserting the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> NAN into ST(0).
+
+<P>There are numerous reasons for insuring that a value be positive. Examples are when it is necessary to extract its square root or compute its logarithm, which can only be performed on positive values by the FPU.
+
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fchs"></A>FCHS</B></FONT> (Change the sign of ST(0))
+
+<pre>Syntax:    <B>fchs</B> (No operand)
+
+Exception flags: Stack Fault, Invalid operation</pre>
+
+<P>This instruction simply reverses the sign bit of the value in ST(0), changing it from positive to negative or vice versa.
+
+<P>An <B>I</B>nvalid operation exception and a <B>S</B>tack <B>F</B>ault exception are detected if ST(0) is empty, setting the related flags in the <A HREF="fpuchap1.htm#sword">Status Word</A>, and inserting the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> NAN into ST(0).
+
+<P>There are numerous reasons for changing the sign of a value. For examples, changing the sign of the logarithm of a number effectively yields the logarithm of the reciprocal of that number.
+
+<P>If the sign of the value in a register other than ST(0) is required, it is a simple matter to exchange the contents of that register and of ST(0), change the sign, and exchange once more. The following code changes the sign of the value in ST(2)
+
+<pre>
+<B>fxch st(2)</B>  ;exchange the contents of ST(0) and ST(2)
+            ;-&gt; ST(0)=original ST(2), ST(2)=original ST(0)
+<B>fchs</B>        ;change the sign of ST(0) which is the original ST(2)
+<B>fxch st(2)</B>  ;exchange the contents of ST(0) and ST(2)
+            ;-&gt; ST(0)=original ST(0), ST(2)=original ST(2) with sign changed</pre>
+If the sign of the value in ST(1) needed to be changed, the following code could also be used. However, any advantage would be very minimal, code size being the same and speed gain possibly only a fraction of a nanosecond.
+<pre><B>fincstp</B>   ;increment the TOP data register field in the Status Word
+          ;ST(0)=&gt;ST(7), ST(1)=&gt;ST(0)
+<B>fchs</B>      ;change the sign of ST(0) (formerly the ST(1) value)
+<B>fdecstp</B>   ;decrement the TOP data register in the Status Word
+          ;ST(7)=&gt;ST(0), ST(0)=&gt;ST(1)
+          ;-&gt; ST(1)=original ST(1) with sign changed</pre>
+
+
+<BR><FONT SIZE="+1"><B><A NAME="fsqrt"></A>FSQRT</B></FONT> (Square root of ST(0))
+
+<pre>Syntax:    <B>fsqrt</B> (No operand)
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value, 
+                 Precision</pre>
+
+This instruction extracts the square root of the value in ST(0) and overwrites the content of ST(0) with the result.
+
+<P>An <B>I</B>nvalid operation exception is detected if ST(0) is empty or contains a negative value, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>, and overwriting the content of ST(0) with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> NAN.
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if ST(0) is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected if the content of ST(0) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>The values of <A HREF="fpuchap2.htm#nans">NANs</A>, +<A HREF="fpuchap2.htm#infini">INFINITY</A>  and -0 remain unchanged without any exception being detected.
+
+<P><BR><FONT SIZE="+1"><B><A NAME="frndint"></A>FRNDINT</B></FONT> (Round ST(0) to an integer)
+
+<pre>Syntax:    <B>frndint</B> (No operand)
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value, 
+                 Precision</pre>
+
+This instruction rounds the value of ST(0) to the nearest integral value according to the rounding mode of the RC field in the <A HREF="fpuchap1.htm#cword">Control Word</A> and overwrites the content of ST(0) with the result.
+
+<P>An <B>I</B>nvalid operation exception and a <B>S</B>tack <B>F</B>ault exception are detected if ST(0) is empty, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>, and inserting the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> NAN into ST(0).
+
+<P>A <B>D</B>enormal exception is detected if the content of ST(0) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word.
+
+<P>A <B>P</B>recision exception will be detected if the content of ST(0) is not an integral value, setting the related flag in the Status Word.
+
+<P>Values of <A HREF="fpuchap2.htm#infini">INFINITY</A> and <A HREF="fpuchap2.htm#nans">NANs</A> remain unchanged without any exception being detected.
+
+<P>Although a similar result could be obtained by storing to memory the value of ST(0) as an integer, it would have to be loaded back to the FPU if that rounded value is required for further computation. The FRNDINT is much faster and more efficient. The size of the value is also immaterial with this instruction while the range of an integer variable could possibly be exceeded.
+
+<P>This instruction is also useful prior to storing a value in the packed BCD format with the <A HREF="fpuchap6.htm#fbstp">FBSTP</A> instruction if a different rounding mode must be used.
+
+<P><BR><CENTER><A HREF="index.html"><B>RETURN TO<B>
+<BR><FONT SIZE="+2">SIMPLY  FPU</FONT>
+<BR><B>CONTENTS<B></A></CENTER><BR>
+</BODY>
+</HTML>

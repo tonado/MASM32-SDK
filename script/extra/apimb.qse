@@ -1,0 +1,56 @@
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+    INTEGER hWnd
+    INTEGER void
+    STRING  buffer
+    STRING  msg$
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+    call init
+
+    hWnd = get_hwnd
+    buffer = alloc$ MAX_PATH
+
+    void = STDCALL GetWindowText hWnd buffer MAX_PATH
+    void = STDCALL SetWindowText hWnd "API MessageBox Demo"
+
+    cstr msg$ "\qQuoted Text\q in a MessageBox"
+    void = STDCALL MessageBox hWnd msg$ "API Demo" MB_OK
+
+    void = STDCALL SetWindowText hWnd buffer
+
+    call cleanup
+
+    end
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+init:
+
+    INTEGER GetWindowText
+    INTEGER SetWindowText
+    INTEGER MessageBox
+    INTEGER user32
+    INTEGER MAX_PATH
+
+    user32 = LoadLibrary "user32.dll"
+
+    GetWindowText = GetProcAddress user32 "GetWindowTextA"
+    SetWindowText = GetProcAddress user32 "SetWindowTextA"
+    MessageBox    = GetProcAddress user32 "MessageBoxA"
+
+    MAX_PATH = 260
+
+    ret
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+cleanup:
+
+    void = FreeLibrary user32
+    buffer = ""
+
+    ret
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤

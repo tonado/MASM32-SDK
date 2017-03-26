@@ -1,0 +1,142 @@
+TPROC.EXE
+
+Tproc is a jump table creation tool that has code replication capacity for
+each code block. At its simplest it produces code of the following type
+without the error prone problems of manually typing the table and matching
+labels.
+
+It will normally produce a procedure that takes a single numeric argument
+which indicates which block of code is executed. The numeric range would
+normally be sequential to avoid redundant code that it not used in the
+procedure. You have the option of adding additional arguments if your
+jump table design requires it.
+
+The tool is used to produce procedures that will branch to a very large
+number of diferent labels without having to sequentially compare them to
+get the correct value first.
+
+; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+
+align 4
+
+default proc value:DWORD
+
+  .data
+    align 4
+    deftbl \
+      dd l0,l1,l2,l3
+  .code
+
+    mov eax, value
+    cmp eax, 3
+    ja error
+    jmp DWORD PTR [deftbl+eax*4]
+
+  align 4
+  error:
+    mov eax, -1
+    jmp quit_default
+
+  align 4
+  l0:
+    mov eax, 0
+    jmp quit_default
+
+  align 4
+  l1:
+    mov eax, 1
+    jmp quit_default
+
+  align 4
+  l2:
+    mov eax, 2
+    jmp quit_default
+
+  align 4
+  l3:
+    mov eax, 3
+    jmp quit_default
+
+  quit_default:
+
+    ret
+
+default endp
+
+; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+
+It has input range control so that if a number beyond the range of the table is
+passed to the procedure, it returns -1.
+
+Within code of the following type the content between the start label and
+the jump to the exit label is user defined and can be written in the edit
+window of TPROC.
+
+  l0:
+  ; -----------------------
+  ; user defined code goes here.
+  ; -----------------------
+    jmp quit_default
+
+The default code when the tool opens is,
+
+    mov eax, {num}
+
+The only available variable in the code replication process is the label number
+which can be inserted at any location in the user defined code by using the notation
+{num}. The tool will replace {num} with the label number of the preceding label.
+
+If the label number is 155, the inserted code with the default is,
+
+    mov eax, 155
+
+You can write any code you like in the edit control on the interface that will
+work with the rest of the procedure and it will be replicated for every label
+within the range of labels set in the interface. If your user defined code needs
+to use any of EBX ESI or EDI, you can preserve any of the three registers from
+the check boxes on the interface.
+
+You can add additional parameters to the default "value" in normal MASM proc syntax
+which you can use with your user defined code to make more complex procedures
+automatically. You can treat the extra parameters as normal procedure parameters
+and use them in your user defined code.
+
+You can routinely include data in the user defined code and use the {num} variable
+to make unique names for each data item.
+
+; ----------------------------------------
+    .data
+      dat1{num} db "text1{num}",0
+      dat2{num} db "text2{num}",0
+      dat3{num} db "text3{num}",0
+      dat4{num} db "text4{num}",0
+      arr(num} dd dat1{num},dat2{num},dat3{num},dat4{num}
+    .code
+    mov eax, arr{num}
+; ----------------------------------------
+
+Code of this type will return the address of an array of zero terminated
+strings that is unique for every label in the jump table.
+
+This general technique gives very high speed access to what can be a very large
+range of variables (thousands) with only the overhead of a single jump to the
+label.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

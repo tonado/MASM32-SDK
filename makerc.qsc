@@ -1,0 +1,16 @@
+
+  yesno Is the editor empty ?**Confirmation
+  jmp nxt
+  exit
+nxt:  
+
+text // For MASM32, save this file as RSRC.RC{lf}
+text {lf}
+text #include "\masm32\include\resource.h"{lf}
+text {lf}
+text // The two following lines of code are for an icon and a bitmap respectively.{lf}
+text // Set the resource ID as a number or alternatively write an equate for it if{lf}
+text // you wish to use a name in you code for the resource.{lf}
+text {lf}
+text 1 ICON MOVEABLE PURE LOADONCALL DISCARDABLE "YOURICON.ICO"{lf}
+text 5 BITMAP MOVEABLE PURE LOADONCALL DISCARDABLE "YOURBMP.BMP"{lf}

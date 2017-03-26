@@ -1,0 +1,353 @@
+<HTML>
+<HEAD>
+<META NAME="Author" CONTENT="Raymond Filiatreault">
+<META NAME="Description" CONTENT="Tutorial on the use of the floating point coprocessor in assembly programming. Chap. 11 Logarithmic and exponential instructions">
+<TITLE>Simply FPU Chap. 11</TITLE>
+</HEAD>
+<BODY TEXT="#402000" LINK="#0000ff" VLINK="#0000ff" ALINK="#0000ff" BACKGROUND="fpufigs/bluewave.gif">
+
+<CENTER><FONT SIZE="+3">SIMPLY  FPU</FONT>
+<BR>by <B>Raymond Filiatreault</B><BR>
+Copyright 2003</CENTER>
+<P>
+<CENTER><B>Chap. 11<BR>Logarithmic and exponential instructions</B></CENTER>
+
+<P><BR>The FPU instructions covered in this chapter perform logarithmic or exponential operations with the value in the TOP data register ST(0), or with both ST(0) and ST(1).
+
+<P>The logarithmic and exponential instructions covered in this document are (in alphabetical order):
+
+<pre><A HREF="#f2xm1"><B>F2XM1</B></A>     2 to the X power Minus 1
+
+<A HREF="#fscale"><B>FSCALE</B></A>    SCALE ST(0) by ST(1)
+
+<A HREF="#fyl2x"><B>FYL2X</B></A>     Y*Log<SUB>2</SUB>X
+
+<A HREF="#fyl2xp1"><B>FYL2XP1</B></A>   Y*Log<SUB>2</SUB>(X+1)</pre>
+
+
+<BR><FONT SIZE="+1"><A NAME="fyl2x"></A><B>FYL2X</B></FONT> (Y*Log<SUB>2</SUB>X)
+
+<pre>Syntax:    <B>fyl2x</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Underflow, Overflow, Zero divide, Precision</pre>
+
+This instruction computes the logarithm base 2 of the value in the TOP data register ST(0) and multiplies it by the value in the ST(1) register. The content of ST(0) must be a non-zero positive number. The content of ST(1) is overwritten with the result and the TOP data register is POPed.
+
+<P>The following tabulation gives the resulting values based on the contents of ST(0) and ST(1). "F" means a finite value between 0 and <A HREF="fpuchap2.htm#infini">INFINITY</A>, and "Inv" means an Invalid operation.
+
+<P>
+<TABLE BORDER="1" WIDTH="100%">
+<TR VALIGN="TOP"><TD>
+<P ALIGN="RIGHT"><FONT SIZE="-1"><B>ST(0)</B></FONT></P>
+
+<P><FONT SIZE="-1"><B>ST(1)</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1"><B>+&infin;</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1"><B>F &gt; +1</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1"><B>+1</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1"><B>+1 &gt; F &gt; 0</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1"><B>&plusmn;0</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1"><B>-F</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1"><B>-&infin;</B></FONT></TD></TR>
+<TR VALIGN="TOP"><TD><FONT SIZE="-1"><B>+&infin;</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+&infin;</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+&infin;</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-&infin;</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-&infin;</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD></TR>
+<TR VALIGN="TOP"><TD><FONT SIZE="-1"><B>+F</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+&infin;</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+F</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+0</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-F</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-&infin;</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD></TR>
+<TR VALIGN="TOP"><TD><FONT SIZE="-1"><B>+0</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+0</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+0</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-0</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD></TR>
+<TR VALIGN="TOP"><TD><FONT SIZE="-1"><B>-0</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-0</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-0</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+0</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD></TR>
+<TR VALIGN="TOP"><TD><FONT SIZE="-1"><B>-F</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-&infin;</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-F</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-0</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+F</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+&infin;</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD></TR>
+<TR VALIGN="TOP"><TD><FONT SIZE="-1"><B>-&infin;</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-&infin;</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-&infin;</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+&infin;</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+&infin;</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">Inv</FONT></TD></TR></TABLE>
+
+<BR>To explain the Invalid results in the above tabulation,
+
+<BR>log(+&infin;)=+&infin;, therefore &infin;*0 is Invalid
+
+<BR>log(+1)=0, therefore 0*&infin; is Invalid
+
+<BR>log(+0)=-&infin;, therefore -&infin;*0 is Invalid
+
+<BR>log(negative number) is always Invalid (except -0 which is treated as +0)
+
+<P>An <B>I</B>nvalid operation exception is detected if either ST(0) or ST(1) is empty, or is a <A HREF="fpuchap2.htm#nans">NAN</A>, or the combination of operands is indicated as "Inv" in the above tabulation, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The TOP data register would be POPed and  the content of ST(0) (formerly ST(1)) would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value.
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if either ST(0) or ST(1) is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when the content of either ST(0) or ST(1) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number or a result is a denormalized number, setting the related flag in the Status Word.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>U</B>nderflow or <B>O</B>verflow exception will be detected if the result exceeds the range limit of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word.
+
+<P>A <B>Z</B>ero divide exception will be detected if the content of ST(0) is ±0 and the content of ST(1) is a non-zero finite number, setting the related flag in the Status Word.
+
+<P>Because the TOP data register is POPed with this instruction, all other values in data registers would now be in the ST(i-1) register.
+
+<P>This instruction is used for two primary reasons. One of them is for the first step in computing the power of any positive number, i.e. <B>x<SUP>y</SUP></B>. This must be performed using logarithms according to the following relation:
+
+<P><B>x<SUP>y</SUP> = antilog[y*log(x)]</B>
+
+<P>Although any logarithm base can be used for the above equation, the obvious base for computing logarithms on the FPU is 2, since it operates strictly with binary numbers. The second step in obtaining the <B>x<SUP>y</SUP></B><SUP></SUP> value would then be to compute the antilog base 2 of the resulting y*log<SUB>2</SUB>(x), the above relationship becoming:
+
+<P><B>x<SUP>y</SUP> =<FONT SIZE="+1">2</FONT><SUP>[y*log</SUP>2<SUP>(x)]</SUP></B>
+
+<P>See the <A HREF="#f2xm1">F2XM1</A> instruction for more details on computing powers of 2.
+
+<P>Typical code to compute the y*log<SUB>2</SUB>(x) portion if both operands are REAL numbers in memory and no error checking is required would be as follows.
+
+<pre>                   ;ST(0)=zzz
+<B>fld   exponent_y</B>   ;load the exponent first 
+                   ;-&gt;ST(0)=exponent, ST(1)=zzz
+<B>fld   number_x</B>     ;then load the x value 
+                   ;-&gt;ST(0)=x value, ST(1)=exponent, ST(2)=zzz
+<B>fyl2x</B>              ;ST(0)=y*log<SUB>2</SUB>(x), ST(1)=zzz</pre>
+
+<P>The other primary reason for using the FYL2X instruction is to compute the logarithm of a number with a base other than 2. The two most universal bases for logarithms are:
+
+<P><B>10</B> which are usually called common logarithms and represented simply as log(x) without specifying the base, and
+
+<BR><B><EM>e</EM></B><EM></EM> (the Napierian constant = 2.71828...) usually called natural logarithms and represented as ln(x).
+
+<P>The relationship between a logarithm base 2 and a logarithm using some other base <B>b</B> is as follows:
+
+<P><B>log<SUB>b</SUB>x = log<SUB>2</SUB>x*(log<SUB>2</SUB>b)<SUP><FONT SIZE="-1">-1</FONT></SUP> = log<SUB>2</SUB>x*log<SUB>b</SUB>2</B>
+
+<P>The FPU has both the log(2) and ln(2) as hard-coded constants which can be loaded with the <A HREF="fpuchap4.htm#fldlg2">FLDLG2</A> and <A HREF="fpuchap4.htm#fldln2">FLDLN2</A> instructions respectively. As an example, the following code could be used to compute the common logarithm of a positive REAL number located in memory.
+
+<pre><B>fldlg2</B>         ;ST(0)=log<SUB>10</SUB>(2), ST(1)=zzz
+<B>fld  real_var</B>  ;ST(0)=real_var, ST(1)=log<SUB>10</SUB>(2), ST(2)=zzz
+<B>fyl2x</B>          ;log<SUB>2</SUB>(real_var)*log<SUB>10</SUB>(2)=&gt;ST(1) and ST(0) is POPed
+               ;ST(0)=log<SUB>10</SUB>(real_var), ST(1)=zzz</pre>
+
+
+<BR><FONT SIZE="+1"><A NAME="fyl2xp1"></A><B>FYL2XP1</B></FONT> (Y*Log<SUB>2</SUB>(X+1))
+
+<pre>Syntax:    <B>fyl2xp1</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Underflow, Overflow, Precision</pre>
+
+This instruction computes the logarithm base 2 of the value in the TOP data register ST(0)+1 and multiplies it by the value in the ST(1) register. The content of ST(1) is overwritten with the result and the TOP data register is POPed. The content of ST(0) must be within the range of -(1-&frac12;&radic;2) to +(1-&frac12;&radic;2), i.e. -0.29289... to +0.29289....The value in ST(1) can range from -<A HREF="fpuchap2.htm#infini">INFINITY</A> to +INFINITY.
+
+<BLOCKQUOTE>	<U>Note:</U> The stated range for ST(0) is according to Intel's Software Developer's Manual dated 2003. If the value in ST(0) is outside the acceptable range, an exception may not be detected and the result may be undefined. Although an exception may be detected under some conditions, it should not be relied upon for all conditions. The range limits for ST(0) may have been expanded or even eliminated for newer processors.</BLOCKQUOTE>
+
+An <B>I</B>nvalid operation exception is detected if either ST(0) or ST(1) is empty or is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The TOP data register would be POPed and the content of ST(0) (formerly ST(1)) would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value.
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if either ST(0) or ST(1) is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when the content of either ST(0) or ST(1) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number or a result is a denormalized number, setting the related flag in the Status Word.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>U</B>nderflow or <B>O</B>verflow exception will be detected if the result exceeds the range limit of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word.
+
+<P>This instruction provides improved accuracy over the <A HREF="#fyl2x">FYL2X</A> instruction when the logarithm of a number very close to 1.0 is required. As an extreme example, if the logarithm of a 1+10<SUP><FONT SIZE="-1">-20</FONT></SUP> value was needed, that value is beyond the precision of the FPU and it would be rounded to a value of 1.0 resulting in a logarithm of 0. The FYL2XP1 gives a result of 1.44*10<FONT SIZE="-1"><SUP>-20</SUP></FONT> , which is very small but finite.
+
+<P>This instruction is useful for the computation of compound interest and annuities. Most equations related to those subjects contain a factor in the form of
+
+<P> <B>(1+R)<SUP>n</SUP></B><SUP></SUP>
+
+<P>where <B>R</B> is the interest rate expressed in decimal (which is usually small),
+<BR>and <B>n</B> is the number of periods.
+
+
+<P><BR><FONT SIZE="+1"><A NAME="f2xm1"></A><B>F2XM1</B></FONT> (2 to the X power Minus 1)
+
+<pre>Syntax:    <B>f2xm1</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Underflow, Precision</pre>
+
+This instruction computes the exponential value of 2 to the power of the value of ST(0) and subtracts 1. The content of ST(0) is overwritten with the result. The content of ST(0) must be within the range of -1.0 to +1.0; if it is outside the acceptable range, the result is undefined but no exception is reported.
+
+<P>An <B>I</B>nvalid operation exception is detected if ST(0) is empty or is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The TOP data would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value. 
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if ST(0) is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when the content of ST(0) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number or the result is a denormalized number, setting the related flag in the Status Word.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>U</B>nderflow exception will be detected if the result exceeds the range limit of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word.
+
+<P>This instruction is part of the second step in computing the power of any positive number, according to the relationship
+
+<P><B>x<SUP>y</SUP> =<FONT SIZE="+1">2</FONT><SUP>[y*log</SUP>2<SUP>(x)]</SUP></B>
+
+<P>However, because the exponent used for this instruction cannot have an absolute value greater than 1.0, another property of exponents must be used.
+
+<P><B>2<SUP>(a+b)</SUP> = 2<SUP>a</SUP> * 2<SUP>b</SUP></B><SUP></SUP>
+
+<P>where <B>a</B> could be the integer portion of the <B>(a+b)</B> value, and <B>b</B> would be the fractional portion. The <A HREF="fpuchap8.htm#frndint">FRNDINT</A> instruction can be used to provide an integer portion which is then used to derive a fractional portion. The <A HREF="#fscale">FSCALE</A> instruction is finally used to combine the two powers of 2. Typical code to complete the computation of <B>x<SUP>y</SUP></B> (started with the <A HREF="#fyl2x">FYL2X</A> instruction) would be as follows.
+
+<pre>              ;ST(0)=y*log<SUB>2</SUB>(x), ST(1)=zzz
+<B>fld  st</B>       ;make a second copy
+              ;ST(0)=y*log<SUB>2</SUB>(x), ST(1)=y*log<SUB>2</SUB>(x), ST(2)=zzz
+<B>frndint</B>       ;round it to an integer
+              ;ST(0)=int[y*log<SUB>2</SUB>(x)], ST(1)=y*log<SUB>2</SUB>(x), ST(2)=zzz
+<B>fsub st(1),st</B> ;this will leave only a fractional portion in ST(1)
+              ;ST(0)=int[y*log<SUB>2</SUB>(x)], ST(1)=y*log<SUB>2</SUB>(x)-int[y*log<SUB>2</SUB>(x)], ST(2)=zzz
+<B>fxch st(1)</B>    ;ST(0)=y*log<SUB>2</SUB>(x)-int[y*log<SUB>2</SUB>(x)], ST(1)=int[y*log<SUB>2</SUB>(x)], ST(2)=zzz
+<B>f2xm1</B>         ;get the fractional power of 2 (minus 1)
+              ;ST(0)=2<SUP>ST(0)</SUP>-1, ST(1)=int[y*log<SUB>2</SUB>(x)], ST(2)=zzz
+<B>fld1</B>          ;ST(0)=1, ST(1)=2<SUP>ST(0)</SUP>-1, ST(2)=int[y*log<SUB>2</SUB>(x)], ST(3)=zzz
+<B>fadd</B>          ;add the 1 to ST(1) and POP ST(0)
+              ;ST(0)=2<SUP>ST(0)</SUP>, ST(1)=int[y*log<SUB>2</SUB>(x)], ST(2)=zzz
+<B>fscale</B>        ;add the integer in ST(1) to the exponent of ST(0)
+              ;effectively multiplying the content of ST(0) by 2<SUP>int</SUP>
+              ;and yielding the final result of <B>x<SUP>y</SUP></B>
+              ;ST(0)=<B>x<SUP>y</SUP></B>, ST(1)=int[y*log<SUB>2</SUB>(x)], ST(2)=zzz
+<B>fstp st(1)</B>    ;the content of ST(1) has become useless
+              ;overwrite the content of ST(1) with the result and POP ST(0)
+              ;ST(0)=<B>x<SUP>y</SUP></B>, ST(1)=zzz</pre>
+
+
+<BR><FONT SIZE="+1"><B><A NAME="fscale"></A>FSCALE</B></FONT> (Scale ST(0) by ST(1))
+
+<pre>Syntax:    <B>fscale</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Underflow, Overflow, Precision</pre>
+
+This instruction adds the truncated integral value of ST(1) to the exponent portion of the value in ST(0). The content of ST(1) remains unchanged. This is effectively a multiplication (or division) of the value in ST(0) by an integral power of 2.
+
+<P>The following tabulation gives the resulting values based on the contents of ST(0) and ST(1). "F" means a finite value between 0 and <A HREF="fpuchap2.htm#infini">INFINITY</A>, and "Inv" means an Invalid operation.
+
+<P>
+<TABLE BORDER="1" WIDTH="100%">
+<TR VALIGN="TOP"><TD>
+<P ALIGN="RIGHT"><B>ST(0)</B></P>
+
+<P><B>ST(1)</B></TD>
+<TD ALIGN="CENTER"><B>+&infin;</B></TD>
+<TD ALIGN="CENTER"><B>+F</B></TD>
+<TD ALIGN="CENTER"><B>+0</B></TD>
+<TD ALIGN="CENTER"><B>-0</B></TD>
+<TD ALIGN="CENTER"><B>-F</B></TD>
+<TD ALIGN="CENTER"><B>-&infin;</B></TD></TR>
+<TR VALIGN="TOP"><TD><B>+&infin;</B></TD>
+<TD ALIGN="CENTER">+&infin;</TD>
+<TD ALIGN="CENTER">+&infin;</TD>
+<TD ALIGN="CENTER">Inv</TD>
+<TD ALIGN="CENTER">Inv</TD>
+<TD ALIGN="CENTER">-&infin;</TD>
+<TD ALIGN="CENTER">-&infin;</TD></TR>
+<TR VALIGN="TOP"><TD><B>+F</B></TD>
+<TD ALIGN="CENTER">+&infin;</TD>
+<TD ALIGN="CENTER">+F</TD>
+<TD ALIGN="CENTER">+0</TD>
+<TD ALIGN="CENTER">-0</TD>
+<TD ALIGN="CENTER">-F</TD>
+<TD ALIGN="CENTER">-&infin;</TD></TR>
+<TR VALIGN="TOP"><TD><B>+0</B></TD>
+<TD ALIGN="CENTER">+&infin;</TD>
+<TD ALIGN="CENTER">+F</TD>
+<TD ALIGN="CENTER">+0</TD>
+<TD ALIGN="CENTER">-0</TD>
+<TD ALIGN="CENTER">-F</TD>
+<TD ALIGN="CENTER">-&infin;</TD></TR>
+<TR VALIGN="TOP"><TD><B>-0</B></TD>
+<TD ALIGN="CENTER">+&infin;</TD>
+<TD ALIGN="CENTER">+F</TD>
+<TD ALIGN="CENTER">+0</TD>
+<TD ALIGN="CENTER">-0</TD>
+<TD ALIGN="CENTER">-F</TD>
+<TD ALIGN="CENTER">-&infin;</TD></TR>
+<TR VALIGN="TOP"><TD><B>-F</B></TD>
+<TD ALIGN="CENTER">+&infin;</TD>
+<TD ALIGN="CENTER">+F</TD>
+<TD ALIGN="CENTER">+0</TD>
+<TD ALIGN="CENTER">-0</TD>
+<TD ALIGN="CENTER">-F</TD>
+<TD ALIGN="CENTER">-&infin;</TD></TR>
+<TR VALIGN="TOP"><TD><B>-&infin;</B></TD>
+<TD ALIGN="CENTER">Inv</TD>
+<TD ALIGN="CENTER">+0</TD>
+<TD ALIGN="CENTER">+0</TD>
+<TD ALIGN="CENTER">-0</TD>
+<TD ALIGN="CENTER">-0</TD>
+<TD ALIGN="CENTER">Inv</TD></TR></TABLE>
+
+<P>To explain the Invalid results in the above tabulation,
+
+<BR>2<SUP>+&infin;</SUP> = +&infin;, therefore &infin;*0 is Invalid
+
+<BR>2<SUP>-&infin;</SUP> = 0, therefore 0*&infin; is Invalid
+
+<P>An <B>I</B>nvalid operation exception is detected if either ST(0) or ST(1) is empty, or is a <A HREF="fpuchap2.htm#nans">NAN</A>, or the combination of operands is indicated as "Inv" in the above tabulation, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The TOP data register would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value.
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if either ST(0) or ST(1) is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when the content of ST(0) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number or the result is a denormalized number, setting the related flag in the Status Word.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>U</B>nderflow or <B>O</B>verflow exception will be detected if the result exceeds the range limit of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word.
+
+<P>This instruction provides rapid scaling of values, up or down, by multiples of 2. A positive exponent will scale up while a negative exponent will scale down. For example, to reduce a value by a factor of 32 (i.e. 2<FONT SIZE="-1"><SUP>5</SUP></FONT> ), a value of -5 would be used. To apply that to an array of REAL4 numbers, the following code is suggested.
+
+<pre>   <B>lea  eax,array_var</B>    ;use EAX as a pointer
+   <B>mov  ecx,array_size</B>   ;use ECX as a counter
+   <B>pushd  -5</B>             ;store an integer value of -5 on the stack
+   <B>fild dword ptr[esp]</B>   ;ST(0)=-5
+
+<B>@@:</B>
+   <B>fld  dword ptr[eax]</B>   ;ST(0)=array value, ST(1)=-5
+   <B>fscale</B>                ;ST(0)=(array value)/32, ST(1)=-5
+   <B>fstp dword ptr[eax]</B>   ;replace with the scaled value and pop ST(0)
+                         ;ST(0)=-5
+   <B>fwait</B>                 ;insure previous instruction is completed
+                         ;before modifying EAX
+   <B>add  eax,4</B>            ;adjust pointer to next REAL4 value
+   <B>dec  ecx</B>              ;adjust counter
+   <B>jnz  @B</B>               ;continue scaling all the array values
+
+;clean-up
+   <B>fstp st</B>               ;free the FPU register containing the -5
+   <B>add  esp,4</B>            ;readjust the stack pointer for the pushed -5</pre>
+
+<P><BR><CENTER><A HREF="index.html"><B>RETURN TO<B>
+<BR><FONT SIZE="+2">SIMPLY  FPU</FONT>
+<BR><B>CONTENTS<B></A></CENTER><BR>
+
+</BODY>
+</HTML>

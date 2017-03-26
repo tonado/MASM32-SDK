@@ -1,0 +1,109 @@
+
+yesno Is editor empty ?**Create Blank Dialog
+jmp nxt1
+exit
+nxt1:
+
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {lf}
+text       .486                      {comment} create 32 bit code{lf}
+text       .model flat, stdcall      {comment} 32 bit memory model{lf}
+text       option casemap :none      {comment} case sensitive{lf}
+text  {lf}
+text {comment}     include files{lf}
+text {comment}     ~~~~~~~~~~~~~{lf}
+text       include \masm32\include\windows.inc{lf}
+text       include \masm32\include\masm32.inc{lf}
+text       include \masm32\include\gdi32.inc{lf}
+text       include \masm32\include\user32.inc{lf}
+text       include \masm32\include\kernel32.inc{lf}
+text       include \masm32\include\Comctl32.inc{lf}
+text       include \masm32\include\comdlg32.inc{lf}
+text       include \masm32\include\shell32.inc{lf}
+text       include \masm32\include\oleaut32.inc{lf}
+text       include \masm32\include\dialogs.inc{lf}
+text       include \masm32\macros\macros.asm{lf}
+text {lf}
+text {comment}     libraries{lf}
+text {comment}     ~~~~~~~~~{lf}
+text       includelib \masm32\lib\masm32.lib{lf}
+text       includelib \masm32\lib\gdi32.lib{lf}
+text       includelib \masm32\lib\user32.lib{lf}
+text       includelib \masm32\lib\kernel32.lib{lf}
+text       includelib \masm32\lib\Comctl32.lib{lf}
+text       includelib \masm32\lib\comdlg32.lib{lf}
+text       includelib \masm32\lib\shell32.lib{lf}
+text       includelib \masm32\lib\oleaut32.lib{lf}
+text {lf}
+text       DlgProc PROTO :DWORD,:DWORD,:DWORD,:DWORD {lf}
+text {lf}
+text     .data?{lf}
+text       hWnd      dd ?{lf}
+text       hInstance dd ?{lf}
+text {lf}
+text     .code{lf}
+text {lf}
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {lf}
+text start:{lf}
+text  {lf}
+text       mov hInstance, FUNC(GetModuleHandle,NULL){lf}
+text {lf}
+text       call main{lf}
+text {lf}
+text       invoke ExitProcess,eax{lf}
+text {lf}
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {lf}
+text main proc{lf}
+text {lf}
+text     Dialog "Blank Dialog", \                {comment} caption{lf}
+text            "MS Sans Serif",10, \            {comment} font,pointsize{lf}
+text             WS_OVERLAPPED or \              {comment} styles for{lf}
+text             WS_SYSMENU or DS_CENTER, \      {comment} dialog window{lf}
+text             3, \                            {comment} number of controls{lf}
+text             50,50,155,100, \                {comment} x y co-ordinates{lf}
+text             1024                            {comment} memory buffer size{lf}
+text {lf}
+text     DlgButton "OK",WS_TABSTOP,106,5,40,13,IDOK{lf}
+text     DlgButton "Cancel",WS_TABSTOP,106,20,40,13,IDCANCEL{lf}
+text     DlgStatic "MASM32 Dialog",SS_LEFT,5,5,60,9,100{lf}
+text {lf}
+text     CallModalDialog hInstance,0,DlgProc,NULL{lf}
+text {lf}
+text     ret{lf}
+text {lf}
+text main endp{lf}
+text {lf}
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {lf}
+text DlgProc proc hWin:DWORD,uMsg:DWORD,wParam:DWORD,lParam:DWORD {lf}
+text {lf}
+text     Switch uMsg{lf}
+text       Case WM_INITDIALOG{lf}
+text         invoke SendMessage,hWin,WM_SETICON,1,{lf}
+text                            FUNC(LoadIcon,NULL,IDI_ASTERISK){lf}
+text         m2m hWnd, hWin{lf}
+text         return 1{lf}
+text       Case WM_COMMAND{lf}
+text         Switch wParam{lf}
+text           Case IDOK{lf}
+text             invoke MessageBox,hWnd,SADD("You clicked OK"),{lf}
+text                               SADD("Hi"),MB_OK or MB_ICONINFORMATION{lf}
+text           Case IDCANCEL{lf}
+text             jmp quit_dialog{lf}
+text         EndSw{lf}
+text       Case WM_CLOSE{lf}
+text         quit_dialog:{lf}
+text         invoke EndDialog,hWin,0{lf}
+text     EndSw{lf}
+text {lf}
+text     return 0{lf}
+text {lf}
+text DlgProc endp{lf}
+text {lf}
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {lf}
+text end start{lf}
+
+starttext

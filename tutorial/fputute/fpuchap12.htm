@@ -1,0 +1,150 @@
+<HTML>
+<HEAD>
+<META NAME="Author" CONTENT="Raymond Filiatreault">
+<META NAME="Description" CONTENT="Tutorial on the use of the floating point coprocessor in assembly programming. Chap. 12 Trigonometric instructions">
+<TITLE>Simply FPU Chap. 12</TITLE>
+</HEAD>
+<BODY TEXT="#402000" LINK="#0000ff" VLINK="#0000ff" ALINK="#0000ff" BACKGROUND="fpufigs/bluewave.gif">
+
+<CENTER><FONT SIZE="+3">SIMPLY  FPU</FONT>
+<BR>by <B>Raymond Filiatreault</B><BR>
+Copyright 2003</CENTER>
+<P>
+<CENTER><B>Chap. 12<BR>Other instructions</B></CENTER>
+
+<P><BR>The instructions covered in this chapter are those which could not be included in other more specific categories. They are (in alphabetical order):
+
+<pre><A HREF="#fnop"><B>FNOP</B></A>      No OPeration
+
+<A HREF="#fprem"><B>FPREM</B></A>     Partial REMainder
+
+<A HREF="#fprem1"><B>FPREM1</B></A>    Partial REMainder 1
+
+<A HREF="#fxtract"><B>FXTRACT</B></A>   eXTRACT exponent and significand</pre>
+
+
+<BR><FONT SIZE="+1"><A NAME="fnop"></A><B>FNOP</B></FONT> (No Operation)
+
+<pre>Syntax:    <B>fnop</B> (no operand)
+
+Exception flags: None</pre>
+
+This instruction performs no operation. It only takes up space and consumes a few clock cycles.
+
+<BR>It may be used as a filler for alignment purposes or timing delays.
+
+
+<P><BR><FONT SIZE="+1"><A NAME="fprem"></A><B>FPREM</B></FONT> (Partial remainder)
+
+<pre>Syntax:    <B>fprem</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Underflow</pre>
+
+This instruction performs the equivalent of a ST(0) modulo ST(1) with REAL numbers, overwriting the content of ST(0) with the remainder which will have the same sign as the original value in ST(0). The content of ST(1) remains unchanged.
+
+<P>The remainder represents the following value:
+
+<P>Remainder = ST(0) - (Q * ST(1))
+
+<P>where Q is an integer obtained by truncating the quotient of ST(0)÷ST(1).
+
+<P>However, the <U>exponent</U> in ST(0) cannot be reduced by more than 63 with each execution of the FPREM instruction. If the difference between the exponents of ST(0) and ST(1) is larger than 63, ST(0) will then be only partially reduced and that <U>partial</U> remainder will replace the content of ST(0). The software will have to repeat the FPREM instruction as often as necessary to obtain a final remainder which will be smaller than the modulus ST(1). When the reduction is complete, the C2 bit of the <A HREF="fpuchap1.htm#sword">Status Word</A> is cleared, otherwise it is set to 1.
+
+<P>An <B>I</B>nvalid operation exception is detected if ST(0) or ST(1) is empty, or is a <A HREF="fpuchap2.htm#nans">NAN</A>, or if ST(0) is <A HREF="fpuchap2.htm#infini">INFINITY</A>, or if ST(1) is zero, setting the related flag in the Status Word. The content of ST(0) would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value.
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if either ST(0) or ST(1) is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when the content of either ST(0) or ST(1) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number or a result is a denormalized number, setting the related flag in the Status Word.
+
+<P>An <B>U</B>nderflow exception will be detected if the result exceeds the range limit of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word.
+
+<P>When the operation is successful, the 3 least significant bits of the quotient (Q) are inserted in the C0, C1 and C3 bit fields of the Status Word in the following manner:
+
+<P>C0 = bit2 of the quotient (Q2)
+
+<BR>C1 = bit0 of the quotient (Q0)
+
+<BR>C3 = bit1 of the quotient (Q1)
+
+<P>If necessary, the following code is suggested to unscramble the bits of the Status Word to their original order in the quotient.
+
+<pre>                ;          <B>AH</B>                                <B>AL</B>
+<B>fstsw ax</B>        ;x  Q1 x  x  x C2 Q0 Q2            x  x  x  x  x  x  x  x
+<B>fwait</B>
+<B>sahf</B>            ;copy AH to the CPU flag register
+<B>jpe  more_fprem</B> ;C2 became the parity flag PF
+                ;if set, the FPREM instruction needs to be repeated
+                ;Q2 became the carry flag CF
+<B>rcl   al,1</B>      ;x  Q1 x  x  x  x  Q0 Q2           x  x  x  x  x  x  x  Q2
+<B>shl   ah,2</B>      ;x  x  x  x  Q0 Q2 x  x (Q1 -&gt; CF) x  x  x  x  x  x  x  Q2
+<B>rcl   al,1</B>      ;x  x  x  x  Q0 Q2 x  x            x  x  x  x  x  x  Q2 Q1
+<B>shr   ah,4</B>      ;x  x  x  x  x  x  x  x (Q0 -&gt; CF) x  x  x  x  x  x  Q2 Q1
+<B>rcl   al,1</B>      ;x  x  x  x  x  x  x  x            x  x  x  x  x  Q2 Q1 Q0
+<B>and   eax,7</B>     ;keep only the 3 least significant bits</pre>
+
+The FPREM instruction was almost an absolute necessity with the earlier FPUs (prior to the 387) when the source angle for the FPTAN instruction could only be in the range of 0 to &pi;/4 radian. The lower 3 bits of the quotient Q were also necessary to locate the angle in the proper sector in order to determine if the reciprocal of the result needed to be computed and which sign was required.
+
+<P>With the more modern FPUs (387+), the FPREM instruction may still be required before using one of the <A HREF="fpuchap10.htm">trigonometric instructions</A> if there is a risk that the source angle exceeds the allowable range of ±2<FONT SIZE="-1"><SUP>63</SUP></FONT> radians. However, knowing the lower 3 bits of the quotient has become almost useless. It is still being made available primarily for backward compatibility.
+
+<P>The following code is suggested for reducing an angle within the allowable range of ±2<FONT SIZE="-1"><SUP>63</SUP></FONT> radians. It assumes that the angle value is already in ST(0) and already expressed in radians.
+
+<pre>
+                    ; ST(0)=angle in radians to be reduced
+   <B>fldpi</B>            ;-&gt;ST(0)=&pi;, ST(1)=angle
+   <B>fadd   st,st</B>     ;-&gt;ST(0)=2&pi;, ST(1)=angle
+   <B>fxch</B>             ;-&gt;ST(0)=angle, ST(1)=2&pi;
+<B>@@:
+   fprem</B>            ;-&gt;ST(0)=reduced angle, ST(1)=2&pi;
+   <B>fstsw  ax</B>        ;Status Word into AX
+   <B>fwait</B>            ;insure transfer is completed
+   <B>sahf</B>             ;copy to the CPU flags
+   <B>jpe    @B</B>        ;continue reducing if C2=PF=1 (reduction incomplete)
+
+   <B>fstp   st(1)</B>     ;overwrite the 2&pi; with the ST(0) value and POP ST(0)
+                    ;-&gt;ST(0)=reduced angle smaller than 2&pi;</pre>
+
+
+<P><BR><FONT SIZE="+1"><A NAME="fprem1"></A><B>FPREM1</B></FONT> (Partial remainder 1)
+
+<pre>Syntax:    <B>fprem1</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Underflow</pre>
+
+This instruction is a modification of the FPREM instruction to compute the remainder as specified in the IEEE Std 754. According to that Standard, the magnitude of the remainder must be less than or equal to half of the modulus ST(1). The sign of the remainder can thus be different than the sign of the original value in ST(0).
+
+<P>For example, using integers, 11 modulo7 with the FPREM instruction would be +4. With the FPREM1 instruction, 4 being more than half the modulus 7, the resulting remainder would be -3. (10 modulo7 would be +3 with either instruction.)
+
+<P>(See the <A HREF="#fprem">FPREM</A> instruction for other details.)
+
+
+<P><BR><FONT SIZE="+1"><A NAME="fxtract"></A><B>FXTRACT</B></FONT> (Extract exponent and significand)
+
+<pre>Syntax:    <B>fxtract</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Zero divide</pre>
+
+This instruction splits the content of ST(0) into two parts, the true <B>unbiased exponent</B> and the <B>significand</B>. The content of ST(0) is overwritten with the true unbiased exponent in floating point format, the TOP field of the <A HREF="fpuchap1.htm#sword">Status Word</A> is decremented, and the significand is inserted in the new ST(0) with a biased exponent of 0 (3FFFh for the <A HREF="fpuchap2.htm#real10">REAL10</A> format of the data registers).
+
+<P>If ST(0) originally had a value of ±0, the true unbiased exponent would be set at -<A HREF="fpuchap2.htm#infini">INFINITY</A> and the significand would be set to a value of 0 with the same sign as the original one.
+
+<P>If ST(0) originally had a value of ±INFINITY, the true unbiased exponent would be set at +INFINITY and the significand would be set at INFINITY with the same sign as the original one.
+
+<P>An <B>I</B>nvalid operation exception is detected if ST(0) is empty, or is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the Status Word. The content of ST(0) would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value, the TOP field of the Status Word decremented, and the INDEFINITE value inserted in the new ST(0). 
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if ST(0) is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when the content of ST(0) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, setting the related flag in the Status Word.
+
+<P>A <B>Z</B>ero divide exception is detected when the content of ST(0) is 0.
+
+<P>This instruction could be used for logarithmic scaling operations. The extracted exponent would be multiplied by the scaling factor, its antilog computed with the <A HREF="fpuchap11.htm#f2xm1">F2XM1</A> instruction, and that result multiplied by the extracted significand.
+
+<P><BR><CENTER><A HREF="index.html"><B>RETURN TO<B>
+<BR><FONT SIZE="+2">SIMPLY  FPU</FONT>
+<BR><B>CONTENTS<B></A></CENTER><BR>
+
+</BODY>
+</HTML>

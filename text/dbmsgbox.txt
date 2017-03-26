@@ -1,0 +1,3 @@
+    pushad
+    fn MessageBox,0,str$(esi),"Test",MB_OK
+    popad

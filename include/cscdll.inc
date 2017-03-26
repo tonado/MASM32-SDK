@@ -1,0 +1,257 @@
+; --------------------------------------------------------------------------------------------------
+;                           cscdll.inc Copyright The MASM32 SDK 1998-2010
+; --------------------------------------------------------------------------------------------------
+
+IFNDEF CSCDLL_INC
+CSCDLL_INC equ <1>
+
+BreakConnections PROTO STDCALL :DWORD,:DWORD
+
+CSCBeginSynchronizationW PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCBeginSynchronization equ <CSCBeginSynchronizationW>
+ENDIF
+
+CSCCheckShareOnlineA PROTO STDCALL :DWORD
+IFNDEF __UNICODE__
+  CSCCheckShareOnline equ <CSCCheckShareOnlineA>
+ENDIF
+
+CSCCheckShareOnlineExW PROTO STDCALL :DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCCheckShareOnlineEx equ <CSCCheckShareOnlineExW>
+ENDIF
+
+CSCCheckShareOnlineW PROTO STDCALL :DWORD
+IFDEF __UNICODE__
+  CSCCheckShareOnline equ <CSCCheckShareOnlineW>
+ENDIF
+
+CSCCopyReplicaA PROTO STDCALL :DWORD,:DWORD
+IFNDEF __UNICODE__
+  CSCCopyReplica equ <CSCCopyReplicaA>
+ENDIF
+
+CSCCopyReplicaW PROTO STDCALL :DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCCopyReplica equ <CSCCopyReplicaW>
+ENDIF
+
+CSCDeleteA PROTO STDCALL :DWORD
+IFNDEF __UNICODE__
+  CSCDelete equ <CSCDeleteA>
+ENDIF
+
+CSCDeleteW PROTO STDCALL :DWORD
+IFDEF __UNICODE__
+  CSCDelete equ <CSCDeleteW>
+ENDIF
+
+CSCDoEnableDisable PROTO STDCALL :DWORD
+
+CSCDoLocalRenameA PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  CSCDoLocalRename equ <CSCDoLocalRenameA>
+ENDIF
+
+CSCDoLocalRenameExW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCDoLocalRenameEx equ <CSCDoLocalRenameExW>
+ENDIF
+
+CSCDoLocalRenameW PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCDoLocalRename equ <CSCDoLocalRenameW>
+ENDIF
+
+CSCEncryptDecryptDatabase PROTO STDCALL :DWORD,:DWORD,:DWORD
+
+CSCEndSynchronizationW PROTO STDCALL :DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCEndSynchronization equ <CSCEndSynchronizationW>
+ENDIF
+
+CSCEnumForStatsA PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  CSCEnumForStats equ <CSCEnumForStatsA>
+ENDIF
+
+CSCEnumForStatsExA PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  CSCEnumForStatsEx equ <CSCEnumForStatsExA>
+ENDIF
+
+CSCEnumForStatsExW PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCEnumForStatsEx equ <CSCEnumForStatsExW>
+ENDIF
+
+CSCEnumForStatsW PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCEnumForStats equ <CSCEnumForStatsW>
+ENDIF
+
+CSCFillSparseFilesA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  CSCFillSparseFiles equ <CSCFillSparseFilesA>
+ENDIF
+
+CSCFillSparseFilesW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCFillSparseFiles equ <CSCFillSparseFilesW>
+ENDIF
+
+CSCFindClose PROTO STDCALL :DWORD
+
+CSCFindFirstFileA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  CSCFindFirstFile equ <CSCFindFirstFileA>
+ENDIF
+
+CSCFindFirstFileForSidA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  CSCFindFirstFileForSid equ <CSCFindFirstFileForSidA>
+ENDIF
+
+CSCFindFirstFileForSidW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCFindFirstFileForSid equ <CSCFindFirstFileForSidW>
+ENDIF
+
+CSCFindFirstFileW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCFindFirstFile equ <CSCFindFirstFileW>
+ENDIF
+
+CSCFindNextFileA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  CSCFindNextFile equ <CSCFindNextFileA>
+ENDIF
+
+CSCFindNextFileW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCFindNextFile equ <CSCFindNextFileW>
+ENDIF
+
+CSCFreeSpace PROTO STDCALL :DWORD,:DWORD
+
+CSCGetSpaceUsageA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  CSCGetSpaceUsage equ <CSCGetSpaceUsageA>
+ENDIF
+
+CSCGetSpaceUsageW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCGetSpaceUsage equ <CSCGetSpaceUsageW>
+ENDIF
+
+CSCIsCSCEnabled PROTO STDCALL
+
+CSCIsServerOfflineA PROTO STDCALL :DWORD,:DWORD
+IFNDEF __UNICODE__
+  CSCIsServerOffline equ <CSCIsServerOfflineA>
+ENDIF
+
+CSCIsServerOfflineW PROTO STDCALL :DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCIsServerOffline equ <CSCIsServerOfflineW>
+ENDIF
+
+CSCMergeShareA PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  CSCMergeShare equ <CSCMergeShareA>
+ENDIF
+
+CSCMergeShareW PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCMergeShare equ <CSCMergeShareW>
+ENDIF
+
+CSCPinFileA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  CSCPinFile equ <CSCPinFileA>
+ENDIF
+
+CSCPinFileW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCPinFile equ <CSCPinFileW>
+ENDIF
+
+CSCPurgeUnpinnedFiles PROTO STDCALL :DWORD,:DWORD,:DWORD
+CSCQueryDatabaseStatus PROTO STDCALL :DWORD,:DWORD
+
+CSCQueryFileStatusA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  CSCQueryFileStatus equ <CSCQueryFileStatusA>
+ENDIF
+
+CSCQueryFileStatusExA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  CSCQueryFileStatusEx equ <CSCQueryFileStatusExA>
+ENDIF
+
+CSCQueryFileStatusExW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCQueryFileStatusEx equ <CSCQueryFileStatusExW>
+ENDIF
+
+CSCQueryFileStatusW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCQueryFileStatus equ <CSCQueryFileStatusW>
+ENDIF
+
+CSCQueryShareStatusA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  CSCQueryShareStatus equ <CSCQueryShareStatusA>
+ENDIF
+
+CSCQueryShareStatusW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCQueryShareStatus equ <CSCQueryShareStatusW>
+ENDIF
+
+CSCSetMaxSpace PROTO STDCALL :DWORD,:DWORD
+CSCShareIdToShareName PROTO STDCALL :DWORD,:DWORD,:DWORD
+
+CSCTransitionServerOnlineA PROTO STDCALL :DWORD
+IFNDEF __UNICODE__
+  CSCTransitionServerOnline equ <CSCTransitionServerOnlineA>
+ENDIF
+
+CSCTransitionServerOnlineW PROTO STDCALL :DWORD
+IFDEF __UNICODE__
+  CSCTransitionServerOnline equ <CSCTransitionServerOnlineW>
+ENDIF
+
+CSCUnpinFileA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  CSCUnpinFile equ <CSCUnpinFileA>
+ENDIF
+
+CSCUnpinFileW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  CSCUnpinFile equ <CSCUnpinFileW>
+ENDIF
+
+CheckCSC PROTO STDCALL :DWORD,:DWORD
+CheckCSCEx PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+LogoffHappened PROTO STDCALL :DWORD
+LogonHappened PROTO STDCALL :DWORD
+MprServiceProc PROTO STDCALL :DWORD
+ReInt_WndProc PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+RefreshConnections PROTO STDCALL :DWORD,:DWORD
+Update PROTO STDCALL :DWORD,:DWORD
+WinlogonLockEvent PROTO STDCALL :DWORD
+WinlogonLogoffEvent PROTO STDCALL :DWORD
+WinlogonLogonEvent PROTO STDCALL :DWORD
+WinlogonScreenSaverEvent PROTO STDCALL :DWORD
+WinlogonShutdownEvent PROTO STDCALL :DWORD
+WinlogonStartShellEvent PROTO STDCALL :DWORD
+WinlogonStartupEvent PROTO STDCALL :DWORD
+WinlogonUnlockEvent PROTO STDCALL :DWORD
+
+ELSE
+  echo -----------------------------------------
+  echo WARNING duplicate include file cscdll.inc
+  echo -----------------------------------------
+ENDIF

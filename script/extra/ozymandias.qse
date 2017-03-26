@@ -1,0 +1,115 @@
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+;          Typing Demo using string functions and an API call
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+    call init
+    delay = 20   ; set the delay between typed characters
+
+    goto typetext
+
+  start:
+    cls
+
+  ; --------------------------------------
+  ; when you insert text into QE you only
+  ; need the ASCII 13 without the ASCII 10
+  ; --------------------------------------
+  typetext:
+    $100 = chr$ "    Ozymandias",13,13
+    $101 = chr$ "    I met a traveller from an antique land",13
+    $102 = chr$ "    Who said: Two vast and trunkless legs of stone",13
+    $103 = chr$ "    Stand in the desert. Near them on the sand,",13
+    $104 = chr$ "    Half sunk, a shatter'd visage lies, whose frown",13
+    $105 = chr$ "    And wrinkled lip and sneer of cold command",13
+    $106 = chr$ "    Tell that its sculptor well those passions read",13
+    $107 = chr$ "    Which yet survive, stamp'd on these lifeless things,",13
+    $108 = chr$ "    The hand that mock'd them and the heart that fed.",13
+    $109 = chr$ "    And on the pedestal these words appear:",13
+    $110 = chr$ "    ",34,"My name is Ozymandias, king of kings:",13
+    $111 = chr$ "    Look on my works, ye mighty, and despair!",34,13
+    $112 = chr$ "    Nothing beside remains: round the decay",13
+    $113 = chr$ "    Of that colossal wreck, boundless and bare,",13
+    $114 = chr$ "    The lone and level sands stretch far away.",13,13
+    $115 = chr$ "    Percy Bysshe Shelley (1792-1822)",13
+
+  ; --------------------
+  ; join all the strings
+  ; --------------------
+    src$ = cat$ $100 $101 $102 $103 $104 $105 $106 $107 $108 $109 $110 $111 $112 $113 $114 $115
+
+  ; ---------------------------
+  ; type the text in the editor
+  ; ---------------------------
+    call typit
+
+    msgbox "Do you want to see this again ?" "Ozymandias" MB_YESNO
+    if #0 == IDYES
+    goto start
+
+    call cleanup
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+  typit:
+    lsrc = len src$             ; get the string length
+    begin = 1                   ; set the counter to 1
+  lbl1:
+    ch$ = mid$ src$ begin 1     ; chomp through string 1 at a time
+    call typechar               ; send each character to the typed output
+    add begin 1                 ; increment the counter
+    if begin <= lsrc            ; test if its reached the end
+    goto lbl1                   ; loop back if it hasn't
+    ret
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+  typechar:
+    text ch$
+    void = STDCALL SendMessage hEdit WM_PAINT 0 0   ; refresh edit display
+    sleep delay
+    ret
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+  init:
+    INTEGER SendMessage
+    INTEGER hEdit
+    INTEGER user32
+    INTEGER void
+    INTEGER delay
+
+    STRING src$
+    INTEGER lsrc
+    INTEGER begin
+    STRING ch$
+
+    user32 = LoadLibrary "user32"
+    SendMessage = GetProcAddress user32 "SendMessageA"
+    hEdit = get_hedit
+    ret
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+  cleanup:
+    void = FreeLibrary user32
+    end
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

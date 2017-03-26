@@ -1,0 +1,27 @@
+MAKECIMP.EXE
+------------
+The utility MAKECIMP.EXE is designed to use a list of names that are EXPORTED
+from a DLL using the C calling convention. Normally you would use DUMPBIN
+or DUMPPE to get the list of exported functions from the DLL and then create
+a file that is formatted to one name for each line.
+
+Function1
+Function2
+Function3 etc ....
+
+There should be no other data in this file except function EXPORT names.
+
+Name the file to reflect the LIBRARY and INCLUDE file name that you require.
+
+If the DLL that has the EXPORTED functions is called MYDLL.DLL you would
+normally make a file called MYDLL.TXT that has all of the EXPORTS required
+for the LIBRARY and INCLUDE files. MAKECIMP.EXE will then create two files
+that have the names MYDLL.INC and MYDLL.LIB.
+
+The text file "msvcrt.txt" is supplied as an example and it has been
+derived from the Win2k sp4 version of msvcrt.dll.
+
+Note that MAKECIMP prepends "crt_" to the function names in the generated
+INCLUDE file which reflects its original task of converting the "msvcrt"
+DLL. If you need otherwise, use GLOBAL replace in a text editor for the
+INCLUDE file to change this prepended text to whatever form you require.

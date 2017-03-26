@@ -1,0 +1,51 @@
+----------------------------------------------------------------------------
+Welcome to the MASM32 SDK, fast track high performance software development.
+----------------------------------------------------------------------------
+
+The MASM32 SDK has now been installed but there are a number of things to do
+to finally set it up so that you can maximise your output with this SDK.
+
+Configure this editor so that it suits your progamming style. The "Edit"
+menu has a settings option so you can configure the editor to your own
+preferences.
+
+If possible, download the old WIN32.HLP file from the internet then set
+it up as the F1 help file so you can access Windows API functions, messages
+and equates directly from the editor with the F1 key.
+
+If you are not already familiar with the MASM32 SDK it is recommended that
+you start with the default editor to learn how the SDK is put together and
+what makes it work. Once you are familiar with it you can safely customise
+how you set up and use the MASM32 SDK.
+
+You should set the file associations in either Explorer or Winfile for ASM
+files to the default editor so that you can open assembler files by double
+clicking on the file in either Explorer or Winfile.
+
+The default editor is set up ready to run with scripts and help files
+available on the menus but there is additional information that you need
+for developing software in assembler in Windows. This cannot be included
+for both size and copyright reasons.
+
+1. The INTEL Pentium 4 or later manuals which can be downloaded from INTEL.
+
+2. The Microsoft PLATFORMSDK or its successor that can either be downloaded
+   from Microsoft or purchased for the price of the shipping.
+
+It will also be to your benefit to download the resource editor RESEDIT
+written by Ketil Olsen as it is a viable and very useful tool to have available
+for creating resource dialogs. You will need to become familiar with how
+it works and the format that it saves RC files with but it is a modern and
+very up to date tool that can produce professional results when used properly.
+
+The MASM32 SDK has a large body of example code that deals with a wide range
+of common code types and it also has extensive documentation on the HELP
+menu to help to get you up to pace quickly in writing assembler. In
+particular check out the "High Level Macro Help" help file on the help menu
+as it is designed to introduce programmers to the MACRO capacity of MASM.
+
+Note that the complete library and macro system for the MASM32 SDK is
+available for you to read and build, there is no secret code in the MASM32
+SDK.
+
+Steve Hutchesson for the MASM32 SDK, 1998-2011

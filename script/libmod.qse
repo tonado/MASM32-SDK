@@ -1,0 +1,177 @@
+; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+
+;                         Create a library module
+
+; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+
+    INTEGER hFile
+    INTEGER flen
+    INTEGER void
+    STRING szbuff
+
+    msgbox "Is the editor empty ?" "Question" MB_YESNO
+    if #0 == IDNO
+    goto bye
+
+    hFile = fcreate "Untitled"
+
+    #0 = fprint hFile "; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл"
+    #0 = fprint hFile ""
+
+    $4 = ".486      Backwards compatible code"
+    $5 = ".686p     Late model processor"
+    $6 = ".MMX      MMX extensions"
+    $7 = ".XMM      SIMD extensions"
+    $9 = cat$ $4 "," $5 "," $6 "," $7
+    select "Select Processor model" "Double Click To Select Processor Model" $9
+
+    if #0 != 0
+    goto lbl1
+    end
+  lbl1:
+    if #0 != 1
+    goto lbl2
+    #0 = fprint hFile "    .486                      ; maximum processor model"
+    goto lblout1
+  lbl2:
+    if #0 != 2
+    goto lbl3
+    #0 = fprint hFile "    .686p                     ; maximum processor model"
+    goto lblout1
+  lbl3:
+    if #0 != 3
+    goto lbl4
+    #0 = fprint hFile "    .686p                     ; maximum processor model"
+    #0 = fprint hFile "    .MMX                      ; MMX extensions"
+    goto lblout1
+  lbl4:
+    #0 = fprint hFile "    .686p                     ; maximum processor model"
+    #0 = fprint hFile "    .XMM                      ; SIMD extensions"
+
+  lblout1:
+    #0 = fprint hFile "    .model flat, stdcall      ; memory model & calling convention"
+    #0 = fprint hFile "    option casemap :none      ; case sensitive"
+    #0 = fprint hFile " "
+
+    msgbox "Does your module require system and library include files ?" "Question" MB_YESNO
+    if #0 == IDNO
+    goto noincs
+
+    #0 = fprint hFile "  ; -----------------------------------------------------------"
+    #0 = fprint hFile "  ; uncomment any include file you need for the library module"
+    #0 = fprint hFile "  ; or add any additional include file that you need."
+    #0 = fprint hFile "  ; -----------------------------------------------------------"
+    #0 = fprint hFile ""
+    #0 = fprint hFile " ;     include \masm32\include\windows.inc"
+    #0 = fprint hFile " ;     include \masm32\include\masm32.inc"
+    #0 = fprint hFile " ;     include \masm32\include\gdi32.inc"
+    #0 = fprint hFile " ;     include \masm32\include\user32.inc"
+    #0 = fprint hFile " ;     include \masm32\include\kernel32.inc"
+    #0 = fprint hFile " ;     include \masm32\include\comctl32.inc"
+    #0 = fprint hFile " ;     include \masm32\include\comdlg32.inc"
+    #0 = fprint hFile " ;     include \masm32\include\shell32.inc"
+    #0 = fprint hFile " ;     include \masm32\include\oleaut32.inc"
+    #0 = fprint hFile " ;     include \masm32\include\msvcrt.inc"
+    #0 = fprint hFile ""
+  noincs:
+
+    msgbox "Do you require MASM32 Macro support ?" "Question" MB_YESNO
+    if #0 == IDNO
+    goto nomacro
+    #0 = fprint hFile "  ; ------------------------------------------------"
+    #0 = fprint hFile "  ; access the MASM32 macros in your library module"
+    #0 = fprint hFile "  ; ------------------------------------------------"
+    #0 = fprint hFile "    include \masm32\macros\macros.asm"
+    #0 = fprint hFile ""
+  nomacro:
+
+    #0 = fprint hFile "  ; ---------------------------------------------------------"
+    #0 = fprint hFile "  ; Write the prototype for the procedure name below ensuring"
+    #0 = fprint hFile "  ; that the parameter count & size match and put it in your"
+    #0 = fprint hFile "  ; library include file."
+    #0 = fprint hFile "  ; ---------------------------------------------------------"
+    #0 = fprint hFile ""
+
+    msgbox "Do you require an un-initialised data section ?" "Question" MB_YESNO
+    if #0 == IDNO
+    goto nouninit
+    #0 = fprint hFile "    .data?      ; uninitialised data section"
+    #0 = fprint hFile ""
+    #0 = fprint hFile ""
+  nouninit:
+
+    msgbox "Do you require an initialised data section ?" "Question" MB_YESNO
+    if #0 == IDNO
+    goto noinit
+    #0 = fprint hFile "    .data       ; initialised data section"
+    #0 = fprint hFile ""
+    #0 = fprint hFile ""
+  noinit:
+
+    #0 = fprint hFile "    .code       ; code section"
+    #0 = fprint hFile ""
+    #0 = fprint hFile "; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл"
+    #0 = fprint hFile ""
+    #0 = fprint hFile ""
+    #0 = fprint hFile "        ; Write your library procedure here"
+    #0 = fprint hFile ""
+    #0 = fprint hFile ""
+    #0 = fprint hFile "; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл"
+    #0 = fprint hFile ""
+    #0 = fprint hFile "end"
+
+    void = fclose hFile
+
+  ; ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+  ; reopen the file, read it into a buffer and write the buffer to the editor
+  ; ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+    hFile = fopen "Untitled"        ; open the file
+    flen = fsize hFile              ; get its length
+
+    szbuff = alloc$ flen            ; allocate a buffer
+    szbuff = fread hFile flen       ; read file into buffer
+    text szbuff                     ; write text to editor
+    void = fclose hFile             ; close the file
+
+  ; ------------------------------------------
+  ; delete the file with the API "DeleteFileA"
+  ; ------------------------------------------
+    rv = dll "kernel32" "DeleteFileA" "Untitled"
+
+    starttext
+
+  bye:
+    end
+
+; ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

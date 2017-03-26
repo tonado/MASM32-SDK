@@ -1,0 +1,329 @@
+<HTML>
+<HEAD>
+<META NAME="Author" CONTENT="Raymond Filiatreault">
+<META NAME="Description" CONTENT="Tutorial on the use of the floating point coprocessor in assembly programming. Chap. 10 Trigonometric instructions">
+<TITLE>Simply FPU Chap. 10</TITLE>
+</HEAD>
+<BODY TEXT="#402000" LINK="#0000ff" VLINK="#0000ff" ALINK="#0000ff" BACKGROUND="fpufigs/bluewave.gif">
+
+<CENTER><FONT SIZE="+3">SIMPLY  FPU</FONT>
+<BR>by <B>Raymond Filiatreault</B><BR>
+Copyright 2003</CENTER>
+<P>
+<CENTER><B>Chap. 10<BR>Trigonometric instructions</B></CENTER>
+
+<P><BR>The FPU instructions covered in this chapter perform trigonometric operations with the value in the TOP data register ST(0), or with both ST(0) and ST(1).
+
+<P>The trigonometric instructions covered in this document are (in alphabetical order):
+
+<pre><A HREF="#fcos"><B>FCOS</B></A>      COSine of the angle value in ST(0)
+
+<A HREF="#fpatan"><B>FPATAN</B></A>    Partial ArcTANgent of the ratio ST(1)/ST(0)
+
+<A HREF="#fptan"><B>FPTAN</B></A>     Partial TANgent of the angle value in ST(0)
+
+<A HREF="#fsin"><B>FSIN</B></A>      SINe of the angle value in ST(0)
+
+<A HREF="#fsincos"><B>FSINCOS</B></A>   SINe and COSine of the angle value in ST(0)</pre>
+
+<BR><FONT SIZE="+1"><A NAME="fsin"></A><B>FSIN</B></FONT> (Sine of the angle value in ST(0))
+
+<pre>Syntax:    <B>fsin</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Underflow, Precision</pre>
+
+This instruction computes the sine of the source angle value in ST(0) and overwrites the content of ST(0) with the result. The angle must be expressed in radians and be within the -2<FONT SIZE="-1"><SUP>63</SUP></FONT> to +2<FONT SIZE="-1"><SUP>63</SUP></FONT> range.
+
+<P>If the source angle value is outside the acceptable range (but not <A HREF="fpuchap2.htm#infini">INFINITY</A>), the C2 flag of the <A HREF="fpuchap1.htm#sword">Status Word</A> is set to 1 and the content of ST(0) remains unchanged, no exception being detected. <FONT SIZE="-1"><EM>(The source value can be reduced to within the acceptable range with the <A HREF="fpuchap12.htm#fprem">FPREM</A> instruction using a divisor of 2&pi;.)</EM></FONT>
+
+<P>An <B>I</B>nvalid operation exception is detected if the TOP data register ST(0) is empty, or is a <A HREF="fpuchap2.htm#nans">NAN</A>, or has a value of INFINITY, setting the related flag in the Status Word. The content of ST(0) would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value.
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if ST(0) is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when the content of ST(0) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number or the result is a denormalized number, setting the related flag in the Status Word.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>U</B>nderflow exception will be detected if the result exceeds the range limit of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word.
+
+<P>The relation between degrees and radians is as follows:
+
+<P>180 degrees = &pi; radians
+
+<P>To compute the sine of an angle expressed in degrees in ST(0), the following code could be used to first convert the value in ST(0) from degrees to radians and check for errors before the FSIN instruction.
+
+<pre>   <B>fclex</B>        ;clear all previous exceptions
+   <B>pushd 180</B>    ;store the integer value of 180 on the stack
+   <B>fidiv dword ptr[esp]</B>   ;divide the angle in degrees by 180
+                ;-&gt; ST(0)=angle in degrees/180
+   <B>fldpi</B>        ;load the hard-coded value of &pi;
+                ;-&gt; ST(0)=&pi;, ST(1)=angle in degrees/180
+   <B>fmul</B>         ;-&gt; ST(0)=angle in degrees*&pi;/180, =&gt; angle in radians
+   <B>fsin</B>         ;compute the sine of the angle
+                ;-&gt; ST(0)=sin(angle) if no error
+   <B>fstsw [esp]</B>  ;store the Status Word on the stack overwriting the 180
+   <B>fwait</B>        ;to insure the last instruction is completed
+   <B>pop   eax</B>    ;get the Status Word in AX (which also cleans the stack)
+   <B>shr   al,1</B>   ;transfer the <B>I</B>nvalid op flag (bit0 of AL) to the CF flag
+   <B>jnc   @F</B>     ;jump if no invalid operation detected
+
+   <B>........</B>     ;insert code to handle an invalid operation
+                ;-&gt; ST(0)=INDEFINITE (angle has been trashed)
+
+<B>@@:</B>
+   <B>sahf</B>         ;transfer AH to the CPU flag register
+   <B>jpo   @F</B>     ;jump if PF=C2=0 meaning angle value is in acceptable range
+
+   <B>........</B>     ;insert code to handle angle ouside acceptable range
+                ;-&gt; ST(0)=angle in radians unchanged
+
+<B>@@:</B>             ;-&gt; ST(0)=sin(angle) -- no error
+</pre>
+
+<BR><FONT SIZE="+1"><A NAME="fcos"></A><B>FCOS</B></FONT> (Cosine of the angle value in ST(0))
+
+<pre>Syntax:    <B>fcos</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Underflow, Precision</pre>
+
+This instruction computes the cosine of the source angle value in ST(0) and overwrites the content of ST(0) with the result. The angle must be expressed in radians and be within the -2<FONT SIZE="-1"><SUP>63</SUP></FONT> to +2<FONT SIZE="-1"><SUP>63</SUP></FONT> range.
+
+<P>If the source angle value is outside the acceptable range (but not <A HREF="fpuchap2.htm#infini">INFINITY</A>), the C2 flag of the <A HREF="fpuchap1.htm#sword">Status Word</A> is set to 1 and the content of ST(0) remains unchanged, no exception being detected. <FONT SIZE="-1"><EM>(The source value can be reduced to within the acceptable range with the <A HREF="fpuchap12.htm#fprem">FPREM</A> instruction using a divisor of 2&pi;.)</EM></FONT>
+
+<P>An <B>I</B>nvalid operation exception is detected if the TOP data register ST(0) is empty, or is a <A HREF="fpuchap2.htm#nans">NAN</A>, or has a value of INFINITY, setting the related flag in the Status Word. The content of ST(0) would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value.
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if ST(0) is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when the content of ST(0) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number or the result is a denormalized number, setting the related flag in the Status Word.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>U</B>nderflow exception will be detected if the result exceeds the range limit of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word.
+
+<P>The relation between degrees and radians is as follows:
+
+<P>180 degrees = &pi; radians
+
+<P>To compute the cosine of an angle expressed in degrees in ST(0), the following code could be used to first convert the value in ST(0) from degrees to radians before the FCOS instruction. The code assumes that ST(0) contains a valid value within the acceptable range, such that no error checking is necessary.
+
+<pre>   <B>pushd 180</B>    ;store the integer value of 180 on the stack
+   <B>fidiv dword ptr[esp]</B>   ;divide the angle in degrees by 180
+                ;-&gt; ST(0)=angle in degrees/180
+   <B>fldpi</B>        ;load the hard-coded value of &pi;
+                ;-&gt; ST(0)=&pi;, ST(1)=angle in degrees/180
+   <B>fmul</B>         ;-&gt; ST(0)=angle in degrees*&pi;/180, =&gt; angle in radians
+   <B>add   esp,4</B>  ;adjust the stack pointer to clean-up the pushed 180
+                ;<B>pop <EM>reg32</EM></B> would also clean the stack but trash a register
+   <B>fcos</B>         ;compute the cosine of the angle
+                ;-&gt; ST(0)=cos(angle)</pre>
+
+<BR><FONT SIZE="+1"><A NAME="fsincos"></A><B>FSINCOS</B></FONT> (Sine and cosine of the angle value in ST(0))
+
+<pre>Syntax:    <B>fsincos</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Underflow, Precision</pre>
+
+This instruction computes the sine and the cosine of the source angle value in ST(0). The sine value replaces the content of ST(0), the TOP register field of the Status Word is decremented, and the cosine value is inserted into the new ST(0). The angle must be expressed in radians and be within the -2<FONT SIZE="-1"><SUP>63</SUP></FONT> to +2<FONT SIZE="-1"><SUP>63</SUP></FONT> range. (This instruction is faster than computing the sine and cosine separately with the FSIN and FCOS instructions.)
+
+<P>If the source angle value is outside the acceptable range (but not <A HREF="fpuchap2.htm#infini">INFINITY</A>), the C2 flag of the <A HREF="fpuchap1.htm#sword">Status Word</A> is set to 1 and the content of all data registers remains unchanged; the TOP register field of the Status Word is not modified and no exception is detected. <FONT SIZE="-1"><EM>(The source value can be reduced to within the acceptable range with the <A HREF="fpuchap12.htm#fprem">FPREM</A> instruction using a divisor of 2&pi;.)</EM></FONT>
+
+<P>An <B>I</B>nvalid operation exception is detected if the TOP data register ST(0) is empty, or is a <A HREF="fpuchap2.htm#nans">NAN</A>, or has a value of INFINITY, or the ST(7) data register is not empty, setting the related flag in the Status Word.  The content of ST(0) would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value, the TOP register field of the Status Word would be decremented, and the content of the new ST(0) would also be overwritten with the INDEFINITE value.
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if ST(0) is empty or if ST(7) is not empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when the content of ST(0) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number or a result is a denormalized number, setting the related flag in the Status Word.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>U</B>nderflow exception will be detected if the result exceeds the range limit of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word.
+
+<P>The relation between degrees and radians is as follows:</P>
+
+<P>180 degrees = &pi; radians
+
+<P>To compute the sine and cosine of an angle expressed in degrees in ST(0), the following code could be used to first convert the value in ST(0) from degrees to radians and verify that it is within the acceptable range before the FSINCOS instruction. This code does not differentiate invalid operations from a value simply out of range.
+
+<pre>
+   <B>pushd 180</B>    ;store the integer value of 180 on the stack
+   <B>fidiv dword ptr[esp]</B>   ;divide the angle in degrees by 180
+                ;-&gt; ST(0)=angle in degrees/180
+   <B>fldpi</B>        ;load the hard-coded value of &pi;
+                ;-&gt; ST(0)=&pi;, ST(1)=angle in degrees/180
+   <B>fmul</B>         ;-&gt; ST(0)=angle in degrees*&pi;/180, =&gt; angle in radians
+   <B>fst   dword ptr[esp]</B> ;use the already reserved space on the stack
+                ;to get a REAL4 version of the value in ST(0)
+   <B>fwait</B>        ;to insure the last instruction is completed
+   <B>pop   eax</B>    ;retrieve the REAL4 in EAX (which also cleans the stack)
+   <B>rol   eax,9</B>  ;the 8 biased exponent bits =&gt; to the lower 8 bits of EAX
+                ;(the sign bit would become the least significant bit of AH)
+   <B>cmp   al,127+64</B>    ;the exponent bias for the REAL4 format is 127
+   <B>jb    @F</B>     ;the value in ST(0) would be within range if AL &lt; 127+64
+
+   <B>.......</B>      ;insert code to handle the unacceptable source value
+                ;if AL=255, source value was &gt;2<FONT SIZE="-1"><SUP>127</SUP></FONT> or was NAN
+
+<B>@@:</B>
+   <B>fsincos</B>      ;compute both the sine and cosine of the angle
+                ;-&gt; ST(0)=cos(angle), ST(1)=sin(angle)
+;all other values in data registers would be in the ST(i+1) register</pre>
+
+<BR><FONT SIZE="+1"><A NAME="fptan"></A><B>FPTAN</B></FONT> (Partial tangent of the angle value in ST(0))</P>
+
+<pre>Syntax:    <B>fptan</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Underflow, Precision</pre>
+
+This instruction computes the tangent of the source angle value in ST(0). The tangent value replaces the content of ST(0), the TOP register field of the Status Word is decremented, and a value of 1.0 is inserted into the new ST(0). The angle must be expressed in radians and be within the -2<FONT SIZE="-1"><SUP>63</SUP></FONT> to +2<FONT SIZE="-1"><SUP>63</SUP></FONT> range.
+
+<BLOCKQUOTE>The extra value of 1.0 is primarily for compatibility with the early co-processors prior to the 387. The FSIN and FCOS instructions were not
+then available and had to be computed from the tangent value (and the
+acceptable range for the angle was only 0 to +&pi;/4). It is more a nuisance
+than a feature with the more modern FPUs, requiring the need for two
+registers instead of one and an extra instruction to discard it.</BLOCKQUOTE>
+
+If the source angle value is outside the acceptable range (but not <A HREF="fpuchap2.htm#infini">INFINITY</A>), the C2 flag of the <A HREF="fpuchap1.htm#sword">Status Word</A> is set to 1 and the content of all data registers remains unchanged; the TOP register field of the Status Word is not modified and no exception is detected. <FONT SIZE="-1"><EM>(The source value can be reduced to within the acceptable range with the <A HREF="fpuchap12.htm#fprem">FPREM</A> instruction using a divisor of 2&pi;.)</EM></FONT>
+
+<P>An <B>I</B>nvalid operation exception is detected if the TOP data register ST(0) is empty, or is a <A HREF="fpuchap2.htm#nans">NAN</A>, or has a value of INFINITY, or the ST(7) data register is not empty, setting the related flag in the Status Word.  The content of ST(0) would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value, the TOP register field of the Status Word would be decremented, and the content of the new ST(0) would also be overwritten with the INDEFINITE value.
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if ST(0) is empty or if ST(7) is not empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when the content of ST(0) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number or a result is a denormalized number, setting the related flag in the Status Word.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>U</B>nderflow exception will be detected if the result exceeds the range limit of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word.
+
+<P>Although the tangent would have a value of infinity when the angle would be exactly equal to &pi;/2, the maximum value returned by the FPTAN instruction will only be approximately 3.69*10<FONT SIZE="-1"><SUP>19</SUP></FONT>. This properly reflects the limit of precision of the FPU.
+
+<P>Because an additional value is loaded to a data register unless this instruction is executed on a value outside the acceptable range, all other values in data registers would then be in the ST(i+1) register.
+
+<P>The tangent of an angle expressed in radians and located in ST(0) is obtained as follows.
+
+<pre>              ;ST(0)=angle in radians, ST(1)=xx
+<B>fptan</B>         ;ST(0)=1.0, ST(1)=tan(angle), ST(2)=xx
+<B>fstp st</B>       ;this pops the TOP register
+              ;ST(0)=tan(angle), ST(1)=xx</pre>
+
+<BR><FONT SIZE="+1"><A NAME="fpatan"></A><B>FPATAN</B></FONT> (Partial arctangent of the ratio ST(1)/ST(0))
+
+<pre>Syntax:    <B>fpatan</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Underflow, Precision</pre>
+
+This instruction computes the arctangent of the ST(1)/ST(0) ratio, overwrites the content of ST(1) with the angle value (in radians) and then POPs the TOP data register. The result will be a value in the range of -&pi; to +&pi; (-180 to +180 if converted to degrees) depending on the signs of the contents of ST(0) and ST(1).
+
+<P>The following tabulation gives the resulting values (or range of values) converted to degrees based on the contents of ST(0) and ST(1). "F" means a finite value between 0 and <A HREF="fpuchap2.htm#infini">INFINITY</A>.
+
+<P><TABLE BORDER="1" WIDTH="100%">
+<TR VALIGN="TOP"><TD>
+<P ALIGN="RIGHT"><FONT SIZE="-1"><B>ST(1)</B></FONT></P>
+
+<P><FONT SIZE="-1"><B>ST(0)</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1"><B>+&infin;</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1"><B>+F</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1"><B>+0</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1"><B>-0</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1"><B>-F</B></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1"><B>-&infin;</B></FONT><B></B></TD></TR>
+<TR VALIGN="TOP"><TD><FONT SIZE="-1"><B>+&infin;</B></FONT><B></B></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+45<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+0<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+0<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-0<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-0<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-45<SUP>o</SUP></FONT></TD></TR>
+<TR VALIGN="TOP"><TD><FONT SIZE="-1"><B>+F</B></FONT><B></B></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+90<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+0<SUP>o</SUP> to +90<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+0<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-0<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-90<SUP>o</SUP> to -0<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-90<SUP>o</SUP></FONT></TD></TR>
+<TR VALIGN="TOP"><TD><FONT SIZE="-1"><B>+0</B></FONT><B></B></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+90<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+90<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+0<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-0<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-90<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-90<SUP>o</SUP></FONT></TD></TR>
+<TR VALIGN="TOP"><TD><FONT SIZE="-1"><B>-0</B></FONT><B></B></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+90<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+90<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+180<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-180<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-90<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-90<SUP>o</SUP></FONT></TD></TR>
+<TR VALIGN="TOP"><TD><FONT SIZE="-1"><B>-F</B></FONT><B></B></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+90<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+90<SUP>o</SUP> to +180<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+180<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-180<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-180<SUP>o</SUP> to -90<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-90<SUP>o</SUP></FONT></TD></TR>
+<TR VALIGN="TOP"><TD><FONT SIZE="-1"><B>-&infin;</B></FONT><B></B></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+135<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+180<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">+180<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-180<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-180<SUP>o</SUP></FONT></TD>
+<TD ALIGN="CENTER"><FONT SIZE="-1">-135<SUP>o</SUP></FONT></TD></TR></TABLE>
+
+<P>An <B>I</B>nvalid operation exception is detected if either ST(0) or ST(1) is empty or is a <A HREF="fpuchap2.htm#nans">NAN</A>, setting the related flag in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The TOP data register would be POPed and  the content of ST(0) (formerly ST(1)) would be overwritten with the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value.
+
+<P>A <B>S</B>tack <B>F</B>ault exception is also detected if either ST(0) or ST(1) is empty, setting the related flag in the Status Word.
+
+<P>A <B>D</B>enormal exception is detected when the content of either ST(0) or ST(1) is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number or the result is a denormalized number, setting the related flag in the Status Word.
+
+<P>A <B>P</B>recision exception will be detected if some fraction bit is lost due to rounding, setting the related flag in the Status Word.
+
+<P>An <B>U</B>nderflow exception will be detected if the result exceeds the range limit of <A HREF="fpuchap2.htm#real10">REAL10</A> numbers, setting the related flag in the Status Word.
+
+<P>Because the TOP data register is POPed with this instruction, all other values in data registers now would be in the ST(i-1) register.
+
+<P>The arctangent can be computed in two different manners. One of them is when the actual value of the tangent is in ST(0), either from prior computations or loaded from memory. By loading a value of +1.0 followed by the FPATAN instruction, the arctangent result would be in the <B>-90&deg; to 0&deg;</B> or <B>0&deg; to +90&deg;</B> ranges depending on the sign of the tangent value. Loading a value of -1.0 would give results in the <B>+90&deg; to +180&deg;</B> or <B>-180&deg; to -90&deg;</B> ranges. Some prior knowledge of the required ranges will be necessary in order to load the 1.0 with the proper sign. Typical code would be:
+
+<pre>                ;ST(0)=value of tangent, ST(1)=xxx
+<B>fld1</B>            ;ST(0)=+1.0, ST(1)=value of tangent, ST(2)=xxx
+<B>fchs</B>            ;change to -1.0 for angle in the +90&deg; to 180&deg; to -90&deg; ranges
+                ;ST(0)=-1.0, ST(1)=value of tangent, ST(2)=xxx
+<B>fpatan</B>          ;ST(0)=angle in radians, ST(1)=xxx
+<B>pushd 180</B>       ;for converting to degrees
+<B>fimul dword ptr[esp]</B> ;ST(0)=180*angle in radians, ST(1)=xxx
+<B>fldpi</B>           ;ST(0)=&pi;, ST(1)=180*angle in radians, ST(2)=xxx
+<B>fdiv</B>            ;ST(0)=180/&pi;*angle in radians=angle in degrees, ST(1)=xxx
+<B>add   esp,4</B>     ;adjust the stack pointer to clean-up the pushed 180
+                ;<B>pop <EM>reg32</EM></B> would also clean the stack but trash a register</pre>
+
+The other manner is when the signed dimensions of the sides of a right triangle (or Cartesian coordinates) are available. The dimension of the side opposite the angle is loaded first followed by the dimension of the side adjacent to the angle. The result will then cover the entire circle.
+
+<P>FPU instructions are not available to directly compute the <B>arcsine</B> and the <B>arccosine</B>. The FPATAN instruction must be used for that purpose based on the usual trigonometric equivalents:
+
+<BR WP="BR1"><BR WP="BR2">
+<pre>            <B>tan(x) = sin(x)/cos(x)</B>
+and         <B>sin<SUP>2</SUP>(x) + cos<SUP>2</SUP>(x) = 1</B></pre>
+
+Typical code to compute arcsin[sin(x)] from the sine value in ST(0) would be as follows. 
+
+<pre>                ;ST(0)=sin(x), ST(1)=zzz
+<B>fld   st</B>        ;ST(0)=sin(x), ST(1)=sin(x), ST(2)=zzz
+<B>fmul  st,st</B>     ;ST(0)=sin<SUP>2</SUP>(x), ST(1)=sin(x), ST(2)=zzz
+<B>fld1</B>            ;ST(0)=1.0, ST(1)=sin<SUP>2</SUP>(x), ST(2)=sin(x), ST(3)=zzz
+<B>fsubr</B>           ;ST(0)=1-sin<SUP>2</SUP>(x)=cos<SUP>2</SUP>(x), ST(1)=sin(x), ST(2)=zzz
+<B>fsqrt</B>           ;ST(0)=cos(x), ST(1)=sin(x), ST(2)=zzz
+<B>fpatan</B>          ;ST(0)=arcsin[sin(x)]=x (in radians), ST(1)=zzz</pre>
+
+Since the derived cos(x) value would always be positive, the resulting angle would be in the -90&deg; to 0&deg; to +90&deg; ranges. The sign of the derived cos(x) value would need to be changed to get an angle in the +90&deg; to 180&deg; to -90&deg; ranges.
+
+<P>The arccosine can be computed in a similar manner. The only difference would be that the cos(x) value and the derived sin(x) value would have to be exchanged before the FPATAN instruction. If the positive sign of the sin(x) value is retained, the resulting arccosine value would be in the 0&deg; to +90&deg; to +180&deg; ranges. The sign of the derived sin(x) value would need to be changed to get an angle in the -0&deg; to -90&deg; to -180&deg; ranges.
+
+<P><BR><CENTER><A HREF="index.html"><B>RETURN TO<B>
+<BR><FONT SIZE="+2">SIMPLY  FPU</FONT>
+<BR><B>CONTENTS<B></A></CENTER><BR>
+
+</BODY>
+</HTML>

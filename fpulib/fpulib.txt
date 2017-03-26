@@ -1,0 +1,18 @@
+The original FPULIB (library of floating point math functions) was primarily designed for the beginners in assembly programming who had some need for such math functions but did not yet have the opportunity lo learn how to use the FPU and its instructions.
+
+Some feedback proved that a little knowledge can be dangerous. Some users were loading too many FPU registers themselves; called functions then resulted in failure because an insufficient number of free registers were remaining to accomplish the task.
+
+A modification was issued later to blindly free any register(s) required by the function, regardless of whether it contained valid data or not. This would have no effect on the beginner using strictly the lib functions. However, it would prevent "FPU stack overflow" errors due to inadvertant use of the FPU registers by "intermediate" programmers. The drawback for that latter group was that valid data on the FPU could be trashed.
+
+Later, it also became evident that some assembler HLL instructions would blindly trash FPU registers to perform their task. Although such action seems to be generally accepted as "fair game", an alternate version of the FPULIB has thus been prepared to avoid such blind trashing. Again, this modified version would have no effect on the beginner using strictly the lib functions. The only drawback is the added overhead to save the FPU registers and restore them.
+
+This version may be an advantage for intermediate users who may want to use some of the library functions without any fear of loosing valuable data in FPU registers, and without any need of preserving such data themselves.
+
+The only restriction of that modified version was that the ST7 register must be free whenever the FPU was not the source for any input parameter AND the result was specified to be returned on the FPU. If that ST7 register was NOT free under those conditions, it would NOT have been trashed but the function would have failed.
+
+Because the primary intention of the library is to help beginners, AND beginners are not expected to know about FPU register management, AND the library functions don't free the registers, it became evident that preserving ALL the FPU registers was not entirely practical. This latest version (and hopefully the last major one) would now trash the FPU's ST7 register if, and only if, no input parameter is specified as being present in the FPU top register but the result is specified to remain on the FPU.
+
+The latest modification was a redesign of the FpuAtoFL function after it was observed that the conversion of integer strings (no decimal digits) may have resulted in the incorporation of a minuscule decimal difference (19th significant digit). The modified algorithm corrects that. However, any string with only decimal digits may still suffer that minuscule inaccuracy.
+
+This FPULIB21.zip file contains all necessary files, including all source code. The bulk of the .zip file is the HELP file which has also been updated to reflect the modifications. 
+

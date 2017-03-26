@@ -1,0 +1,67 @@
+; --------------------------------------------------------------------------------------------------
+;                          wiaservc.inc Copyright The MASM32 SDK 1998-2010
+; --------------------------------------------------------------------------------------------------
+
+IFNDEF WIASERVC_INC
+WIASERVC_INC equ <1>
+
+DllEntryPoint PROTO STDCALL :DWORD,:DWORD,:DWORD
+wiasCreateChildAppItem PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasCreateDrvItem PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasCreateLogInstance PROTO STDCALL :DWORD,:DWORD
+wiasCreatePropContext PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasDebugError PROTO C :VARARG
+wiasDebugTrace PROTO C :VARARG
+wiasDownSampleBuffer PROTO STDCALL :DWORD,:DWORD
+wiasFormatArgs PROTO C :VARARG
+wiasFreePropContext PROTO STDCALL :DWORD
+wiasGetChangedValueFloat PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasGetChangedValueGuid PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasGetChangedValueLong PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasGetChangedValueStr PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasGetChildrenContexts PROTO STDCALL :DWORD,:DWORD,:DWORD
+wiasGetContextFromName PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+wiasGetDrvItem PROTO STDCALL :DWORD,:DWORD
+wiasGetImageInformation PROTO STDCALL :DWORD,:DWORD,:DWORD
+wiasGetItemType PROTO STDCALL :DWORD,:DWORD
+wiasGetPropertyAttributes PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasGetRootItem PROTO STDCALL :DWORD,:DWORD
+wiasIsPropChanged PROTO STDCALL :DWORD,:DWORD,:DWORD
+wiasParseEndorserString PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+wiasPrintDebugHResult PROTO STDCALL :DWORD,:DWORD
+wiasQueueEvent PROTO STDCALL :DWORD,:DWORD,:DWORD
+wiasReadMultiple PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasReadPropBin PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasReadPropFloat PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasReadPropGuid PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasReadPropLong PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasReadPropStr PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasSendEndOfPage PROTO STDCALL :DWORD,:DWORD,:DWORD
+wiasSetItemPropAttribs PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+wiasSetItemPropNames PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+wiasSetPropChanged PROTO STDCALL :DWORD,:DWORD,:DWORD
+wiasSetPropertyAttributes PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasSetValidFlag PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+wiasSetValidListFloat PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasSetValidListGuid PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasSetValidListLong PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasSetValidListStr PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasSetValidRangeFloat PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasSetValidRangeLong PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasUpdateScanRect PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+wiasUpdateValidFormat PROTO STDCALL :DWORD,:DWORD,:DWORD
+wiasValidateItemProperties PROTO STDCALL :DWORD,:DWORD,:DWORD
+wiasWriteBufToFile PROTO STDCALL :DWORD,:DWORD
+wiasWriteMultiple PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+wiasWritePageBufToFile PROTO STDCALL :DWORD
+wiasWritePropBin PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+wiasWritePropFloat PROTO STDCALL :DWORD,:DWORD,:DWORD
+wiasWritePropGuid PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+wiasWritePropLong PROTO STDCALL :DWORD,:DWORD,:DWORD
+wiasWritePropStr PROTO STDCALL :DWORD,:DWORD,:DWORD
+
+ELSE
+  echo -------------------------------------------
+  echo WARNING duplicate include file wiaservc.inc
+  echo -------------------------------------------
+ENDIF

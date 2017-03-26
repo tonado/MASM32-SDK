@@ -1,0 +1,699 @@
+; --------------------------------------------------------------------------------------------------
+;                           shell32.inc Copyright The MASM32 SDK 1998-2010
+; --------------------------------------------------------------------------------------------------
+
+IFNDEF SHELL32_INC
+SHELL32_INC equ <1>
+
+CDefFolderMenu_Create2 PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+CDefFolderMenu_Create PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+CallCPLEntry16 PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+
+CheckEscapesA PROTO STDCALL :DWORD,:DWORD
+IFNDEF __UNICODE__
+  CheckEscapes equ <CheckEscapesA>
+ENDIF
+
+CheckEscapesW PROTO STDCALL :DWORD,:DWORD
+IFDEF __UNICODE__
+  CheckEscapes equ <CheckEscapesW>
+ENDIF
+
+CommandLineToArgvW PROTO STDCALL :DWORD,:DWORD
+IFDEF __UNICODE__
+  CommandLineToArgv equ <CommandLineToArgvW>
+ENDIF
+
+DAD_AutoScroll PROTO STDCALL :DWORD,:DWORD,:DWORD
+DAD_DragEnterEx2 PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+DAD_DragEnterEx PROTO STDCALL :DWORD,:DWORD,:DWORD
+DAD_DragLeave PROTO STDCALL
+DAD_DragMove PROTO STDCALL :DWORD,:DWORD
+DAD_SetDragImage PROTO STDCALL :DWORD,:DWORD
+DAD_ShowDragImage PROTO STDCALL :DWORD
+
+DoEnvironmentSubstA PROTO STDCALL :DWORD,:DWORD
+IFNDEF __UNICODE__
+  DoEnvironmentSubst equ <DoEnvironmentSubstA>
+ENDIF
+
+DoEnvironmentSubstW PROTO STDCALL :DWORD,:DWORD
+IFDEF __UNICODE__
+  DoEnvironmentSubst equ <DoEnvironmentSubstW>
+ENDIF
+
+DragAcceptFiles PROTO STDCALL :DWORD,:DWORD
+DragFinish PROTO STDCALL :DWORD
+
+DragQueryFileA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  DragQueryFile equ <DragQueryFileA>
+ENDIF
+
+DragQueryFileAorW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  DragQueryFileAor equ <DragQueryFileAorW>
+ENDIF
+
+DragQueryFileW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  DragQueryFile equ <DragQueryFileW>
+ENDIF
+
+DragQueryPoint PROTO STDCALL :DWORD,:DWORD
+DriveType PROTO STDCALL :DWORD
+DuplicateIcon PROTO STDCALL :DWORD,:DWORD
+
+ExtractAssociatedIconA PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  ExtractAssociatedIcon equ <ExtractAssociatedIconA>
+ENDIF
+
+ExtractAssociatedIconExA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  ExtractAssociatedIconEx equ <ExtractAssociatedIconExA>
+ENDIF
+
+ExtractAssociatedIconExW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  ExtractAssociatedIconEx equ <ExtractAssociatedIconExW>
+ENDIF
+
+ExtractAssociatedIconW PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  ExtractAssociatedIcon equ <ExtractAssociatedIconW>
+ENDIF
+
+ExtractIconA PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  ExtractIcon equ <ExtractIconA>
+ENDIF
+
+
+ExtractIconExA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  ExtractIconEx equ <ExtractIconExA>
+ENDIF
+
+ExtractIconExW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  ExtractIconEx equ <ExtractIconExW>
+ENDIF
+
+ExtractIconResInfoA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  ExtractIconResInfo equ <ExtractIconResInfoA>
+ENDIF
+
+ExtractIconResInfoW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  ExtractIconResInfo equ <ExtractIconResInfoW>
+ENDIF
+
+ExtractIconW PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  ExtractIcon equ <ExtractIconW>
+ENDIF
+
+ExtractVersionResource16W PROTO STDCALL :DWORD,:DWORD
+IFDEF __UNICODE__
+  ExtractVersionResource16 equ <ExtractVersionResource16W>
+ENDIF
+
+FindExeDlgProc PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+
+FindExecutableA PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  FindExecutable equ <FindExecutableA>
+ENDIF
+
+FindExecutableW PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  FindExecutable equ <FindExecutableW>
+ENDIF
+
+FreeIconList PROTO STDCALL :DWORD,:DWORD
+GetFileNameFromBrowse PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ILAppendID PROTO STDCALL :DWORD,:DWORD,:DWORD
+ILClone PROTO STDCALL :DWORD
+ILCloneFirst PROTO STDCALL :DWORD
+ILCombine PROTO STDCALL :DWORD,:DWORD
+
+ILCreateFromPathA PROTO STDCALL :DWORD
+IFNDEF __UNICODE__
+  ILCreateFromPath equ <ILCreateFromPathA>
+ENDIF
+
+ILCreateFromPathW PROTO STDCALL :DWORD
+IFDEF __UNICODE__
+  ILCreateFromPath equ <ILCreateFromPathW>
+ENDIF
+
+ILFindChild PROTO STDCALL :DWORD,:DWORD
+ILFindLastID PROTO STDCALL :DWORD
+ILFree PROTO STDCALL :DWORD
+ILGetNext PROTO STDCALL :DWORD
+ILGetSize PROTO STDCALL :DWORD
+ILIsEqual PROTO STDCALL :DWORD,:DWORD
+ILIsParent PROTO STDCALL :DWORD,:DWORD,:DWORD
+ILLoadFromStream PROTO STDCALL :DWORD,:DWORD
+ILRemoveLastID PROTO STDCALL :DWORD
+ILSaveToStream PROTO STDCALL :DWORD,:DWORD
+
+InternalExtractIconListA PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  InternalExtractIconList equ <InternalExtractIconListA>
+ENDIF
+
+InternalExtractIconListW PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  InternalExtractIconList equ <InternalExtractIconListW>
+ENDIF
+
+
+IsLFNDriveA PROTO STDCALL :DWORD
+IFNDEF __UNICODE__
+  IsLFNDrive equ <IsLFNDriveA>
+ENDIF
+
+IsLFNDriveW PROTO STDCALL :DWORD
+IFDEF __UNICODE__
+  IsLFNDrive equ <IsLFNDriveW>
+ENDIF
+
+IsNetDrive PROTO STDCALL :DWORD
+IsUserAnAdmin PROTO STDCALL
+OpenRegStream PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+PathCleanupSpec PROTO STDCALL :DWORD,:DWORD
+PathGetShortPath PROTO STDCALL :DWORD
+PathIsExe PROTO STDCALL :DWORD
+
+PathIsSlowA PROTO STDCALL :DWORD,:DWORD
+IFNDEF __UNICODE__
+  PathIsSlow equ <PathIsSlowA>
+ENDIF
+
+PathIsSlowW PROTO STDCALL :DWORD,:DWORD
+IFDEF __UNICODE__
+  PathIsSlow equ <PathIsSlowW>
+ENDIF
+
+PathMakeUniqueName PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+PathProcessCommand PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+PathQualify PROTO STDCALL :DWORD
+PathResolve PROTO STDCALL :DWORD,:DWORD,:DWORD
+PathYetAnotherMakeUniqueName PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+PickIconDlg PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+PifMgr_CloseProperties PROTO STDCALL :DWORD,:DWORD
+PifMgr_GetProperties PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+PifMgr_OpenProperties PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+PifMgr_SetProperties PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ReadCabinetState PROTO STDCALL :DWORD,:DWORD
+RealDriveType PROTO STDCALL :DWORD,:DWORD
+
+RealShellExecuteA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  RealShellExecute equ <RealShellExecuteA>
+ENDIF
+
+RealShellExecuteExA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  RealShellExecuteEx equ <RealShellExecuteExA>
+ENDIF
+
+RealShellExecuteExW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  RealShellExecuteEx equ <RealShellExecuteExW>
+ENDIF
+
+RealShellExecuteW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  RealShellExecute equ <RealShellExecuteW>
+ENDIF
+
+RegenerateUserEnvironment PROTO STDCALL :DWORD,:DWORD
+RestartDialog PROTO STDCALL :DWORD,:DWORD,:DWORD
+RestartDialogEx PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+SHAddFromPropSheetExtArray PROTO STDCALL :DWORD,:DWORD,:DWORD
+SHAddToRecentDocs PROTO STDCALL :DWORD,:DWORD
+SHAlloc PROTO STDCALL :DWORD
+SHAppBarMessage PROTO STDCALL :DWORD,:DWORD
+SHBindToParent PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+
+SHBrowseForFolderA PROTO STDCALL :DWORD
+IFNDEF __UNICODE__
+  SHBrowseForFolder equ <SHBrowseForFolderA>
+ENDIF
+
+SHBrowseForFolderW PROTO STDCALL :DWORD
+IFDEF __UNICODE__
+  SHBrowseForFolder equ <SHBrowseForFolderW>
+ENDIF
+
+SHCLSIDFromString PROTO STDCALL :DWORD,:DWORD
+SHChangeNotification_Lock PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+SHChangeNotification_Unlock PROTO STDCALL :DWORD
+SHChangeNotify PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+SHChangeNotifyDeregister PROTO STDCALL :DWORD
+SHChangeNotifyRegister PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+SHCloneSpecialIDList PROTO STDCALL :DWORD,:DWORD,:DWORD
+SHCoCreateInstance PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+SHCreateDirectory PROTO STDCALL :DWORD,:DWORD
+
+SHCreateDirectoryExA PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  SHCreateDirectoryEx equ <SHCreateDirectoryExA>
+ENDIF
+
+SHCreateDirectoryExW PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHCreateDirectoryEx equ <SHCreateDirectoryExW>
+ENDIF
+
+SHCreateFileExtractIconW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHCreateFileExtractIcon equ <SHCreateFileExtractIconW>
+ENDIF
+
+SHCreateProcessAsUserW PROTO STDCALL :DWORD
+IFDEF __UNICODE__
+  SHCreateProcessAsUser equ <SHCreateProcessAsUserW>
+ENDIF
+
+SHCreatePropSheetExtArray PROTO STDCALL :DWORD,:DWORD,:DWORD
+SHCreateQueryCancelAutoPlayMoniker PROTO STDCALL :DWORD
+SHCreateShellFolderView PROTO STDCALL :DWORD,:DWORD
+SHCreateShellFolderViewEx PROTO STDCALL :DWORD,:DWORD
+SHCreateShellItem PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+SHCreateStdEnumFmtEtc PROTO STDCALL :DWORD,:DWORD,:DWORD
+
+SHDefExtractIconA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  SHDefExtractIcon equ <SHDefExtractIconA>
+ENDIF
+
+SHDefExtractIconW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHDefExtractIcon equ <SHDefExtractIconW>
+ENDIF
+
+SHDestroyPropSheetExtArray PROTO STDCALL :DWORD
+SHDoDragDrop PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+
+SHEmptyRecycleBinA PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  SHEmptyRecycleBin equ <SHEmptyRecycleBinA>
+ENDIF
+
+SHEmptyRecycleBinW PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHEmptyRecycleBin equ <SHEmptyRecycleBinW>
+ENDIF
+
+SHEnumerateUnreadMailAccountsW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHEnumerateUnreadMailAccounts equ <SHEnumerateUnreadMailAccountsW>
+ENDIF
+
+SHExtractIconsW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHExtractIcons equ <SHExtractIconsW>
+ENDIF
+
+
+SHFileOperationA PROTO STDCALL :DWORD
+IFNDEF __UNICODE__
+  SHFileOperation equ <SHFileOperationA>
+ENDIF
+
+SHFileOperationW PROTO STDCALL :DWORD
+IFDEF __UNICODE__
+  SHFileOperation equ <SHFileOperationW>
+ENDIF
+
+SHFindFiles PROTO STDCALL :DWORD,:DWORD
+SHFind_InitMenuPopup PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+SHFlushClipboard PROTO STDCALL
+SHFlushSFCache PROTO STDCALL
+SHFormatDrive PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+SHFree PROTO STDCALL :DWORD
+SHFreeNameMappings PROTO STDCALL :DWORD
+SHGetAttributesFromDataObject PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+
+SHGetDataFromIDListA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  SHGetDataFromIDList equ <SHGetDataFromIDListA>
+ENDIF
+
+SHGetDataFromIDListW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHGetDataFromIDList equ <SHGetDataFromIDListW>
+ENDIF
+
+SHGetDesktopFolder PROTO STDCALL :DWORD
+
+SHGetDiskFreeSpaceA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  SHGetDiskFreeSpace equ <SHGetDiskFreeSpaceA>
+ENDIF
+
+SHGetDiskFreeSpaceExA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  SHGetDiskFreeSpaceEx equ <SHGetDiskFreeSpaceExA>
+ENDIF
+
+SHGetDiskFreeSpaceExW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHGetDiskFreeSpaceEx equ <SHGetDiskFreeSpaceExW>
+ENDIF
+
+
+SHGetFileInfoA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  SHGetFileInfo equ <SHGetFileInfoA>
+ENDIF
+
+SHGetFileInfoW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHGetFileInfo equ <SHGetFileInfoW>
+ENDIF
+
+SHGetFolderLocation PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+
+SHGetFolderPathA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  SHGetFolderPath equ <SHGetFolderPathA>
+ENDIF
+
+SHGetFolderPathAndSubDirA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  SHGetFolderPathAndSubDir equ <SHGetFolderPathAndSubDirA>
+ENDIF
+
+SHGetFolderPathAndSubDirW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHGetFolderPathAndSubDir equ <SHGetFolderPathAndSubDirW>
+ENDIF
+
+SHGetFolderPathW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHGetFolderPath equ <SHGetFolderPathW>
+ENDIF
+
+SHGetIconOverlayIndexA PROTO STDCALL :DWORD,:DWORD
+IFNDEF __UNICODE__
+  SHGetIconOverlayIndex equ <SHGetIconOverlayIndexA>
+ENDIF
+
+SHGetIconOverlayIndexW PROTO STDCALL :DWORD,:DWORD
+IFDEF __UNICODE__
+  SHGetIconOverlayIndex equ <SHGetIconOverlayIndexW>
+ENDIF
+
+SHGetImageList PROTO STDCALL :DWORD,:DWORD,:DWORD
+SHGetInstanceExplorer PROTO STDCALL :DWORD
+SHGetMalloc PROTO STDCALL :DWORD
+
+SHGetNewLinkInfoA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  SHGetNewLinkInfo equ <SHGetNewLinkInfoA>
+ENDIF
+
+SHGetNewLinkInfoW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHGetNewLinkInfo equ <SHGetNewLinkInfoW>
+ENDIF
+
+
+SHGetPathFromIDListA PROTO STDCALL :DWORD,:DWORD
+IFNDEF __UNICODE__
+  SHGetPathFromIDList equ <SHGetPathFromIDListA>
+ENDIF
+
+SHGetPathFromIDListW PROTO STDCALL :DWORD,:DWORD
+IFDEF __UNICODE__
+  SHGetPathFromIDList equ <SHGetPathFromIDListW>
+ENDIF
+
+SHGetRealIDL PROTO STDCALL :DWORD,:DWORD,:DWORD
+
+SHGetSetFolderCustomSettingsW PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHGetSetFolderCustomSettings equ <SHGetSetFolderCustomSettingsW>
+ENDIF
+
+SHGetSetSettings PROTO STDCALL :DWORD,:DWORD,:DWORD
+SHGetSettings PROTO STDCALL :DWORD,:DWORD
+SHGetShellStyleHInstance PROTO STDCALL
+SHGetSpecialFolderLocation PROTO STDCALL :DWORD,:DWORD,:DWORD
+
+SHGetSpecialFolderPathA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  SHGetSpecialFolderPath equ <SHGetSpecialFolderPathA>
+ENDIF
+
+SHGetSpecialFolderPathW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHGetSpecialFolderPath equ <SHGetSpecialFolderPathW>
+ENDIF
+
+SHGetUnreadMailCountW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHGetUnreadMailCount equ <SHGetUnreadMailCountW>
+ENDIF
+
+SHHandleUpdateImage PROTO STDCALL :DWORD
+SHILCreateFromPath PROTO STDCALL :DWORD,:DWORD,:DWORD
+
+SHInvokePrinterCommandA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  SHInvokePrinterCommand equ <SHInvokePrinterCommandA>
+ENDIF
+
+SHInvokePrinterCommandW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHInvokePrinterCommand equ <SHInvokePrinterCommandW>
+ENDIF
+
+SHIsFileAvailableOffline PROTO STDCALL :DWORD,:DWORD
+SHLimitInputEdit PROTO STDCALL :DWORD,:DWORD
+SHLoadInProc PROTO STDCALL :DWORD
+SHLoadNonloadedIconOverlayIdentifiers PROTO STDCALL
+SHLoadOLE PROTO STDCALL :DWORD
+SHMapIDListToImageListIndexAsync PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+SHMapPIDLToSystemImageListIndex PROTO STDCALL :DWORD,:DWORD,:DWORD
+SHMultiFileProperties PROTO STDCALL :DWORD,:DWORD
+SHObjectProperties PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+SHOpenFolderAndSelectItems PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+
+SHOpenPropSheetW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHOpenPropSheet equ <SHOpenPropSheetW>
+ENDIF
+
+SHParseDisplayName PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+
+SHPathPrepareForWriteA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  SHPathPrepareForWrite equ <SHPathPrepareForWriteA>
+ENDIF
+
+SHPathPrepareForWriteW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHPathPrepareForWrite equ <SHPathPrepareForWriteW>
+ENDIF
+
+SHPropStgCreate PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+SHPropStgReadMultiple PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+SHPropStgWriteMultiple PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+
+SHQueryRecycleBinA PROTO STDCALL :DWORD,:DWORD
+IFNDEF __UNICODE__
+  SHQueryRecycleBin equ <SHQueryRecycleBinA>
+ENDIF
+
+SHQueryRecycleBinW PROTO STDCALL :DWORD,:DWORD
+IFDEF __UNICODE__
+  SHQueryRecycleBin equ <SHQueryRecycleBinW>
+ENDIF
+
+SHReplaceFromPropSheetExtArray PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+SHRestricted PROTO STDCALL :DWORD
+SHRunControlPanel PROTO STDCALL :DWORD,:DWORD
+SHSetInstanceExplorer PROTO STDCALL :DWORD
+SHSetLocalizedName PROTO STDCALL :DWORD,:DWORD,:DWORD
+
+SHSetUnreadMailCountW PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHSetUnreadMailCount equ <SHSetUnreadMailCountW>
+ENDIF
+
+SHShellFolderView_Message PROTO STDCALL :DWORD,:DWORD,:DWORD
+SHSimpleIDListFromPath PROTO STDCALL :DWORD
+
+SHStartNetConnectionDialogW PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHStartNetConnectionDialog equ <SHStartNetConnectionDialogW>
+ENDIF
+
+SHTestTokenMembership PROTO STDCALL :DWORD,:DWORD
+
+SHUpdateImageA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  SHUpdateImage equ <SHUpdateImageA>
+ENDIF
+
+SHUpdateImageW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SHUpdateImage equ <SHUpdateImageW>
+ENDIF
+
+SHUpdateRecycleBinIcon PROTO STDCALL
+SHValidateUNC PROTO STDCALL :DWORD,:DWORD,:DWORD
+
+SheChangeDirA PROTO STDCALL :DWORD
+IFNDEF __UNICODE__
+  SheChangeDir equ <SheChangeDirA>
+ENDIF
+
+SheChangeDirExA PROTO STDCALL :DWORD
+IFNDEF __UNICODE__
+  SheChangeDirEx equ <SheChangeDirExA>
+ENDIF
+
+SheChangeDirExW PROTO STDCALL :DWORD
+IFDEF __UNICODE__
+  SheChangeDirEx equ <SheChangeDirExW>
+ENDIF
+
+SheChangeDirW PROTO STDCALL :DWORD
+IFDEF __UNICODE__
+  SheChangeDir equ <SheChangeDirW>
+ENDIF
+
+SheConvertPathW PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SheConvertPath equ <SheConvertPathW>
+ENDIF
+
+SheFullPathA PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  SheFullPath equ <SheFullPathA>
+ENDIF
+
+SheFullPathW PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SheFullPath equ <SheFullPathW>
+ENDIF
+
+SheGetCurDrive PROTO STDCALL
+
+SheGetDirA PROTO STDCALL :DWORD,:DWORD
+IFNDEF __UNICODE__
+  SheGetDir equ <SheGetDirA>
+ENDIF
+
+SheGetDirExW PROTO STDCALL :DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  SheGetDirEx equ <SheGetDirExW>
+ENDIF
+
+SheGetDirW PROTO STDCALL :DWORD,:DWORD
+IFDEF __UNICODE__
+  SheGetDir equ <SheGetDirW>
+ENDIF
+
+SheGetPathOffsetW PROTO STDCALL :DWORD
+IFDEF __UNICODE__
+  SheGetPathOffset equ <SheGetPathOffsetW>
+ENDIF
+
+SheRemoveQuotesA PROTO STDCALL :DWORD
+IFNDEF __UNICODE__
+  SheRemoveQuotes equ <SheRemoveQuotesA>
+ENDIF
+
+SheRemoveQuotesW PROTO STDCALL :DWORD
+IFDEF __UNICODE__
+  SheRemoveQuotes equ <SheRemoveQuotesW>
+ENDIF
+
+SheSetCurDrive PROTO STDCALL :DWORD
+
+SheShortenPathA PROTO STDCALL :DWORD,:DWORD
+IFNDEF __UNICODE__
+  SheShortenPath equ <SheShortenPathA>
+ENDIF
+
+SheShortenPathW PROTO STDCALL :DWORD,:DWORD
+IFDEF __UNICODE__
+  SheShortenPath equ <SheShortenPathW>
+ENDIF
+
+ShellAboutA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  ShellAbout equ <ShellAboutA>
+ENDIF
+
+ShellAboutW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  ShellAbout equ <ShellAboutW>
+ENDIF
+
+ShellExecuteA PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFNDEF __UNICODE__
+  ShellExecute equ <ShellExecuteA>
+ENDIF
+
+
+ShellExecuteExA PROTO STDCALL :DWORD
+IFNDEF __UNICODE__
+  ShellExecuteEx equ <ShellExecuteExA>
+ENDIF
+
+ShellExecuteExW PROTO STDCALL :DWORD
+IFDEF __UNICODE__
+  ShellExecuteEx equ <ShellExecuteExW>
+ENDIF
+
+ShellExecuteW PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+IFDEF __UNICODE__
+  ShellExecute equ <ShellExecuteW>
+ENDIF
+
+ShellHookProc PROTO STDCALL :DWORD,:DWORD,:DWORD
+
+ShellMessageBoxA PROTO C :VARARG
+IFNDEF __UNICODE__
+  ShellMessageBox equ <ShellMessageBoxA>
+ENDIF
+
+ShellMessageBoxW PROTO C :VARARG
+IFDEF __UNICODE__
+  ShellMessageBox equ <ShellMessageBoxW>
+ENDIF
+
+Shell_GetCachedImageIndex PROTO STDCALL :DWORD,:DWORD,:DWORD
+Shell_GetImageLists PROTO STDCALL :DWORD,:DWORD
+Shell_MergeMenus PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+
+Shell_NotifyIconA PROTO STDCALL :DWORD,:DWORD
+IFNDEF __UNICODE__
+  Shell_NotifyIcon equ <Shell_NotifyIconA>
+ENDIF
+
+Shell_NotifyIconW PROTO STDCALL :DWORD,:DWORD
+IFDEF __UNICODE__
+  Shell_NotifyIcon equ <Shell_NotifyIconW>
+ENDIF
+
+SignalFileOpen PROTO STDCALL :DWORD
+WOWShellExecute PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+Win32DeleteFile PROTO STDCALL :DWORD
+WriteCabinetState PROTO STDCALL :DWORD
+
+ELSE
+  echo ------------------------------------------
+  echo WARNING duplicate include file shell32.inc
+  echo ------------------------------------------
+ENDIF

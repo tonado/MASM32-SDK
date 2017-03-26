@@ -1,0 +1,46 @@
+; --------------------------------------------------------------------------------------------------
+;                            usp10.inc Copyright The MASM32 SDK 1998-2010
+; --------------------------------------------------------------------------------------------------
+
+IFNDEF USP10_INC
+USP10_INC equ <1>
+
+DG PROTO C :VARARG
+ScriptApplyDigitSubstitution PROTO STDCALL :DWORD,:DWORD,:DWORD
+ScriptApplyLogicalWidth PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ScriptBreak PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+ScriptCPtoX PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ScriptCacheGetHeight PROTO STDCALL :DWORD,:DWORD,:DWORD
+ScriptFreeCache PROTO STDCALL :DWORD
+ScriptGetCMap PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ScriptGetFontProperties PROTO STDCALL :DWORD,:DWORD,:DWORD
+ScriptGetGlyphABCWidth PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+ScriptGetLogicalWidths PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ScriptGetProperties PROTO STDCALL :DWORD,:DWORD
+ScriptIsComplex PROTO STDCALL :DWORD,:DWORD,:DWORD
+ScriptItemize PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ScriptJustify PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ScriptLayout PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+ScriptPlace PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ScriptRecordDigitSubstitution PROTO STDCALL :DWORD,:DWORD
+ScriptShape PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ScriptStringAnalyse PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ScriptStringCPtoX PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+ScriptStringFree PROTO STDCALL :DWORD
+ScriptStringGetLogicalWidths PROTO STDCALL :DWORD,:DWORD
+ScriptStringGetOrder PROTO STDCALL :DWORD,:DWORD
+ScriptStringOut PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ScriptStringValidate PROTO STDCALL :DWORD
+ScriptStringXtoCP PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+ScriptString_pLogAttr PROTO STDCALL :DWORD
+ScriptString_pSize PROTO STDCALL :DWORD
+ScriptString_pcOutChars PROTO STDCALL :DWORD
+ScriptTextOut PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+ScriptXtoCP PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+  ; debug arg type unknown
+
+ELSE
+  echo ----------------------------------------
+  echo WARNING duplicate include file usp10.inc
+  echo ----------------------------------------
+ENDIF

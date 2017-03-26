@@ -1,0 +1,182 @@
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+;          Typing Demo using string functions and an API call
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+    call init
+    delay = 20   ; set the delay between typed characters
+
+    goto typetext
+
+  start:
+    cls
+
+  typetext:
+
+    msgbox "First we type in the call to the main include file" "Write the INCLUDE line" MB_OK
+
+    cstr src$ "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤\n"
+    call typit
+    cstr src$ "    include \masm32\include\masm32rt.inc\n"
+    call typit
+    cstr src$ "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤\n\n"
+    call typit
+
+    msgbox "The next thing we type is the UNINITIALSED data section for data that does not have a starting value" "Type the UNINITIALISED data line" MB_OK
+
+    cstr src$ "    .data?\n"
+    call typit
+
+    cstr src$ "      value dd ?\n\n"
+    call typit
+
+    msgbox "We then create an INITIALISED data section for data that has a starting value" "Create the INITIALISED data section" MB_OK
+
+    cstr src$ "    .data\n"
+    call typit
+    cstr src$ "      item dd 0\n\n"
+    call typit
+
+    msgbox "The main CODE section is next so we can write executable code" "Create CODE section" MB_OK
+
+    cstr src$ "    .code\n\n"
+    call typit
+
+    msgbox "We now create the application's ENTRY POINT with the start label" "Create ENTRY POINT" MB_OK
+
+    cstr src$ "start:\n\n"
+       call typit
+
+    cstr src$ "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤\n\n"
+    call typit
+
+    msgbox "We are now at a GLOBAL scope level before creating a procedure" "Initial code section" MB_OK
+
+    cstr src$ "    call main\n"
+    call typit
+
+    msgbox "'main' in a call to a procedure that we will write shortly" "1st procedure call" MB_OK
+
+    cstr src$ "    inkey\n"
+    call typit
+
+    msgbox "The 'inkey' macro allows us to wait for a keystroke before exiting" "Add the 'inkey' macro" MB_OK
+
+    cstr src$ "    exit\n\n"
+    call typit
+
+    msgbox "The 'exit' macro terminates the application, next we write a procedure" "Start a procedure" MB_OK
+
+
+    cstr src$ "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤\n\n"
+    call typit
+
+    cstr src$ "main proc\n\n"
+    call typit
+
+    msgbox "'main' is the name of this simple procedure" "Tell MASM where the procedure starts" MB_OK
+
+    cstr src$ "    cls\n"
+    call typit
+    cstr src$ "    print \qHello World\q,13,10\n\n"
+    call typit
+
+    msgbox "Display a 'Hello World' message then exit the procedure with a RET" "Display a message" MB_OK
+
+    cstr src$ "    ret\n\n"
+    call typit
+
+    msgbox "The RET returns program execution back to where the procedure was called from" "The RET instruction" MB_OK
+
+    cstr src$ "main endp\n\n"
+    call typit
+
+    msgbox "Tell MASM where the procedure 'main' ends using ENDP" "Close the procedure" MB_OK
+
+    cstr src$ "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤\n\n"
+    call typit
+
+    cstr src$ "end start\n"
+    call typit
+
+    msgbox "The END start tells MASM where the entire application ends" "Terminate the application" MB_OK
+
+    msgbox "Do you want to see this again ?" "Console Tutorial" MB_YESNO
+    if #0 == IDYES
+    goto start
+
+    cstr $10 "You would create a seperate directory from the FILE menu save the file\n"
+    cstr $11 "as something like CONSOLE.ASM. Remember to build this file as a console\n"
+    cstr $12 "application from the PROJECT Menu with CONSOLE ASSEMBLE AND LINK\n" 
+    
+    $15 = cat$ $10 $11 $12
+
+    msgbox $15 "What do I do next ?" MB_OK
+
+    call cleanup
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+  typit:
+    lsrc = len src$             ; get the string length
+    begin = 1                   ; set the counter to 1
+  lbl1:
+    ch$ = mid$ src$ begin 1     ; chomp through string 1 at a time
+    call typechar               ; send each character to the typed output
+    add begin 1                 ; increment the counter
+    if begin <= lsrc            ; test if its reached the end
+    goto lbl1                   ; loop back if it hasn't
+    ret
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+  typechar:
+    text ch$
+    void = STDCALL SendMessage hEdit WM_PAINT 0 0   ; refresh edit display
+    sleep delay
+    ret
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+  init:
+    INTEGER SendMessage
+    INTEGER hEdit
+    INTEGER user32
+    INTEGER void
+    INTEGER delay
+
+    STRING src$
+    INTEGER lsrc
+    INTEGER begin
+    STRING ch$
+
+    user32 = LoadLibrary "user32"
+    SendMessage = GetProcAddress user32 "SendMessageA"
+    hEdit = get_hedit
+    ret
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+  cleanup:
+    void = FreeLibrary user32
+    end
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

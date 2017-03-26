@@ -1,0 +1,14 @@
+  ; --------------------------------------------------------------------------
+  ; 'lpstr' is a place holder for the string address you wish to test against.
+  ; You can use one (1) or more 'case$' statements.
+  ; The 'else$' statement if required must be used as the last statement
+  ; before the 'endsw$' statement. It can be used only once.
+  ; --------------------------------------------------------------------------
+    switch$ lpstr
+      case$ "word1"
+        fn MessageBox,hWnd,"word1","switch$ block",MB_OK
+
+      else$
+        fn MessageBox,hWnd,"default","switch$ block",MB_OK
+
+    endsw$

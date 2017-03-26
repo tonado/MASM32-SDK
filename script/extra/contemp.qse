@@ -1,0 +1,194 @@
+; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+
+    STRING wizard$
+    STRING filename$
+    STRING runname$
+    STRING bare$
+    STRING result$
+    STRING szbuff
+    INTEGER hFile
+    INTEGER rv
+    INTEGER flen
+    INTEGER void
+
+; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+;                               runtime code
+; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+
+    wizard$ = "Console Wizard"
+
+    gettext "Create console Template" "Please enter required file name" "test.asm"
+    if$ $0 = ""
+    end                             ; exit if no file name entered
+
+    filename$ = lower$ $0           ; assign gettext return value to a string variable
+
+    hFile = fcreate filename$       ; create file and store the file handle in hFile
+
+    call head
+
+    msgbox "Do you want a .DATA? section in the template ?" wizard$ MB_YESNO
+    if #0 = IDYES
+    call data
+
+    msgbox "Do you want a .DATA section in the template ?" wizard$ MB_YESNO
+    if #0 = IDYES
+    call data?
+
+    call body1
+
+    msgbox "Insert pause on exit ?" wizard$ MB_YESNO
+    if #0 = IDYES
+    call exitpause
+
+    call body2
+
+    msgbox "Clear screen at start ?" wizard$ MB_YESNO
+    if #0 = IDYES
+    call clearscreen
+
+    gettext "Enter text you wish to display" "Click CANCEL for none" "Hello World"
+    if$ $0 != ""
+    call setmsg
+
+    call tail
+
+    call batch
+
+    hFile = fopen filename$         ; open the file
+    flen = fsize hFile              ; get its length
+
+    szbuff = alloc$ flen            ; allocate a buffer
+    szbuff = fread hFile flen       ; read file into buffer
+    text szbuff                     ; write text to editor
+    void = fclose hFile             ; close the file
+
+    result$ = cat$ "Open " filename$ " and build it with MAKEIT.BAT"
+
+    msgbox result$ "Quick Editor" MB_OK
+
+    end
+
+; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+;                           called procedures
+; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+
+  head:
+    rv = fprint hFile "; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл"
+    rv = fprint hFile ";                            console template"
+    rv = fprint hFile "; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл"
+    rv = fprint hFile ""
+    rv = fprint hFile "    include \masm32\include\masm32rt.inc"
+    rv = fprint hFile ""
+    ret
+
+; --------------------------------
+
+  data:
+    rv = fprint hFile "    .data?"
+    rv = fprint hFile "      value dd ?"
+    rv = fprint hFile ""
+    ret
+
+; --------------------------------
+
+  data?:
+    rv = fprint hFile "    .data"
+    rv = fprint hFile "      item dd 0"
+    rv = fprint hFile ""
+    ret
+
+; --------------------------------
+
+  body1:
+    rv = fprint hFile "    .code"
+    rv = fprint hFile ""
+    rv = fprint hFile "start:"
+    rv = fprint hFile ""
+    rv = fprint hFile "; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл"
+    rv = fprint hFile ""
+    rv = fprint hFile "    call main"
+    ret
+
+; --------------------------------
+
+  exitpause:
+    rv = fprint hFile "    inkey"
+    ret
+
+; --------------------------------
+
+  body2:
+    rv = fprint hFile "    exit"
+    rv = fprint hFile ""
+    rv = fprint hFile "; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл"
+    rv = fprint hFile ""
+    rv = fprint hFile "main proc"
+    rv = fprint hFile ""
+    ret
+
+; --------------------------------
+
+  clearscreen:
+    rv = fprint hFile "    cls"
+    ret
+
+; --------------------------------
+
+  setmsg:
+    rv = fprintc hFile "    print \q" $0 "\q,13,10\r\n"
+    ret
+
+; --------------------------------
+
+  tail:
+    rv = fprint hFile ""
+    rv = fprint hFile "    ret"
+    rv = fprint hFile ""
+    rv = fprint hFile "main endp"
+    rv = fprint hFile ""
+    rv = fprint hFile "; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл"
+    rv = fprint hFile ""
+    rv = fprint hFile "end start"
+
+    #0 = fclose hFile
+    ret
+
+; --------------------------------
+
+  batch:
+    hFile = fcreate "makeit.bat"
+
+    bare$ = remove$ filename$ ".asm"
+
+    rv = fprint hFile "  @echo off"
+    rv = fprint hFile ""
+    rv = fprintc hFile "  if exist \q" bare$ ".obj\q del \q" bare$ ".obj\q\r\n"
+    rv = fprintc hFile "  if exist \q" bare$ ".exe\q del \q" bare$ ".exe\q\r\n"
+    rv = fprint hFile ""
+    rv = fprintc hFile "  \\masm32\\bin\\ml /c /coff \q" bare$ ".asm\q\r\n"
+    rv = fprint hFile "  if errorlevel 1 goto errasm"
+    rv = fprint hFile ""
+    rv = fprintc hFile "  \masm32\bin\PoLink /SUBSYSTEM:CONSOLE \q" bare$ ".obj\q\r\n"
+    rv = fprint hFile "  if errorlevel 1 goto errlink"
+    rv = fprintc hFile "  dir \q" bare$ ".*\q\r\n"
+    rv = fprint hFile "  goto TheEnd"
+    rv = fprint hFile ""
+    rv = fprint hFile ":errlink"
+    rv = fprint hFile "  echo _"
+    rv = fprint hFile "  echo Link error"
+    rv = fprint hFile "  goto TheEnd"
+    rv = fprint hFile ""
+    rv = fprint hFile ":errasm"
+    rv = fprint hFile "  echo _"
+    rv = fprint hFile "  echo Assembly Error"
+    rv = fprint hFile "  goto TheEnd"
+    rv = fprint hFile ""
+    rv = fprint hFile ":TheEnd"
+    rv = fprint hFile ""
+    rv = fprint hFile "  pause"
+
+    #0 = fclose hFile
+    ret
+
+; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл

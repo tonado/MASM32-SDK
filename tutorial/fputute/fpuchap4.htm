@@ -1,0 +1,344 @@
+<HTML>
+<HEAD>
+<META NAME="Author" CONTENT="Raymond Filiatreault">
+<META NAME="Description" CONTENT="Tutorial on the use of the floating point coprocessor in assembly programming. Chap. 4 Data transfer instructions - REAL numbers">
+<TITLE>Simply FPU Chap. 4</TITLE>
+</HEAD>
+<BODY TEXT="#402000" LINK="#0000ff" VLINK="#0000ff" ALINK="#0000ff" BACKGROUND="fpufigs/bluewave.gif">
+
+<CENTER><FONT SIZE="+3">SIMPLY  FPU</FONT>
+<BR>by <B>Raymond Filiatreault</B><BR>
+Copyright 2003</CENTER>
+<P>
+<CENTER><B>Chap. 4<BR>Data transfer instructions - REAL numbers</B></CENTER>
+
+<P><BR>The FPU instructions covered in this chapter perform no mathematical operation on numerical data. Their main purpose is simply to transfer floating point data between the FPU's 80-bit data registers, or between those registers and memory, or to access the 7 constants hard coded into the FPU. <FONT SIZE="-1"><EM>(Other instructions must be used to transfer <A HREF="fpuchap5.htm">integer</A> and <A HREF="fpuchap6.htm">BCD</A> data).</EM></FONT>
+
+<P>The data transfer instructions are (in alphabetical order):
+
+<pre><A HREF="#fcmov"><B>FCMOVcc</B></A>   Conditional MOVe based on CPU flags
+
+<A HREF="#fld"><B>FLD</B></A>       LoaD real number
+
+<A HREF="#fst"><B>FST</B></A>       STore real number
+
+<A HREF="#fstp"><B>FSTP</B></A>      STore real number and Pop the top data register
+
+<A HREF="#fxch"><B>FXCH</B></A>      eXCHange the top data register with another data register</pre>
+
+<P>The instructions to transfer the 7 hard-coded constants into the top data register are (in alphabetical order):
+
+<pre><A HREF="#fld1"><B>FLD1</B></A>      LoaD the value of 1
+
+<A HREF="#fldl2e"><B>FLDL2E</B></A>    LoaD the Log base 2 of <EM>e</EM> (Napierian constant)
+
+<A HREF="#fldl2t"><B>FLDL2T</B></A>    LoaD the Log base 2 of Ten
+
+<A HREF="#fldlg2"><B>FLDLG2</B></A>    LoaD the Log base 10 of 2 (common log of 2)
+
+<A HREF="#fldln2"><B>FLDLN2</B></A>    LoaD the Log base <EM>e</EM> of 2 (natural log of 2)
+
+<A HREF="#fldpi"><B>FLDPI</B></A>     LoaD the value of PI
+
+<A HREF="#fldz"><B>FLDZ</B></A>      LoaD the value of Zero</pre>
+
+
+<BR><A NAME="fld"></A><FONT SIZE="+1"><B>FLD</B></FONT> (Load real number)
+
+<pre>Syntax:    <B>fld <EM>Src</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value</pre>
+
+This instruction decrements the <B>TOP</B> register pointer in the <A HREF="fpuchap1.htm#sword">Status Word</A> and loads the floating point value from the specified source (<EM>Src</EM>) in the new TOP data register. The source can be one of the FPU's data registers or the memory address of a REAL4, REAL8, or REAL10 value (see Chap.2 for <A HREF="fpuchap2.htm#realmode">addressing modes of real numbers</A>).
+
+<P>If the ST(7) data register which would become the new ST(0) is not empty, both a <B>S</B>tack <B>F</B>ault and an <B>I</B>nvalid operation exceptions are detected, setting both flags in the Status Word. The TOP register pointer in the Status Word would still be decremented and the new value in ST(0) would be the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> NAN.
+
+<P>If the source is a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, a <B>D</B>enormal exception will be detected, setting the related flag in the Status Word. The value will still be loaded and normalized if possible.
+
+<P>If the source is one of the FPU's data registers, its value is retrieved before the TOP register pointer is decremented. If that source register is empty, both a <B>S</B>tack <B>F</B>ault <U>and</U> an <B>I</B>nvalid operation exceptions are detected, setting both flags in the Status Word. The TOP register pointer will still be decremented and the new value in ST(0) will be the INDEFINITE NAN.
+
+<P>The content of the <A HREF="fpuchap1.htm#tword">Tag Word</A> will be modified according to the result of the operation.
+
+<P>Examples of using this instruction:
+
+<pre><B>fld  st(3)</B> ;the value in the current ST(3) is copied into the new ST(0)
+           ;the same value will now be in ST(0) and ST(4)
+
+<B>fld  st</B>    ;duplicates the TOP value which will now be in both ST(0) and ST(1)</pre>
+
+<P><BLOCKQUOTE>Note that <B>fld st(7)</B> will always be an Invalid operation and the outcome will always be the INDEFINITE value in the new ST(0). <FONT SIZE="-1"><EM>The ST(7) register must be empty for a valid FLD instruction but would also be an invalid source if it is empty!</EM></FONT> </BLOCKQUOTE>
+
+<pre><B>fld  real4_var</B>   ;the value of the <EM>real4_var</EM> variable 
+                 ;is converted to the REAL10 format and copied into ST(0)
+
+<B>fld  qword ptr[ebx]</B> ;ST(0) takes the value of the QWORD located at the address
+                 ;indicated by EBX which the FPU interprets as a REAL8 value
+
+<B>fld  tbyte ptr[edi+50]</B> ;the FPU interprets the value at the address EDI+50
+                 ;as a REAL10 and copies it to ST(0).</pre>
+
+<BLOCKQUOTE>The content of memory is simply a series of bits. Floating point data cannot be differentiated from any other type of data. The FPU will thus interpret a series of bits as instructed. (See <A HREF="fpuchap2.htm#rule3">Rule #3</A>).</BLOCKQUOTE>
+
+<P>If the source is a REAL10 value in memory, it has the same format as the FPU's data registers and is simply copied as is.
+
+<P><A HREF="#realround"></A>However, if the source is a <A HREF="fpuchap2.htm#real4">REAL4</A> or a <A HREF="fpuchap2.htm#real8">REAL8</A> value, it is converted to the 80-bit <A HREF="fpuchap2.htm#real10">REAL10</A> format before loading it to ST(0). When such an operation is observed with a debugger, the displayed value in the FPU data register may often seem slightly different from the intended one. That would be due to the rounding which occurred when the data had to be shortened to fit into the REAL4 or REAL8 format, and some precision was lost.
+
+<P>Just as 3.33333... is never the exact value of 10÷3 regardless of the length of the fractional part, binary fractions behave in a similar manner. For example, a decimal value of 1.2 in binary would be:
+
+<pre>1.00110011001100110011001100110011....b    0011 repeating indefinitely.</pre>
+
+If a variable is declared as a REAL4 and initialized with that value, the assembler would most probably have used the FPU to convert it to binary with 64 bits of precision using the "0011" sequence as often as possible. To fit that value into the REAL4 format, it could only keep the first 23 fraction bits. The 24<SUP>th</SUP> bit being a "1", the number was rounded UP to:
+
+<pre>1.0011 0011 0011 0011 0011 010b</pre>
+
+Because of this rounding UP, this value is now slightly larger than the original decimal value and a debugger would show it as follows if loaded into an FPU data register:
+
+<pre>1.2000000476837158</pre>
+
+Similarly, some binary fractions would be rounded DOWN and the resulting value would be slightly smaller than the original one. For example, a REAL4 variable initialized with a decimal value of 1.3 would be loaded to the FPU's data register as:
+
+<pre>1.0100 1100 1100 1100 1100 110b</pre>
+
+which would be shown in decimal format by a debugger as:
+
+<pre>1.2999999523162842</pre>
+
+This rounding can also affect REAL4 variables initialized with large numbers having more than 7 integer digits. For example, if a REAL4 variable is initialized with 987654321.0 and loaded to the FPU, a debugger would show it as 987654336.0!
+
+<BLOCKQUOTE><EM>The FPU and floating point real numbers do not provide unlimited precision. The REAL4 format's relative precision is only equivalent to approx. 7 significant decimal digits, the REAL8 format being equivalent to
+approx. 15 significant decimal digits, and the REAL10 to 19 significant decimal digits.</EM></BLOCKQUOTE>
+
+
+<P><BR><A NAME="fst"></A><FONT SIZE="+1"><B>FST</B></FONT> (Store real number)
+
+<pre>Syntax:    <B>fst <EM>Dest</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Precision</pre>
+
+This instruction stores the value currently in the TOP data register ST(0) to the specified destination (<EM>Dest</EM>). The destination can be one of the FPU's data registers or the memory address of a REAL4 or REAL8 value (see Chap.2 for <A HREF="fpuchap2.htm#realmode">addressing modes of real numbers</A>).
+
+<P><BLOCKQUOTE><EM>This instruction <U>cannot</U> store the value of ST(0) as a REAL10 in memory; see the <A HREF="#fstp">FSTP</A> instruction for such an operation.</EM></BLOCKQUOTE>
+
+<P>If the ST(0) data register is empty, both a <B>S</B>tack <B>F</B>ault and an <B>I</B>nvalid operation exceptions are detected, setting both flags in the <A HREF="fpuchap1.htm#sword">Status Word</A>, and the value of <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> would be stored at the specified destination. If the ST(0) contains a <A HREF="fpuchap2.htm#denormal">denormalized</A> number, a <B>D</B>enormal exception will be detected, setting the related flag in the Status Word.
+
+<P>When the destination is one of the FPU's data registers, the content of ST(0) will overwrite the content of the destination register, whether that destination register is empty or not, and adjust the <A HREF="fpuchap1.htm#tword">Tag Word</A> to reflect any change in the status of that register.
+
+<P>When the destination is a <A HREF="fpuchap2.htm#real4">REAL4</A> or <A HREF="fpuchap2.htm#real8">REAL8</A> memory address, the <A HREF="fpuchap2.htm#real10">REAL10</A> value in ST(0) is first converted to the appropriate format and rounded according to the bits in the <B>RC</B> field of the <A HREF="fpuchap1.htm#cword">Control Word</A>. A <B>P</B>recision exception is detected if some of the least significant bits would be lost, setting the related flag in the Status Word. A <B>D</B>enormal exception may also be detected, setting the related flag in the Status Word, if the value of ST(0) must be denormalized to fit the destination's format.
+
+<P>Examples of using this instruction:
+
+<pre><B>fst  st(3)</B>  ;the value of the current ST(0) is copied to the current ST(3)
+            ;the same value will now be in ST(0) and ST(3)
+
+<B>fst  st</B>     ;although this instruction is allowed, no data register is changed
+            ;an exception may still be detected due to the value in ST(0)</pre>
+
+<P><BLOCKQUOTE><EM>Note that <B>fst st(7)</B> is valid but is not recommended because it would prevent loading other values to the FPU. If for some reason it should become necessary to use it, ST(7) should be emptied as soon as possible (such as with the <A HREF="fpuchap3.htm#ffree">FFREE</A> instruction).</EM></BLOCKQUOTE>
+
+<pre><B>fst  dword ptr [eax]</B>   ;stores the value of ST(0) in the REAL4 format
+                       ;at the memory address indicated by EAX</P>
+
+<B>fst  real_var</B>   ;stores the value of ST(0) in the appropriate format
+                ;at the address of the real_var memory variable</pre>
+
+<P>Although the FPU performs computations with 64 bits of precision, 40 of those bits of precision will be lost when a computed value is stored as a REAL4. Re-using such a stored value in subsequent computations will automatically limit the precision to 24 bits even though 64 bits would be used.
+<P>Similarly, 11 bits of precision will be lost when a computed value is stored as a REAL8. Re-using such a stored value in subsequent computations will automatically limit the precision to 53 bits even though 64 bits would be used.
+
+
+<P><BR><A NAME="fstp"></A><FONT SIZE="+1"><B>FSTP</B></FONT> (Store real number and Pop the top data register)
+
+<pre>Syntax:    <B>fstp <EM>Dest</EM></B>
+
+Exception flags: Stack Fault, Invalid operation, Denormalized value,
+                 Precision</pre>
+
+This instruction is the same as the <A HREF="#fst">FST</A> instruction except for the following two additions:
+
+<P>- it allows storing the ST(0) value in memory as a <A HREF="fpuchap2.htm#real10">REAL10</A> value, and
+
+<BR>- the ST(0) register is <A HREF="fpuchap1.htm#pop">POPped</A> after the transfer is completed, modifying the <A HREF="fpuchap1.htm#tword">Tag Word</A> and incrementing the TOP register pointer of the <A HREF="fpuchap1.htm#sword">Status Word</A>.
+
+<P>This instruction would be used, for example,
+
+<P>- when the final result of a computation must be stored in memory, liberating the FPU's
+TOP data register for future use,
+
+<pre><B>fstp qword ptr [edx]</B>  ;stored as a REAL8 at the address specified by EDX</pre>
+
+<P>- when an intermediate result of a computation in ST(0) must be preserved without any loss of precision,
+
+<pre><B>fstp temp_var</B>  ;temp_var having been declared as a TBYTE</pre>
+
+<P>- when the reuse of a data register could be beneficial while liberating the TOP register,
+
+<pre><B>fstp st(4)</B>   ;after the instruction is completed, the former value of ST(4)
+             ;would be overwritten by the former value of ST(0), and
+             ;would become ST(3) after popping ST(0)</pre>
+
+<P>- when the value in ST(0) has become useless and the register needs to be liberated.
+
+<pre><B>fstp st</B>     ;copied upon itself and popped</pre>
+
+
+<P><BR><A NAME="fxch"></A><FONT SIZE="+1"><B>FXCH</B></FONT> (Exchange the top data register with another data register)
+
+<pre>Syntax:    <B>fxch <EM>Dest</EM></B>
+           <B>fxch</B> (no operand, ST(1) being implied)
+
+Exception flags: Stack Fault, Invalid operation</pre>
+
+This instruction exchanges the content of the TOP data register ST(0) with the content of one of the other data registers (<EM>Dest</EM>). <FONT SIZE="-1"><EM>(Memory operands are not allowed with this instruction.)</EM></FONT>
+
+<P>If either ST(0) or the destination register is empty, both a <B>S</B>tack <B>F</B>ault and an <B>I</B>nvalid operation exceptions are detected, setting both flags in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The value of <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> will have been assumed in the empty register and then exchanged with the value of the other register. The <A HREF="fpuchap1.htm#tword">Tag Word</A> will be adjusted to reflect any change in the status of the two registers involved.
+
+<P>With many FPU instructions, the data in ST(0) must be one of the operands or even the only operand. FXCH is useful when some operation on data other than in the ST(0) register may be required during a computation. For example, if the square root of the value in ST(3) should be needed before proceeding with a computation, the following code could be used:
+
+<pre><B>fxch st(3)</B>   ;get the value of ST(3) into the TOP register
+             ;the value of ST(0) being kept in ST(3)
+<B>fsqrt</B>        ;extract its square root
+<B>fxch st(3)</B>   ;return it to its relative position and
+             ;bring back the former value of ST(0) to its original position</pre>
+
+
+<P><BR><A NAME="fcmov"><FONT SIZE="+1"><B>FCMOVcc</B></FONT></A> (Conditional move based on CPU flags)
+
+<pre>Syntax:    <B>fcmov<I>cc st,st(i)</I></B>
+
+Exception flags: Stack Fault, Invalid operation</pre>
+
+<BLOCKQUOTE><B>Note:</B> This instruction is valid only for the Pentium Pro and subsequent processors. It may not be supported by some assemblers (for MASM, the .686 directive must be used). The encodings are provided to facilitate hard-coding of this instruction if it is not supported by the assembler.</BLOCKQUOTE>
+
+This instruction overwrites the content of the TOP data register ST(0) with the content of the specified ST(i) data register if the specified condition is true. Following is the list of the conditions supported with the instruction, with the encodings and descriptions.
+
+<pre><B>Encoding      Instruction       Description</B>
+ DA C0+i   FCMOVB   ST,ST(i)    Move if below (CF=1)
+ DA C8+i   FCMOVE   ST,ST(i)    Move if equal (ZF=1)
+ DA D0+i   FCMOVBE  ST,ST(i)    Move if below or equal (CF=1 or ZF=1)
+ DA D8+i   FCMOVU   ST,ST(i)    Move if unordered (PF=1)
+ DB C0+i   FCMOVNB  ST,ST(i)    Move if not below (CF=0)
+ DB C8+i   FCMOVNE  ST,ST(i)    Move if not equal (ZF=0)
+ DB D0+i   FCMOVNBE ST,ST(i)    Move if not below or equal (CF=0 and ZF=0)
+ DB D8+i   FCMOVNU  ST,ST(i)    Move if not unordered (PF=0)</pre>
+
+If the ST(i) data register is empty, both a <B>S</B>tack <B>F</B>ault and an <B>I</B>nvalid operation exceptions are detected, setting both flags in the <A HREF="fpuchap1.htm#sword">Status Word</A>. The value of <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> will have been assumed in the empty register and overwrite the content of the TOP data register ST(0).
+
+<P>Extreme caution must be used with this instruction depending on how the CPU flags have been modified. For example, when PF=1 due to an FPU instruction generating an invalid operation exception, the CF and ZF flags are also usually set to 1. If the instruction is used after the CPU flags are modified by a regular CPU instruction, the PF flag may not have any significant meaning.
+
+
+<P><BR><A NAME="fldz"><FONT SIZE="+1"><B>FLDZ</B></FONT></A> (Load the value of Zero)
+
+<pre>Syntax:    <B>fldz</B>  (no operand)
+
+Exception flags: Stack Fault, Invalid operation</pre>
+
+This instruction decrements the <B>TOP</B> register pointer in the <A HREF="fpuchap1.htm#sword">Status Word</A> and loads the value of +0.0 into the new TOP data register.
+
+<P>If the ST(7) data register which would become the new ST(0) is not empty, both a <B>S</B>tack <B>F</B>ault <U>and</U> an <B>I</B>nvalid operation exceptions are detected, setting both flags in the Status Word. The TOP register pointer in the Status Word would still be decremented and the new value in ST(0) would be the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> NAN.
+
+<P>A typical use of this instruction would be to "initialize" a data register intended to be used as an accumulator. Even though a value of zero could also be easily loaded from memory, this instruction is faster and does not need the use of memory.
+
+
+<P><BR><A NAME="fld1"></A><FONT SIZE="+1"><B>FLD1</B></FONT> (Load the value of 1)
+
+<pre>Syntax:    <B>fld1</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation</pre>
+
+This instruction decrements the <B>TOP</B> register pointer in the <A HREF="fpuchap1.htm#sword">Status Word</A> and loads the value of +1.0 in <A HREF="fpuchap2.htm#real10">REAL10</A> format into the new TOP data register.
+
+<P>If the ST(7) data register which would become the new ST(0) is not empty, both a <B>S</B>tack <B>F</B>ault <U>and</U> an <B>I</B>nvalid operation exceptions are detected, setting both flags in the Status Word. The TOP register pointer in the Status Word would still be decremented and the new value in ST(0) would be the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> NAN.
+
+<P>A value of 1 may be required in some computations. One example would be when the reciprocal of a number is needed. Even though a value of 1 could also be easily loaded from memory, this instruction is faster and does not need the use of memory.
+
+
+<P><BR><A NAME="fldpi"><FONT SIZE="+1"><B>FLDPI</B></FONT></A> (Load the value of PI)
+
+<pre>Syntax:    <B>fldpi</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation</pre>
+
+This instruction decrements the <B>TOP</B> register pointer in the <A HREF="fpuchap1.htm#sword">Status Word</A> and loads the value of <B>&pi;</B> (3.14159...) in <A HREF="fpuchap2.htm#real10">REAL10</A> format with a precision equivalent to approximately 19 decimal digits into the new TOP data register.
+
+<P>If the ST(7) data register which would become the new ST(0) is not empty, both a <B>S</B>tack <B>F</B>ault <U>and</U> an <B>I</B>nvalid operation exceptions are detected, setting both flags in the Status Word. The TOP register pointer in the Status Word would still be decremented and the new value in ST(0) would be the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> NAN.
+
+<P>The value of <B>&pi;</B> is often required for computations related to the circle, sphere, trigonometry, converting angles to/from degrees/radians, and numerous other applications.
+
+
+<P><BR><A NAME="fldl2e"><FONT SIZE="+1"><B>FLDL2E</B></FONT></A> (Load the Log base 2 of the Napierian constant <EM>e</EM>)</P>
+
+<pre>Syntax:    <B>fldl2e</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation</pre>
+
+This instruction decrements the <B>TOP</B> register pointer in the <A HREF="fpuchap1.htm#sword">Status Word</A> and loads the value of log<SUB><FONT SIZE="-1">2</FONT></SUB>(<EM>e</EM>) in <A HREF="fpuchap2.htm#real10">REAL10</A> format with a precision equivalent to approximately 19 decimal digits into the new TOP data register.
+
+<P>If the ST(7) data register which would become the new ST(0) is not empty, both a <B>S</B>tack <B>F</B>ault <U>and</U> an <B>I</B>nvalid operation exceptions are detected, setting both flags in the Status Word. The TOP register pointer in the Status Word would still be decremented and the new value in ST(0) would be the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> NAN.
+
+<P>This constant is most useful when an exponential of <EM>e</EM> must be computed, such as for the hyperbolic functions. From logarithmic relations:
+
+<pre>    <B>log<SUB>2</SUB>(<EM>e</EM><SUP>y</SUP>) = ylog<SUB>2</SUB>(<EM>e</EM>)</B></pre>
+
+<P>The antilog base 2 of the ylog<SUB><FONT SIZE="-1">2</FONT></SUB>(<EM>e</EM>) result can then be computed using other FPU instructions (including <A HREF="fpuchap11.htm#f2xm1">F2XM1</A>) to arrive at the <EM>e</EM><SUP>y</SUP> value.
+
+
+<P><BR><A NAME="fldl2t"><FONT SIZE="+1"><B>FLDL2T</B></FONT></A> (Load the Log base 2 of 10)
+
+<pre>Syntax:    <B>fldl2t</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation</pre>
+
+This instruction decrements the <B>TOP</B> register pointer in the <A HREF="fpuchap1.htm#sword">Status Word</A> and loads the value of log<SUB><FONT SIZE="-1">2</FONT></SUB>(10) in <A HREF="fpuchap2.htm#real10">REAL10</A> format with a precision equivalent to approximately 19 decimal digits into the new TOP data register.
+
+<P>If the ST(7) data register which would become the new ST(0) is not empty, both a <B>S</B>tack <B>F</B>ault <U>and</U> an <B>I</B>nvalid operation exceptions are detected, setting both flags in the Status Word. The TOP register pointer in the Status Word would still be decremented and the new value in ST(0) would be the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> NAN.
+
+<P>This constant is most useful when an exponential of 10 (such as the common antilog) must be computed. From logarithmic relations:
+
+<pre>    <B>log<SUB>2</SUB>(10<SUP>y</SUP>) = ylog<SUB>2</SUB>(10)</B></pre>
+
+<P>The antilog base 2 of the ylog<SUB><FONT SIZE="-1">2</FONT></SUB>(10) result can then be computed using other FPU instructions (including <A HREF="fpuchap11.htm#f2xm1">F2XM1</A>) to arrive at the 10<SUP>y</SUP> value.
+
+
+<P><BR><A NAME="fldlg2"><FONT SIZE="+1"><B>FLDLG2</B></FONT></A> (Load the log base 10 of 2)
+
+<pre>Syntax:    <B>fldlg2</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation</pre>
+
+This instruction decrements the <B>TOP</B> register pointer in the <A HREF="fpuchap1.htm#sword">Status Word</A> and loads the value of log<SUB><FONT SIZE="-1">10</FONT></SUB>(2) in <A HREF="fpuchap2.htm#real10">REAL10</A> format with a precision equivalent to approximately 19 decimal digits into the new TOP data register.
+
+<P>If the ST(7) data register which would become the new ST(0) is not empty, both a <B>S</B>tack <B>F</B>ault <U>and</U> an <B>I</B>nvalid operation exceptions are detected, setting both flags in the Status Word. The TOP register pointer in the Status Word would still be decremented and the new value in ST(0) would be the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> NAN.
+
+<P>Although this constant is the reciprocal of the log<SUB><FONT SIZE="-1">2</FONT></SUB>(10) constant obtained with the <A HREF="#fldl2t">FLDL2T</A> instruction, it is preferred for computing the common log (base 10) of numbers because it would involve a multiplication instead of a division according to the following logarithmic relations:
+
+<pre><B>log<SUB>10</SUB>(x) = log<SUB>10</SUB>(2)&middot;log<SUB>2</SUB>(x)</B></pre>
+
+<P><EM>A log<SUB><FONT SIZE="-1">2</FONT></SUB>(x) value can be obtained with the <A HREF="fpuchap11.htm#fyl2x">FYL2X</A> or <A HREF="fpuchap11.htm#fyl2xp1">FYL2XP1</A> instructions.</EM>
+
+<P>Computing the common log of a number may have many uses. One of them is to get information on the relative size of a real number before proceeding to convert it and display it in decimal format, whether it be in regular or scientific notation.
+
+
+<P><BR><A NAME="fldln2"><FONT SIZE="+1"><B>FLDLN2</B></FONT></A> (Load the log base <EM>e</EM> of 2)
+
+<pre>Syntax:    <B>fldln2</B> (no operand)
+
+Exception flags: Stack Fault, Invalid operation</pre>
+
+This instruction decrements the <B>TOP</B> register pointer in the <A HREF="fpuchap1.htm#sword">Status Word</A> and loads the value of ln(2) in <A HREF="fpuchap2.htm#real10">REAL10</A> format with a precision equivalent to approximately 19 decimal digits into the new TOP data register.
+
+<P>If the ST(7) data register which would become the new ST(0) is not empty, both a <B>S</B>tack <B>F</B>ault <U>and</U> an <B>I</B>nvalid operation exceptions are detected, setting both flags in the Status Word. The TOP register pointer in the Status Word would still be decremented and the new value in ST(0) would be the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> NAN.
+
+<P>Although this constant is the reciprocal of the log<SUB><FONT SIZE="-1">2</FONT></SUB>(<EM>e</EM>) constant obtained with the <A HREF="#fldl2e">FLDL2E</A> instruction, it is preferred for computing the natural log (base <EM>e</EM>) of numbers because it would involve a multiplication instead of a division according to the following logarithmic relations:
+
+<pre><B>ln(x) = ln(2)&middot;log<SUB>2</SUB>(x)</B></pre>
+
+<P><EM>A log<SUB><FONT SIZE="-1">2</FONT></SUB>(x) value can be obtained with the <A HREF="fpuchap11.htm#fyl2x">FYL2X</A> or <A HREF="fpuchap11.htm#fyl2xp1">FYL2XP1</A> instructions.</EM>
+
+<P>The natural log of a number is often used in some scientific computations. For example, it is necessary for computing the hyperbolic arc functions.
+
+<P><BR><CENTER><A HREF="index.html"><B>RETURN TO<B>
+<BR><FONT SIZE="+2">SIMPLY  FPU</FONT>
+<BR><B>CONTENTS<B></A></CENTER><BR>
+
+</BODY>
+</HTML>

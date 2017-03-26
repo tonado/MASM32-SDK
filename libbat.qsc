@@ -1,0 +1,36 @@
+; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+; This script builds a batch file named "makelib.bat" that builds the
+; library of the name you choose from the ASM files in the current directory.
+; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+
+  yesno Is the current directory where you wish to build your library ?**Create Library Batch File
+  jmp nxt
+  exit
+nxt:  
+
+  input Enter your library name with NO extension**default
+
+  fcreate makelib.bat
+    fprint {comment} ------------------------------------------------------------
+    fprint : This batch file creates a response file for both ML and LINK
+    fprint {comment} ------------------------------------------------------------
+    fprint @echo off
+    fprint cls
+    fprint echo.
+    fprint echo    ** Assembling {str0}.lib library modules.
+    fprint echo.
+    fprint dir /b *.asm > _tmp.rsp
+    fprint \masm32\bin\ml /c /coff @_tmp.rsp
+    fprint echo.
+    fprint echo    ** Linking {str0}.lib
+    fprint echo.
+    fprint dir /b *.obj > _lnk.rsp
+    fprint \masm32\bin\link -lib @_lnk.rsp "/out:default.lib" 
+    fprint dir *.lib
+    fprint del *.obj
+    fprint del _tmp.rsp
+    fprint del _lnk.rsp
+    fprint pause
+  fclose
+
+  msgbox Run MAKELIB.BAT to build the {str0}.lib**Batch file written to disk

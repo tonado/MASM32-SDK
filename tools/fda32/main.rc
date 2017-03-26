@@ -1,0 +1,48 @@
+// いいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいい
+
+#include "\masm32\INCLUDE\Resource.h"
+
+#define mainrc
+
+// いいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいい
+
+1 24 "fda32.xml"    // manifest file
+
+500 ICON MOVEABLE PURE LOADONCALL DISCARDABLE "fda32.ico"
+700 BITMAP MOVEABLE PURE LOADONCALL DISCARDABLE "toolbar.bmp"
+800 BITMAP MOVEABLE PURE LOADONCALL DISCARDABLE "bluegrad.bmp"
+
+// いいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいい
+
+#include "rsrc.rc"
+
+// いいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいい
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION 1, 0, 0, 0
+PRODUCTVERSION 1, 0, 0, 0
+FILEOS VOS__WINDOWS32
+FILETYPE VFT_APP
+// FILETYPE VFT_DLL
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904B0"
+    BEGIN
+      VALUE "CompanyName",      "Steve Hutchesson\000"
+      VALUE "FileDescription",  "MASM32 Data Assembler\000"
+      VALUE "FileVersion",      "1.0\000"
+      VALUE "InternalName",     "fda32\000"
+      VALUE "OriginalFilename", "fda32.exe\000"
+      VALUE "LegalCopyright",   "\251 2010 The MASM32 SDK\000"
+      VALUE "ProductName",      "fda32\000"
+      VALUE "ProductVersion",   "1.0\000"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 0x4B0
+  END
+END
+
+// いいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいい

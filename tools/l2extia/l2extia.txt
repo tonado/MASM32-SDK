@@ -1,0 +1,22 @@
+L2EXTIA.EXE
+
+This is an alternative method of creating include files that can be used
+with MASM32. It produces include files in the EXTERNDEF format for system
+DLL imports. This method allows direct calls to imported functions rather
+that the lookup table that is the native format for MASM 32 bit EXE files.
+
+L2EXTIA.EXE will only work on library files that have "decorated names". It
+will not work on C functions, COM or any other variation of library file.
+
+The include files depend on a macro that has been placed in the WINDOWS.INC
+file to expand parameters so the WINDOWS.INC file must be placed before any
+include file that is created this way.
+
+The format has been tested and it works correctly but it may not be
+compatible with the source code or libraries in MAMS32. The utility has
+been provided for programmers who wish to write code using this technique.
+MASM32 assumes the standard format and is written in this manner.
+
+The file "argcount.asm" contains the macro that is used by the include file
+created with L2EXTIA.EXE in the event that the include files are used with
+a version of WINDOWS.INC that does not have the macro.

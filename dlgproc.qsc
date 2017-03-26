@@ -1,0 +1,126 @@
+
+yesno Please ensure that the editor is empty first**Insert code at this location ?
+jump nextlabel
+exit
+nextlabel:
+
+input Please enter the name for the dialog's message handling procedure; result is in str0
+
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {lf}
+text       .486                      {comment} create 32 bit code{lf}
+text       .model flat, stdcall      {comment} 32 bit memory model{lf}
+text       option casemap :none      {comment} case sensitive{lf}
+text {lf}
+text {comment}     include files{lf}
+text {comment}     ~~~~~~~~~~~~~{lf}
+text       include \masm32\include\windows.inc{lf}
+text       include \masm32\include\masm32.inc{lf}
+text       include \masm32\include\gdi32.inc{lf}
+text       include \masm32\include\user32.inc{lf}
+text       include \masm32\include\kernel32.inc{lf}
+text       include \masm32\include\Comctl32.inc{lf}
+text       include \masm32\include\comdlg32.inc{lf}
+text       include \masm32\include\shell32.inc{lf}
+text       include \masm32\include\oleaut32.inc{lf}
+text       include \masm32\include\msvcrt.inc{lf}
+text       include \masm32\include\dialogs.inc{lf}
+text       include \masm32\macros\macros.asm{lf}
+text {lf}
+text {comment}     libraries{lf}
+text {comment}     ~~~~~~~~~{lf}
+text       includelib \masm32\lib\masm32.lib{lf}
+text       includelib \masm32\lib\gdi32.lib{lf}
+text       includelib \masm32\lib\user32.lib{lf}
+text       includelib \masm32\lib\kernel32.lib{lf}
+text       includelib \masm32\lib\Comctl32.lib{lf}
+text       includelib \masm32\lib\comdlg32.lib{lf}
+text       includelib \masm32\lib\shell32.lib{lf}
+text       includelib \masm32\lib\oleaut32.lib{lf}
+text       includelib \masm32\lib\msvcrt.lib{lf}
+text {lf}
+text {lf}
+text       [dlgproc] PROTO :DWORD,:DWORD,:DWORD,:DWORD
+
+selectline
+replace [dlgproc]**{str0}
+
+text {lf}{lf}
+text     .data?{lf}
+text         hInstance dd ?{lf}
+text {lf}
+text     .code{lf}
+text {lf}
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {lf}
+text start:{lf}
+text {lf}
+text       mov hInstance, FUNC(GetModuleHandle,NULL){lf}
+text {lf}
+text       call main{lf}
+text {lf}
+text       invoke ExitProcess,eax{lf}
+text {lf}
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {lf}
+text main proc{lf}
+text {lf}
+text     Dialog "Bare Bones Dialog", \           {comment} caption{lf}
+text            "MS Sans Serif",10, \            {comment} font,pointsize{lf}
+text             WS_OVERLAPPED or \              {comment} styles for{lf}
+text             WS_SYSMENU or DS_CENTER, \      {comment} dialog window{lf}
+text             2, \                            {comment} number of controls{lf}
+text             50,50,150,80, \                 {comment} x y co-ordinates{lf}
+text             1024                            {comment} memory buffer size{lf}
+text {lf}
+text     DlgButton "Cancel",WS_TABSTOP,48,40,50,15,IDCANCEL{lf}
+text     DlgStatic "Bare Bones Dialog Written In MASM32", \{lf}
+text               SS_CENTER,2,20,140,9,100{lf}
+text {lf}
+text     CallModalDialog hInstance,0,[dlgproc],NULL
+
+selectline
+replace [dlgproc]**{str0}
+
+text {lf}{lf}
+text     ret{lf}
+text {lf}
+text main endp{lf}
+text {lf}
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {lf}
+text [dlgproc] proc hWin:DWORD,uMsg:DWORD,wParam:DWORD,lParam:DWORD
+
+selectline
+replace [dlgproc]**{str0}
+
+text {lf}{lf}
+text {lf}
+text     .if uMsg == WM_INITDIALOG{lf}
+text       invoke SendMessage,hWin,WM_SETICON,1,{lf}
+text                          FUNC(LoadIcon,NULL,IDI_ASTERISK){lf}
+text {lf}
+text     .elseif uMsg == WM_COMMAND{lf}
+text       .if wParam == IDCANCEL{lf}
+text         jmp quit_dialog{lf}
+text       .endif{lf}
+text {lf}
+text     .elseif uMsg == WM_CLOSE{lf}
+text       quit_dialog:{lf}
+text       invoke EndDialog,hWin,0{lf}
+text {lf}
+text     .endif{lf}
+text {lf}
+text     xor eax, eax{lf}
+text     ret{lf}
+text {lf}
+text [dlgproc] endp
+
+selectline
+replace [dlgproc]**{str0}
+
+text {lf}{lf}
+text {comment} ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл{lf}
+text {lf}
+text end start{lf}
+starttext

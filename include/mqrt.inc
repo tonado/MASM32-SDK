@@ -1,0 +1,55 @@
+; --------------------------------------------------------------------------------------------------
+;                            mqrt.inc Copyright The MASM32 SDK 1998-2010
+; --------------------------------------------------------------------------------------------------
+
+IFNDEF MQRT_INC
+MQRT_INC equ <1>
+
+MQADsPathToFormatName PROTO STDCALL :DWORD,:DWORD,:DWORD
+MQAllocateMemory PROTO STDCALL :DWORD
+MQBeginTransaction PROTO STDCALL :DWORD
+MQCloseCursor PROTO STDCALL :DWORD
+MQCloseQueue PROTO STDCALL :DWORD
+MQCreateCursor PROTO STDCALL :DWORD,:DWORD
+MQCreateQueue PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+MQDeleteQueue PROTO STDCALL :DWORD
+MQFreeMemory PROTO STDCALL :DWORD
+MQFreeSecurityContext PROTO STDCALL :DWORD
+MQGetMachineProperties PROTO STDCALL :DWORD,:DWORD,:DWORD
+MQGetOverlappedResult PROTO STDCALL :DWORD
+MQGetPrivateComputerInformation PROTO STDCALL :DWORD,:DWORD
+MQGetQueueProperties PROTO STDCALL :DWORD,:DWORD
+MQGetQueueSecurity PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+MQGetSecurityContext PROTO STDCALL :DWORD,:DWORD,:DWORD
+MQGetSecurityContextEx PROTO STDCALL :DWORD,:DWORD,:DWORD
+MQHandleToFormatName PROTO STDCALL :DWORD,:DWORD,:DWORD
+MQInstanceToFormatName PROTO STDCALL :DWORD,:DWORD,:DWORD
+MQLocateBegin PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+MQLocateEnd PROTO STDCALL :DWORD
+MQLocateNext PROTO STDCALL :DWORD,:DWORD,:DWORD
+MQMgmtAction PROTO STDCALL :DWORD,:DWORD,:DWORD
+MQMgmtGetInfo PROTO STDCALL :DWORD,:DWORD,:DWORD
+MQOpenQueue PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD
+MQPathNameToFormatName PROTO STDCALL :DWORD,:DWORD,:DWORD
+MQPurgeQueue PROTO STDCALL :DWORD
+MQReceiveMessage PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+MQReceiveMessageByLookupId PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+MQRegisterCertificate PROTO STDCALL :DWORD,:DWORD,:DWORD
+MQSendMessage PROTO STDCALL :DWORD,:DWORD,:DWORD
+MQSetQueueProperties PROTO STDCALL :DWORD,:DWORD
+MQSetQueueSecurity PROTO STDCALL :DWORD,:DWORD,:DWORD
+RTCreateInternalCertificate PROTO STDCALL :DWORD
+RTDeleteInternalCert PROTO STDCALL :DWORD
+RTGetInternalCert PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+RTGetUserCerts PROTO STDCALL :DWORD,:DWORD,:DWORD
+RTIsDependentClient PROTO STDCALL
+RTOpenInternalCertStore PROTO STDCALL :DWORD,:DWORD,:DWORD,:DWORD,:DWORD
+RTRegisterUserCert PROTO STDCALL :DWORD,:DWORD
+RTRemoveUserCert PROTO STDCALL :DWORD
+RTXactGetDTC PROTO STDCALL :DWORD
+
+ELSE
+  echo ---------------------------------------
+  echo WARNING duplicate include file mqrt.inc
+  echo ---------------------------------------
+ENDIF

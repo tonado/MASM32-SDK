@@ -1,0 +1,387 @@
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+    INTEGER hFile
+    INTEGER rv
+    INTEGER void
+    STRING filename$
+    STRING projname$
+    STRING projpath$
+    STRING apptitle$
+    STRING QEpath$
+    STRING currentdir$
+
+  ; ---------------------
+  ; set the target folder
+  ; ---------------------
+    projpath$ = getfolder "Set your target folder" "Create your dialog template here"
+    if$ projpath$ = ""
+    end
+    chdir projpath$                     ; change to your target directory
+
+  ; --------------------
+  ; set the project name
+  ; --------------------
+    gettext "Type the project name with NO extension" "Do NOT use spaces in the name" "project"
+    if$ $0 = ""
+    end
+    projname$ = $0                      ; assign the gettext return string to a named variable string
+    filename$ = cat$ projname$ ".asm"   ; append the ASM extension to it
+
+  ; --------------------
+  ; set the window title
+  ; --------------------
+    gettext "Type the Application title" "This is the text for the title bar" "Windows Application"
+    if$ $0 = ""
+    end
+    apptitle$ = $0                      ; assign the gettext return string to a named variable string
+
+  ; ************************
+  ; create the main ASM file
+  ; ************************
+    hFile = fcreate filename$
+
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile ";                                Build this dialog with MAKEIT.BAT"
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile ""
+    rv = fprint hFile "    ; __UNICODE__ equ 1    ; uncomment to build as UNICODE"
+    rv = fprint hFile ""
+    rv = fprint hFile "    include \masm32\include\masm32rt.inc"
+    rv = fprint hFile "    .686p"
+    rv = fprint hFile "    .MMX"
+    rv = fprint hFile "    .XMM"
+    rv = fprint hFile ""
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile ""
+    rv = fprint hFile "    include " projname$ ".inc"
+    rv = fprint hFile ""
+    rv = fprint hFile "  ; --------------------"
+    rv = fprint hFile "  ; GLOBAL scope handles"
+    rv = fprint hFile "  ; --------------------"
+    rv = fprint hFile "    .data?"
+    rv = fprint hFile "      hInstance  dd ?"
+    rv = fprint hFile "      hWnd       dd ?"
+    rv = fprint hFile "      hGroup     dd ?"
+    rv = fprint hFile "      hButn1     dd ?"
+    rv = fprint hFile "      hButn2     dd ?"
+    rv = fprint hFile ""
+    rv = fprint hFile "    .code"
+    rv = fprint hFile ""
+    rv = fprint hFile "start:"
+    rv = fprint hFile "    mov hInstance, FUNC(GetModuleHandle, NULL)"
+    rv = fprint hFile ""
+    rv = fprint hFile "  ; -------------------------------------------"
+    rv = fprint hFile "  ; Call the dialog box from the resource file"
+    rv = fprint hFile "  ; -------------------------------------------"
+    rv = fprint hFile "    invoke DialogBoxParam,hInstance,100,0,ADDR DlgProc,0"
+    rv = fprint hFile ""
+    rv = fprint hFile "    invoke ExitProcess,eax"
+    rv = fprint hFile ""
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile ""
+    rv = fprint hFile "DlgProc proc hWin:DWORD,uMsg:DWORD,wParam:DWORD,lParam:DWORD"
+    rv = fprint hFile ""
+    rv = fprint hFile "    LOCAL icce:INITCOMMONCONTROLSEX"
+    rv = fprint hFile ""
+    rv = fprintc hFile "    STRING dlgTitle, \q " apptitle$ "\q\r\n"
+    rv = fprint hFile ""
+    rv = fprint hFile "      switch uMsg"
+    rv = fprint hFile "        case WM_INITDIALOG"
+    rv = fprint hFile "          m2m hWnd, hWin    ; Copy hWin to GLOBAL variable"
+    rv = fprint hFile "          invoke SendMessage,hWin,WM_SETTEXT,0,ADDR dlgTitle"
+    rv = fprint hFile "          invoke SendMessage,hWin,WM_SETICON,1,FUNC(LoadIcon,hInstance,500)"
+    rv = fprint hFile ""
+    rv = fprint hFile  "          mov icce.dwSize, SIZEOF INITCOMMONCONTROLSEX            ; set the structure size"
+    rv = fprint hFile  "          xor eax, eax                                            ; set EAX to zero"
+    rv = fprint hFile  "          or eax, ICC_WIN95_CLASSES"
+    rv = fprint hFile " ;           or eax, ICC_ANIMATE_CLASS                               ; OR as many styles as you need to it"
+    rv = fprint hFile " ;           or eax, ICC_COOL_CLASSES"
+    rv = fprint hFile " ;           or eax, ICC_DATE_CLASSES"
+    rv = fprint hFile " ;           or eax, ICC_HOTKEY_CLASS"
+    rv = fprint hFile " ;           or eax, ICC_INTERNET_CLASSES"
+    rv = fprint hFile " ;           or eax, ICC_LISTVIEW_CLASSES"
+    rv = fprint hFile " ;           or eax, ICC_PAGESCROLLER_CLASS"
+    rv = fprint hFile " ;           or eax, ICC_PROGRESS_CLASS"
+    rv = fprint hFile " ;           or eax, ICC_TAB_CLASSES"
+    rv = fprint hFile " ;           or eax, ICC_TREEVIEW_CLASSES"
+    rv = fprint hFile " ;           or eax, ICC_UPDOWN_CLASS"
+    rv = fprint hFile " ;           or eax, ICC_USEREX_CLASSES"
+    rv = fprint hFile ""
+    rv = fprint hFile "  ; --------------------------------------------"
+    rv = fprint hFile "  ; NOTE : It is marginally more efficient to OR"
+    rv = fprint hFile "  ; required styles together at assembly time."
+    rv = fprint hFile "  ; --------------------------------------------"
+    rv = fprint hFile ""
+    rv = fprint hFile  "          mov icce.dwICC, eax"
+    rv = fprint hFile  "          invoke InitCommonControlsEx,ADDR icce                   ; initialise the common control library"
+    rv = fprint hFile ""
+    rv = fprint hFile "        ; --------------------------------"
+    rv = fprint hFile "        ; Get the handle for each control"
+    rv = fprint hFile "        ; --------------------------------"
+    rv = fprint hFile "          mov hGroup, rv(GetDlgItem,hWin,101)"
+    rv = fprint hFile "          mov hButn1, rv(GetDlgItem,hWin,102)"
+    rv = fprint hFile "          mov hButn2, rv(GetDlgItem,hWin,103)"
+    rv = fprint hFile ""
+    rv = fprint hFile "          xor eax, eax"
+    rv = fprint hFile "          ret"
+    rv = fprint hFile ""
+    rv = fprint hFile "      case WM_COMMAND"
+    rv = fprint hFile "        switch wParam"
+    rv = fprint hFile "          case 102"
+    rv = fprintc hFile "            fn MsgboxI,hWnd,\qOK Button    \q,\qHowdy\q,MB_OK,500\r\n"
+    rv = fprint hFile "          case 103"
+    rv = fprint hFile "            jmp exit_dialog"
+    rv = fprint hFile "        endsw"
+    rv = fprint hFile ""
+    rv = fprint hFile "      case WM_CLOSE"
+    rv = fprint hFile "        exit_dialog:                ; jump to this label to close program"
+    rv = fprint hFile "        invoke EndDialog,hWin,0"
+    rv = fprint hFile ""
+    rv = fprint hFile "      endsw"
+    rv = fprint hFile ""
+    rv = fprint hFile "    xor eax, eax    ; this must be here in NT4 and later"
+    rv = fprint hFile "    ret"
+    rv = fprint hFile ""
+    rv = fprint hFile "DlgProc endp"
+    rv = fprint hFile ""
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile ""
+    rv = fprint hFile "MsgboxI proc hParent:DWORD,pText:DWORD,pTitle:DWORD,mbStyle:DWORD,IconID:DWORD"
+    rv = fprint hFile ""
+    rv = fprint hFile "    LOCAL mbp   :MSGBOXPARAMS"
+    rv = fprint hFile ""
+    rv = fprint hFile "    or mbStyle, MB_USERICON"
+    rv = fprint hFile ""
+    rv = fprint hFile "    mov mbp.cbSize,             SIZEOF mbp"
+    rv = fprint hFile "    m2m mbp.hwndOwner,          hParent"
+    rv = fprint hFile "    mov mbp.hInstance,          rv(GetModuleHandle,0)"
+    rv = fprint hFile "    m2m mbp.lpszText,           pText"
+    rv = fprint hFile "    m2m mbp.lpszCaption,        pTitle"
+    rv = fprint hFile "    m2m mbp.dwStyle,            mbStyle"
+    rv = fprint hFile "    m2m mbp.lpszIcon,           IconID"
+    rv = fprint hFile "    mov mbp.dwContextHelpId,    NULL"
+    rv = fprint hFile "    mov mbp.lpfnMsgBoxCallback, NULL"
+    rv = fprint hFile "    mov mbp.dwLanguageId,       NULL"
+    rv = fprint hFile ""
+    rv = fprint hFile "    invoke MessageBoxIndirect,ADDR mbp"
+    rv = fprint hFile ""
+    rv = fprint hFile "    ret"
+    rv = fprint hFile ""
+    rv = fprint hFile "MsgboxI endp"
+    rv = fprint hFile ""
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile ""
+    rv = fprint hFile "end start"
+    rv = fprint hFile ""
+
+    rv = fclose hFile
+
+  ; ****************************
+  ; create the XML manifest file
+  ; ****************************
+    hFile = fcreate "manifest.xml"
+
+    rv = fprintc hFile "<?xml version=\q1.0\q encoding=\qUTF-8\q standalone=\qyes\q?>\r\n"
+    rv = fprintc hFile "<assembly xmlns=\qurn:schemas-microsoft-com:asm.v1\q manifestVersion=\q1.0\q>\r\n"
+    rv = fprint hFile "<description>Dialog Application</description>"
+    rv = fprint hFile "<dependency>"
+    rv = fprint hFile "<dependentAssembly>"
+    rv = fprint hFile "<assemblyIdentity"
+    rv = fprintc hFile "type=\qwin32\q\r\n"
+    rv = fprintc hFile "name=\qMicrosoft.Windows.Common-Controls\q\r\n"
+    rv = fprintc hFile "version=\q6.0.0.0\q\r\n"
+    rv = fprintc hFile "processorArchitecture=\qX86\q\r\n"
+    rv = fprintc hFile "publicKeyToken=\q6595b64144ccf1df\q\r\n"
+    rv = fprintc hFile "language=\q*\q\r\n"
+    rv = fprint hFile "/>"
+    rv = fprint hFile "</dependentAssembly>"
+    rv = fprint hFile "</dependency>"
+    rv = fprint hFile "</assembly>"
+
+    rv = fclose hFile
+
+  ; *************************
+  ; create the RC script file
+  ; *************************
+    hFile = fcreate "rsrc.rc"
+
+    rv = fprint hFile "// «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««"
+    rv = fprint hFile ""
+    rv = fprintc hFile "#include \q\\masm32\\INCLUDE\\resource.h\q\r\n"
+    rv = fprint hFile ""
+    rv = fprint hFile "#define MANIFEST 24"
+    rv = fprint hFile ""
+    rv = fprint hFile "// «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««"
+    rv = fprint hFile ""
+    rv = fprintc hFile "1 MANIFEST \qmanifest.xml\q\r\n"
+    rv = fprint hFile ""
+    rv = fprintc hFile "500 ICON \q" projname$ ".ico\q\r\n"
+    rv = fprint hFile ""
+    rv = fprint hFile "// «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««"
+    rv = fprint hFile ""
+    rv = fprint hFile "#define LANG_NEUTRAL 0"
+    rv = fprint hFile "#define SUBLANG_NEUTRAL 0"
+    rv = fprint hFile ""
+    rv = fprint hFile "100 DIALOG 327, 117, 262, 134"
+    rv = fprint hFile "LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL"
+    rv = fprint hFile "STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | DS_CENTER"
+    rv = fprintc hFile "CAPTION \qDialog Title\q\r\n"
+    rv = fprintc hFile "FONT 8, \qMS Shell Dlg\q\r\n"
+    rv = fprint hFile "BEGIN"
+    rv = fprintc hFile "    CONTROL \q\q, 101, \qButton\q, BS_GROUPBOX, 171, 10, 79, 54\r\n"
+    rv = fprintc hFile "    CONTROL \qOK\q, 102, \qButton\q, WS_TABSTOP, 180, 22, 61, 14\r\n"
+    rv = fprintc hFile "    CONTROL \qCancel\q, 103, \qButton\q, WS_TABSTOP, 180, 40, 61, 14\r\n"
+    rv = fprint hFile "END"
+    rv = fprint hFile ""
+    rv = fprint hFile "// «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««"
+    rv = fprint hFile ""
+    rv = fprint hFile "VS_VERSION_INFO VERSIONINFO"
+    rv = fprint hFile "FILEVERSION 1, 0, 0, 0"
+    rv = fprint hFile "PRODUCTVERSION 1, 0, 0, 0"
+    rv = fprint hFile "FILEOS 0"
+    rv = fprint hFile "FILETYPE VFT_APP"
+    rv = fprint hFile "BEGIN"
+    rv = fprintc hFile "  BLOCK \qStringFileInfo\q\r\n"
+    rv = fprint hFile "  BEGIN"
+    rv = fprintc hFile "    BLOCK \q040904B0\q\r\n"
+    rv = fprint hFile "    BEGIN"
+    rv = fprintc hFile "      VALUE \qCompanyName\q,      \qYour Name or Company\\000\q\r\n"
+    rv = fprintc hFile "      VALUE \qFileDescription\q,  \qDescription of your app\\000\q\r\n"
+    rv = fprintc hFile "      VALUE \qFileVersion\q,      \q1.0\\000\q\r\n"
+    rv = fprintc hFile "      VALUE \qInternalName\q,     \qtool name\\000\q\r\n"
+    rv = fprintc hFile "      VALUE \qOriginalFilename\q, \q" projname$ ".exe\\000\q\r\n"
+    rv = fprintc hFile "      VALUE \qLegalCopyright\q,   \q\\251 2020 Your Name\\000\q\r\n"
+    rv = fprintc hFile "      VALUE \qProductName\q,      \qYour Product Name\\000\q\r\n"
+    rv = fprintc hFile "      VALUE \qProductVersion\q,   \q1.0\\000\q\r\n"
+    rv = fprint hFile "    END"
+    rv = fprint hFile "  END"
+    rv = fprintc hFile "  BLOCK \qVarFileInfo\q\r\n"
+    rv = fprint hFile "  BEGIN"
+    rv = fprintc hFile "    VALUE \qTranslation\q, 0x409, 0x4B0\r\n"
+    rv = fprint hFile "  END"
+    rv = fprint hFile "END  "
+    rv = fprint hFile ""
+    rv = fprint hFile "// «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««"
+    rv = fprint hFile ""
+
+    rv = fclose hFile
+
+  ; *********************
+  ; create the batch file
+  ; *********************
+    hFile = fcreate "makeit.bat"
+
+    rv = fprint hFile "@echo off"
+    rv = fprint hFile ": -------------------------------"
+    rv = fprint hFile ": if resources exist, build them"
+    rv = fprint hFile ": -------------------------------"
+    rv = fprint hFile "H:\masm32\BIN\rc.exe /v rsrc.rc"
+    rv = fprint hFile "H:\masm32\BIN\CVTRES.EXE /machine:ix86 rsrc.res"
+    rv = fprint hFile ""
+    rv = fprintc hFile "if exist %1.obj del \q" projname$ ".obj\q\r\n"
+    rv = fprintc hFile "if exist %1.exe del \q" projname$ ".exe\q\r\n"
+    rv = fprint hFile ""
+    rv = fprint hFile ": -----------------------------------------"
+    rv = fprint hFile ": assemble Project.asm into an OBJ file"
+    rv = fprint hFile ": -----------------------------------------"
+    rv = fprintc hFile "H:\\masm32\\BIN\\ml.exe /c /coff \q" projname$ ".asm\q\r\n"
+    rv = fprint hFile "if errorlevel 1 goto errasm"
+    rv = fprint hFile ""
+    rv = fprint hFile ": --------------------------------------------------"
+    rv = fprint hFile ": link the main OBJ file with the resource OBJ file"
+    rv = fprint hFile ": --------------------------------------------------"
+    rv = fprintc hFile "H:\\masm32\\BIN\\LINK.EXE /SUBSYSTEM:WINDOWS \q" projname$ ".obj\q rsrc.obj\r\n"
+    rv = fprint hFile "if errorlevel 1 goto errlink"
+    rv = fprintc hFile "dir \q" projname$ ".*\q\r\n"
+    rv = fprint hFile "goto TheEnd"
+    rv = fprint hFile ""
+    rv = fprint hFile ":errlink"
+    rv = fprint hFile ": ----------------------------------------------------"
+    rv = fprint hFile ": display message if there is an error during linking"
+    rv = fprint hFile ": ----------------------------------------------------"
+    rv = fprint hFile "echo."
+    rv = fprint hFile "echo There has been an error while linking this project."
+    rv = fprint hFile "echo."
+    rv = fprint hFile "goto TheEnd"
+    rv = fprint hFile ""
+    rv = fprint hFile ":errasm"
+    rv = fprint hFile ": -----------------------------------------------------"
+    rv = fprint hFile ": display message if there is an error during assembly"
+    rv = fprint hFile ": -----------------------------------------------------"
+    rv = fprint hFile "echo."
+    rv = fprint hFile "echo There has been an error while assembling this project."
+    rv = fprint hFile "echo."
+    rv = fprint hFile "goto TheEnd"
+    rv = fprint hFile ""
+    rv = fprint hFile ":TheEnd"
+    rv = fprint hFile ""
+    rv = fprint hFile "pause"
+
+    rv = fclose hFile
+
+  ; ***********************
+  ; create the include file
+  ; ***********************
+    filename$ = cat$ projname$ ".inc"   ; append the INC extension to it
+
+    hFile = fcreate filename$
+
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile ";                                       Local prototypes"
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile ""
+    rv = fprint hFile "    DlgProc PROTO :DWORD,:DWORD,:DWORD,:DWORD"
+    rv = fprint hFile "    MsgboxI PROTO :DWORD,:DWORD,:DWORD,:DWORD,:DWORD"
+
+    rv = fclose hFile
+
+  ; ***************
+  ; create the icon
+  ; ***************
+    filename$ = cat$ projname$ ".ico"   ; append the ICO extension to it
+    hFile = fcreate filename$
+
+rv = fhexout hFile "0000010001002020100001000400E802000016000000280000002000000040000000010004000000000000020000000000000000000000000000000000000000"
+rv = fhexout hFile "000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF000000"
+rv = fhexout hFile "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+rv = fhexout hFile "0000000000000000000000000000000777777777777777777777777770000007FFFFFFFFFFFFFFFFFFFFFFFF70000007FFFFFFFFFFFFFFFFFFFFFFFF70000007"
+rv = fhexout hFile "FFFFFFFFFFFFFFFFFFFFFFFF70000007FFFFFFFFFFFFFFFFFFFFFFFF70000007FFFFFFFFFFFFFFFFFFFFFFFF70000007FFFFFFFFFFFFFFFFFFFFFFFF70000007"
+rv = fhexout hFile "FFFFFFFFFFFFFFFFFFFFFFFF70000007FFFFFFFFFFFFFFFFFFFFFFFF70000007FFFFFFFFFFFFFFFFFFFFFFFF70000007FFFFFFFFFFFFFFFF8000000F70000007"
+rv = fhexout hFile "FFFFFFFFFFFFFFFF8777770F70000007FFFFFFFFFFFFFFFF8888888F70000007FFFFFFFFFFFFFFFFFFFFFFFF70000007FFFFFFFFFFFFFFFF8000000F70000007"
+rv = fhexout hFile "FFFFFFFFFFFFFFFF8777770F70000007FFFFFFFFFFFFFFFF8888888F70000007FFFFFFFFFFFFFFFFFFFFFFFF700000077777777777777777777777777000000C"
+rv = fhexout hFile "AACCCCCCCCCCCCCCCCCC99999000000CAACCCCCCCCCCCCCCCCCC9999900000070000000000000000000000007000000000000000000000000000000000000000"
+rv = fhexout hFile "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000FFFF"
+rv = fhexout hFile "FFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000003E0000003E0000003E0000003E0000003E0000003E0000003E0000003E0000003E0000003E0000003E0000003E000"
+rv = fhexout hFile "0003E0000003E0000003E0000003E0000003E0000003E0000003E0000003E0000003E0000007E0000007FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+
+    rv = fclose hFile
+
+    run "makeit.bat"   ; build the project
+
+    msgbox "Your project will now open in a new instance of QE    " "Your New Project" MB_OK
+
+    call get_qe_path
+    QEpath$ = $0
+
+    currentdir$ = alloc$ 260
+    void = dll "kernel32" "GetCurrentDirectoryA" 260 currentdir$
+    currentdir$ = ztrim$ currentdir$
+    filename$ = cat$ projname$ ".asm"
+    $10 = cat$ QEpath$ " " currentdir$ "\" filename$
+    exec $10
+
+    end
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+get_qe_path:
+
+    $0 = alloc$ 260
+    #1500 = ptr $0
+    #1501 = dll "kernel32" "GetModuleFileNameA" 0 #1500 260
+    $0 = ztrim$ $0  ; string returned in $0
+
+    ret
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+

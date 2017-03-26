@@ -1,0 +1,34 @@
+// いいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいい
+
+#include "\masm32\INCLUDE\Resource.h"
+
+// いいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいい
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION 1, 0, 0, 0
+PRODUCTVERSION 1, 0, 0, 0
+FILEOS VOS__WINDOWS32
+FILETYPE VFT_APP
+// FILETYPE VFT_DLL
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904B0"
+    BEGIN
+      VALUE "CompanyName",      "Steve Hutchesson\000"
+      VALUE "FileDescription",  "MASM32 Text Result Viewer\000"
+      VALUE "FileVersion",      "1.0\000"
+      VALUE "InternalName",     "tview\000"
+      VALUE "OriginalFilename", "tview.exe\000"
+      VALUE "LegalCopyright",   "\251 2010 The MASM32 SDK\000"
+      VALUE "ProductName",      "tview\000"
+      VALUE "ProductVersion",   "1.0\000"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 0x4B0
+  END
+END
+
+// いいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいい

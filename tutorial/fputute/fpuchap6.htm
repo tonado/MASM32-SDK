@@ -1,0 +1,393 @@
+<HTML>
+<HEAD>
+<META NAME="Author" CONTENT="Raymond Filiatreault">
+<META NAME="Description" CONTENT="Tutorial on the use of the floating point coprocessor in assembly programming. Chap. 6 Data transfer instructions - Packed decimals">
+<TITLE>Simply FPU Chap. 6</TITLE>
+</HEAD>
+<BODY TEXT="#402000" LINK="#0000ff" VLINK="#0000ff" ALINK="#0000ff" BACKGROUND="fpufigs/bluewave.gif">
+
+<CENTER><FONT SIZE="+3">SIMPLY  FPU</FONT>
+<BR>by <B>Raymond Filiatreault</B><BR>
+Copyright 2003</CENTER>
+<P>
+<CENTER><B>Chap. 6<BR>Data transfer instructions - Packed decimals</B></CENTER>
+
+<P><BR>The FPU instructions covered in this chapter perform no mathematical operation on numerical data. Their main purpose is simply to transfer packed Binary Coded Decimal (BCD) integer data between the FPU's 80-bit data registers and memory.
+
+<P>There are only two FPU instructions using packed BCD data as the operand and no other data type can be used with those instructions. Both have the letter "B" immediately following the "F" in the mnemonic.
+
+<pre><A HREF="#fbld"><B>FBLD</B></A>   LoaD BCD data from memory
+
+<A HREF="#fbstp"><B>FBSTP</B></A>  STore BCD data to memory</pre>
+
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fbld"></A>FBLD</B></FONT> (Load BCD data from memory)
+
+<pre>Syntax:    <B>fbld <EM>Src</EM></B><EM></EM>
+
+Exception flags: Stack Fault, Invalid operation</pre>
+
+This instruction decrements the TOP register pointer in the <A HREF="fpuchap1.htm#sword">Status Word</A> and loads the packed BCD integer value from the specified source (<EM>Src</EM>) in the new TOP data register ST(0) after  converting it to the 80-bit <A HREF="fpuchap2.htm#real10">REAL10</A> format. The source must be the memory address of an 80-bit TBYTE having the specified packed BCD format. (See Chap.2 for the <A HREF="fpuchap2.htm#bcds">packed BCD format</A> and its addressing modes).
+
+<P>If the ST(7) data register which would become the new ST(0) is not empty, both a <B>S</B>tack <B>F</B>ault <U>and</U> an <B>I</B>nvalid operation exceptions are detected, setting both flags in the Status Word. The TOP register pointer in the Status Word would still be decremented and the new value in ST(0) would be the <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> NAN.
+
+<P>The content of the <A HREF="fpuchap1.htm#tword">Tag Word</A> for the new TOP register will be modified according to the result of the operation.
+
+<P>Although each nibble (4 bits) in a proper packed BCD format should not exceed a value of 9, the FPU will convert any value without any exception being detected. If a nibble does exceed a value of 9, the FPU simply uses its mod 10 value and carries a 1 to the next nibble. For example,
+
+<P>if a TBYTE contains the hex value of <B>00000000000000009A7Dh</B>,
+
+<P>the FBLD instruction would convert it as the decimal value of <B>10083d</B>
+
+<P>or the same as a proper packed BDC value of <B>00000000000000010083h</B>.
+
+<P><BR>The FBLD instruction is used primarily for converting alphanumeric strings (which usually contain a fractional part) to the REAL10 format. The process involves
+
+<P>- parsing the string for invalid characters to avoid processing "garbage",
+
+<BR>- determining the number of decimal places,
+
+<BR>- converting the digits to the packed BCD format,
+
+<BR>- loading the formatted number to the FPU as an integer, and
+
+<BR>- dividing by the appropriate exponent of 10 according to the number of decimal places in the original string.
+
+<P>Following is an example of code to convert a decimal string to the packed BCD format. This example would only allow a string in the regular decimal notation. Separate instructions would be needed to also accept a string in the scientific notation. (Code is not included for the final steps of loading it to the FPU and dividing by an exponent of 10 to arrive at the final floating point value.)
+
+<P><CENTER>************</CENTER>
+
+<P>//The packed BCD value will be stored in a global memory variable. A local variable or some other memory location could be used as well for this purpose. The same applies for the location where the null-terminated "user input" string will be available.
+
+<P>This code will return the packed BCD value in memory, the total number of
+integer/decimal digits in AH and the number of decimal digits in AL. If an error is detected (no input digit, more than 18 digits, invalid character), EAX will return with 0, and ECX will contain the counts of digits.//
+
+<pre>.data
+
+<b>temp_bcd     dt   ?</b>
+<b>szdecimal    db   32 dup(0)</b>
+
+.code
+
+<b>a2bcd proc</b>
+
+; EDI will be used as the pointer for the location of the BCD value
+; ESI will be used as the pointer to the source decimal string
+; ECX will be used to hold the count of integer digits (in CH)
+; and decimal digits (in CL)
+
+   <b>push esi</b>
+   <b>push edi</b>
+   <b>xor  ecx,ecx</b>         ;initialize for the counts
+   <b>lea  esi,szdecimal-1</b> ;point to byte preceeding the source string
+   <b>lea  edi,temp_bcd</b>    ;point to the memory location for the packed BCD
+
+   <b>xor  eax,eax</b>
+   <b>stosd</b>
+   <b>stosd</b>
+   <b>stosw</b>                ;initializes the TBYTE to 0, including the sign byte
+   <b>dec  edi</b>             ;adjust for pointing to the sign byte
+                        ; (most significant byte)
+                        ;which now assumes the value as positive
+
+; The following is to skip leading spaces without generating an error
+
+<b>space_check:</b>
+   <b>inc  esi</b>             ;point to next character
+   <b>mov  al,[esi]</b>        ;get character
+   <b>cmp  al," "</b>          ;is it a space
+   <b>jz   space_check</b>     ;check for another space
+
+; Check 1<SUP>st</SUP> non-space character for + or - sign
+
+   <b>.if  al == "-"</b>       ;is there a "-" sign
+      <b>mov  byte ptr [edi],80h</b> ;changes the sign byte for the negative code
+      <b>inc  esi</b>          ;point to next character
+
+   <b>.elseif al == "+"</b>    ;is there a "+" sign
+      <b>inc  esi</b>          ;point to next character,
+                        ; the sign byte is already coded positive
+   <b>.endif</b>
+
+<b>integer_count:</b>
+   <b>.if  al == 0</b>         ;is it the end of the source string
+      <b>jmp count_end</b>
+   <b>.elseif al == "."</b>    ;is it a "period" decimal delimiter
+      <b>jmp decimal_count</b>
+   <b>.elseif al == ","</b>    ;is it a "coma" decimal delimiter
+                        ; (also used in numerous countries)
+      <b>jmp decimal_count</b>
+   <b>.elseif al &lt; "0"</b>     ;is it an invalid character below the ASCII 0
+      <b>jmp input_error</b>
+   <b>.elseif al &gt; "9"</b>     ;is it an invalid character above the ASCII 9
+      <b>jmp input_error</b>
+   <b>.elseif ch == 18</b>     ;is digit count already at the maximum allowed
+      <b>jmp input_error</b>
+   <b>.endif</b>
+
+   <b>inc  ch</b>              ;increment the count of integers digits
+   <b>inc  esi</b>             ;point to next character
+   <b>mov  al,[esi]</b>        ;get character
+   <b>jmp  integer_count</b>   ;continue counting integer digits
+
+<b>decimal_count:</b>
+   <b>inc  esi</b>             ;point to next character
+   <b>mov  al,[esi]</b>        ;get character
+   <b>.if  al == 0</b>         ;is it the end of the source string
+      <b>jmp count_end</b>
+   <b>.elseif al &lt; "0"</b>     ;is it an invalid character below the ASCII 0
+      <b>jmp input_error</b>
+   <b>.elseif al &gt; "9"</b>     ;is it an invalid character above the ASCII 9
+      <b>jmp input_error</b>
+   <b>.elseif ch == 18</b>     ;is digit count already at the maximum allowed
+      <b>jmp input_error</b>
+   <b>.endif</b>
+
+   <b>inc  cl</b>              ;increment the count of decimals digits
+   <b>inc  ch</b>              ;increment the count of integers+decimals digits
+   <b>jmp  decimal_count</b>   ;continue counting decimal digits
+
+<b>count_end:</b>
+   <b>.if  ch == 0</b>         ;check if input has any digit
+      <b>jmp input_error</b>
+   <b>.endif</b>
+
+; At this point, the input string is valid,
+; CL contains the count of decimal digits,
+; CH contains the total count of decimal+integer digits, and
+; ESI points to the terminating 0.
+; All the digits now have to be converted to binary and
+; packed two per byte from the least significant to the more significant
+
+   <b>push ecx</b>            ;for temporary storage of the counts
+   <b>sub  ch,cl</b>          ;CH now contains the count of only the integer digits
+   <b>lea  edi,temp_bcd</b>   ;point to the least significant byte of the packed BCD
+
+<b>pack_decimals:</b>
+   <b>dec  esi</b>            ;point to the next more significant digit
+   <b>mov  al,[esi]</b>       ;get decimal character
+
+   <b>.if  cl == 0</b>        ;check if decimal digits all done
+      <b>.if  al &lt; "0"</b>    ;checks if current character is the decimal delimiter
+         <b>dec  esi</b>      ;skip the decimal delimiter
+      <b>.endif</b>
+      <b>jmp  pack_integers</b>
+   <b>.endif</b>
+
+   <b>and  al,0fh</b>         ;keep only the binary portion
+   <b>ror  ax,4</b>           ;transfer the 4 bits to the H.O. nibble of AH
+   <b>dec  esi</b>            ;point to the next more significant digit
+   <b>dec  cl</b>             ;decrement counter of decimal characters
+
+   <b>.if  cl == 0</b>        ;check if decimal digits all done
+      <b>dec  esi</b>         ;skip the decimal delimiter
+      <b>jmp  pack_integer2</b> ;get an integer character as 2<SUP>nd</SUP> nibble of this byte
+   <b>.endif</b>
+
+   <b>mov  al,[esi]</b>       ;get decimal character
+   <b>and  al,0fh</b>         ;keep only the binary portion
+   <b>rol  ax,4</b>           ;moves the 2<SUP>nd</SUP> binary value to the H.O. nibble of AL
+                       ;and retrieves the 1<SUP>st</SUP> binary value from AH
+                       ; into the L.O. nibble of AL
+   <b>stosb</b>               ;store this packed BCD byte and increment EDI
+   <b>dec  cl</b>             ;decrement counter of decimal characters
+   <b>jmp  pack_decimals</b>  ;continue packing the decimal digits
+
+<b>pack_integers:</b>
+   <b>.if  ch == 0</b>        ;check if integer digits all done
+      <b>jmp  all_done</b>    ;and terminate the packing process
+   <b>.endif</b>
+
+   <b>mov  al,[esi]</b>       ;get integer character
+   <b>and  al,0fh</b>         ;keep only the binary portion
+   <b>ror  ax,4</b>           ;transfer the 4 bits to the H.O. nibble of AH
+   <b>dec  esi</b>            ;point to the next more significant digit
+   <b>dec  ch</b>             ;decrement counter of integer characters
+
+<b>pack_integer2:</b>
+   <b>.if  ch == 0</b>        ;check if integer digits all done
+      <b>rol  ax,4</b>        ;moves the 2<SUP>nd</SUP> binary value to the H.O. nibble of AL
+                       ;and retrieves the 1<SUP>st</SUP> binary value from AH
+                       ; into the L.O. nibble of AL
+      <b>mov  [edi],al</b>    ;store this packed BCD byte
+      <b>jmp  all_done</b>    ;and terminate the packing process
+   <b>.endif</b>
+
+   <b>mov  al,[esi]</b>       ;get integer character
+   <b>and  al,0fh</b>         ;keep only the binary portion
+   <b>rol  ax,4</b>           ;moves the 2<SUP>nd</SUP> binary value to the H.O. nibble of AL
+                       ;and retrieves the 1<SUP>st</SUP> binary value from AH
+                       ; into the L.O. nibble of AL
+   <b>stosb</b>               ;store this packed BCD byte and increment EDI
+   <b>dec  esi</b>            ;point to the next more significant digit
+   <b>dec  ch</b>             ;decrement counter of integer characters
+   <b>jmp  pack_integers</b>  ;continue packing the integer digits
+
+<b>all_done:</b>
+   <b>pop  eax</b>            ;retrieve the counts which were in ECX
+   <b>pop  edi</b>
+   <b>pop  esi</b>
+   <b>ret</b>
+
+<b>input_error:</b>
+   <b>xor  eax,eax</b>        ;to return with error code
+   <b>pop  edi</b>
+   <b>pop  esi</b>
+   <b>ret</b>
+
+<b>a2bcd endp</b></pre>
+
+<P><CENTER>************</CENTER>
+
+
+<P><BR><FONT SIZE="+1"><B><A NAME="fbstp">FBSTP</A></B></FONT> (Store BCD data to memory)
+
+<pre>Syntax:    <B>fbstp <EM>Dest</EM></B><EM></EM>
+
+Exception flags: Stack Fault, Invalid operation, Precision</pre>
+
+This instruction rounds the value of the TOP data register ST(0) to the nearest integer (regardless of the rounding mode of the RC field in the <A HREF="fpuchap1.htm#cword">Control Word</A>), converts it to the packed BCD format, and stores it at the specified destination (<EM>Dest</EM>). (See Chap.2 for the <A HREF="fpuchap2.htm#bcds">packed BCD format</A> and its addressing modes). It then POPs the TOP data register ST(0), modifying the <A HREF="fpuchap1.htm#tword">Tag Word</A> and incrementing the TOP register pointer of the <A HREF="fpuchap1.htm#sword">Status Word</A>.
+
+<BLOCKQUOTE><EM>If the floating point value needs to be rounded according to some other mode, the <A HREF="fpuchap8.htm#frndint">FRNDINT</A> instruction must be used prior to the FBSTP instruction.</EM></BLOCKQUOTE>
+
+<P>If the ST(0) data register is empty, both a <B>S</B>tack <B>F</B>ault <U>and</U> an <B>I</B>nvalid operation exceptions are detected, setting both flags in the Status Word. The <A HREF="fpuchap2.htm#indefini">INDEFINITE</A> value in REAL10 format (FFFFC000000000000000h) would be stored as such at the specified destination.
+
+<P>If the rounded value of ST(0) would contain more than 18 integer digits, an <B>I</B>nvalid operation exception is detected, setting the related flag in the Status Word. The INDEFINITE value in REAL10 format would be stored as such at the specified destination.
+
+<P>If the value in ST(0) would contain a binary fraction, some precision would be lost and a <B>P</B>recision exception would be detected, setting the related flag in the Status Word.
+
+<P><BR>The FBSTP instruction is used primarily for converting floating point values from ST(0) to alphanumeric strings (usually with a required number of decimal places). The process involves:
+
+<BR>- multiplying the value in ST(0) by an appropriate exponent of 10 according to the number of required decimal places, (taking precautions not to exceed 18 significant decimal digits in the resulting integer portion),
+
+<BR>- storing it to a memory location as a packed BCD format,
+
+<BR>- converting from the packed BCD format to a null-terminated alphanumeric string.
+
+<BLOCKQUOTE>If the value to be converted is &ge;10<SUP><FONT SIZE="-1">19</FONT></SUP> or <1, it should generally be converted to the scientific notation. The exception may be for small values close to 1 which need to be reported only to a few decimal places.</BLOCKQUOTE>
+
+<P>Following is an example of code to convert from the packed BCD format to a decimal string in regular notation (some modification would be needed to prepare a decimal string in scientific notation).
+
+<P><CENTER>************</CENTER>
+
+<P>//The packed BCD value will be stored in a global memory variable. A local variable or some other memory location could be used as well for this purpose. The same applies for the location where the resulting null-terminated decimal string will be stored.
+
+<P>This code assumes that the floating point value is currently in the FPU's ST(0) register. It also assumes that 2 decimal places are required and that the resulting decimal value will not contain more than 18 digits. No error checking is performed.
+
+<P>The decimal string will also be left-justified. A "-" sign will be inserted as the first character if the value is negative, but nothing is inserted if the value is positive. Those are all additional options for the programmer.//
+
+<P>.data
+
+<pre><b>temp_bcd     dt   ?</b>
+<b>szdecimal    db   32 dup(0)</b>
+
+.code
+
+<b>bcd2a PROC
+
+   pushd 100</b>            ;use the stack as storage for this value
+   <b>fimul dword ptr[esp]</b> ;converts 2 decimal places as 2 more integer digits
+   <b>fbstp temp_bcd</b>       ;store the packed BCD integer value
+   <b>pop  eax</b>             ;clean the stack of the pushed 100 
+
+; ESI will be used for pointing to the packed BCD
+; EDI will be used for pointing to the decimal string
+
+   <b>push esi</b>
+   <b>push edi</b>
+   <b>lea  esi,temp_bcd+9</b>  ;point to the most significant byte
+   <b>lea  edi,szdecimal</b>   ;point to the start of the decimal string buffer
+   <b>xor  eax,eax</b>
+   <b>fwait</b>                ;to ascertain that the transfer of the
+                        ;packed BCD is completed
+
+   <b>mov  al,[esi]</b>        ;get the byte with the sign code
+   <b>dec  esi</b>             ;decrement to next most significant byte
+   <b>or   al,al</b>           ;for checking the sign bit
+   <b>jns  @F</b>              ;jump if no sign bit
+   <b>mov  al,"-"</b>          ;the value is negative
+   <b>stosb</b>                ;insert the negative sign
+
+<b>@@:</b>
+
+; The next 8 bytes (in this example) will contain the integer digits
+; and the least significant byte will then contain the 2 decimal digits.
+; No leading 0 will be included in the integer portion
+; unless it would be the only integer digit.
+
+   <b>mov  ecx,8</b>           ;number of bytes to process for integer digits
+
+<b>@@:</b>
+
+   <b>mov  al,[esi]</b>        ;get the next byte
+   <b>dec  esi</b>             ;adjust the pointer to the next one
+   <b>or   al,al</b>           ;for checking if it is 0
+   <b>jnz  @F</b>              ;the starting integer digit is now in AL
+   <b>dec  ecx</b>             ;adjust the counter of integer bytes
+   <b>jnz  @B</b>              ;continue searching for the first integer digit
+
+; If the loop terminates with ECX=0, the integer portion would be 0.
+; A "0" character must be inserted before processing the decimal digits
+
+   <b>mov  al,"0"</b>          ;the ASCII 0
+   <b>stosb</b>                ;insert it
+   <b>mov  al,[esi]</b>        ;get the byte containing the decimal digits
+   <b>jmp  decimal_digits</b>
+
+<b>@@:</b>
+
+; The first integer byte must be checked to determine
+; if it contains 1 or 2 integer digits
+
+   <b>test al,0f0h</b>         ;test if the H.O. nibble contains a digit
+   <b>jz   int_digit2</b>      ;if not, process only the L.O. nibble
+
+<b>int_digit1:</b>
+   <b>ror  ax,4</b>            ;puts the H.O. nibble in the L.O. nibble position
+                        ;and saves the L.O. nibble in AH
+   <b>add  al,30h</b>          ;convert it to ASCII character
+   <b>stosb</b>                ;store this character
+   <b>shr  ax,12</b>           ;restores the L.O. nibble in AL
+                        ;and also resets the other bits of AX
+
+<b>int_digit2:</b>
+   <b>add  al,30h</b>          ;convert it to ASCII character
+   <b>stosb</b>                ;store this character
+   <b>mov  al,[esi]</b>        ;get next byte
+   <b>dec  esi</b>             ;adjust the pointer to the next one
+   <b>dec  ecx</b>             ;adjust the counter of integer bytes
+   <b>jnz  int_digit1</b>      ;continue processing the integer bytes
+
+<b>decimal_digits:</b>
+   <b>mov  byte ptr [edi],"."</b> ;insert the preferred decimal delimiter
+   <b>inc  edi</b>
+
+; If more than 2 decimal digits are required, a counter would be needed
+; to process the necessary bytes.
+; Also, if the number of required decimal digits is not even, the code
+; would have to be altered to insert the decimal delimiter at the
+; proper location.
+
+   <b>ror  ax,4</b>            ;puts the H.O. nibble in the L.O. nibble position
+                        ;and saves the L.O. nibble in AH
+   <b>add  al,30h</b>          ;convert it to ASCII character
+   <b>stosb</b>                ;store this character
+   <b>shr  ax,12</b>           ;restores the L.O. nibble in AL
+                        ;and also resets the other bits of AX
+   <b>add  al,30h</b>          ;convert it to ASCII character
+   <b>stosw</b>                ;store this character + the terminating 0
+
+   <b>pop edi</b>
+   <b>pop esi</b>
+   <b>ret
+
+bcd2a ENDP</b></pre>
+
+<P><CENTER>************</CENTER>
+
+<P><BR><CENTER><A HREF="index.html"><B>RETURN TO<B>
+<BR><FONT SIZE="+2">SIMPLY  FPU</FONT>
+<BR><B>CONTENTS<B></A></CENTER><BR>
+
+</BODY>
+</HTML>

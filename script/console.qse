@@ -1,0 +1,113 @@
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+;                    create a new console application
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+    INTEGER hFile
+    INTEGER rv
+
+    STRING path$
+    STRING proj$
+    STRING def$
+    STRING asm$
+    STRING qt$
+    STRING txt$
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+    path$ = getfolder "Set or create a folder for your new console app" "Ensure you do not overwrite an existing project"
+    if$ path$ = ""
+    end
+
+    chdir path$     ; change directory to the new location
+
+    qt$ = chr$ 34
+
+    gettext "Type the CONSOLE project name" "Ensure you do NOT enter a file extension" "console"
+    if$ $0 = ""
+    end
+
+    proj$ = $0
+
+    hFile = fcreate "makeit.bat"
+
+    rv = fprint hFile "@echo off"
+    rv = fprint hFile ""
+    rv = fprintc hFile "    if exist \q" proj$ ".obj\q del \q" proj$ ".obj\q\r\n"
+    rv = fprintc hFile "    if exist \q" proj$ ".exe\q del \q" proj$ ".exe\q\r\n"
+    rv = fprint hFile ""
+    rv = fprintc hFile "    \\masm32\\bin\\ml /c /coff \q" proj$ ".asm\q\r\n"
+    rv = fprint hFile "    if errorlevel 1 goto errasm"
+    rv = fprint hFile ""
+    rv = fprintc hFile "    \\masm32\\bin\\PoLink /SUBSYSTEM:CONSOLE \q" proj$ ".obj\q\r\n"
+    rv = fprint hFile "    if errorlevel 1 goto errlink"
+    rv = fprintc hFile "    dir \q" proj$ ".*\q\r\n"
+    rv = fprint hFile "    goto TheEnd"
+    rv = fprint hFile ""
+    rv = fprint hFile "  :errlink"
+    rv = fprint hFile "    echo _"
+    rv = fprint hFile "    echo Link error"
+    rv = fprint hFile "    goto TheEnd"
+    rv = fprint hFile ""
+    rv = fprint hFile "  :errasm"
+    rv = fprint hFile "    echo _"
+    rv = fprint hFile "    echo Assembly Error"
+    rv = fprint hFile "    goto TheEnd"
+    rv = fprint hFile "    "
+    rv = fprint hFile "  :TheEnd"
+    rv = fprint hFile ""
+    rv = fprint hFile "pause"
+
+    rv = fclose hFile
+
+    asm$ = cat$ proj$ ".asm"
+    hFile = fcreate asm$
+
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile "    include \masm32\include\masm32rt.inc"
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile ""
+    rv = fprint hFile "comment * -----------------------------------------------------"
+    rv = fprint hFile "                     Build this console app with"
+    rv = fprintc hFile "                  \qMAKEIT.BAT\q on the PROJECT menu.\r\n"
+    rv = fprint hFile "        ----------------------------------------------------- *"
+    rv = fprint hFile ""
+    rv = fprint hFile "    .data?"
+    rv = fprint hFile "      value dd ?"
+    rv = fprint hFile ""
+    rv = fprint hFile "    .data"
+    rv = fprint hFile "      item dd 0"
+    rv = fprint hFile ""
+    rv = fprint hFile "    .code"
+    rv = fprint hFile ""
+    rv = fprint hFile "start:"
+    rv = fprint hFile "   "
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile ""
+    rv = fprint hFile "    call main"
+    rv = fprint hFile "    inkey"
+    rv = fprint hFile "    exit"
+    rv = fprint hFile ""
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile ""
+    rv = fprint hFile "main proc"
+    rv = fprint hFile ""
+    rv = fprint hFile "    cls"
+    rv = fprintc hFile "    print \qHello World\q,13,10\r\n"
+    rv = fprint hFile ""
+    rv = fprint hFile "    ret"
+    rv = fprint hFile ""
+    rv = fprint hFile "main endp"
+    rv = fprint hFile ""
+    rv = fprint hFile "; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤"
+    rv = fprint hFile ""
+    rv = fprint hFile "end start"
+
+    rv = fclose hFile
+
+    txt$ = cat$ "Open " qt$ proj$ ".asm" qt$ " to edit new console app, build it with MAKEIT.BAT"
+
+    msgbox txt$ "Done" MB_OK
+
+    openfile
+
+    end

@@ -1,0 +1,140 @@
+---------------------------------------------------------------------------
+
+Pelle Orinius has given permission to include a number of his high tech
+tools in the MASM32 Project.
+
+Pelle's tools are available from his website as a complete programming
+package called Pelles C.
+
+http://www.smorgasbordet.com/pellesc/
+
+The tools included in the MASM32 Project are the command line tools
+suitable for building assembler projects and/or modules in assembler.
+Pelles C contain a complete IDE that includes its own resource editor
+and a complete range of tools and accessories for building C and
+mixed C and ASM projects.
+
+With current testing the linker produces more efficient PE headers and
+generally results in a smaller EXE file.
+
+With the current build style batch files used in MASM32, the main difference
+when using PoLink.exe instead of the Microsoft Link.exe is that the
+resource file must be appended as a RES file, not an OBJ file converted
+by CVTRES.EXE.
+
+Below are the available command line options for PoAsm.exe, PoLink.exe
+Porc.exe and PoLib.exe.
+
+---------------------------------------------------------------------------
+
+Pelles Macro Assembler, Version 1.00.35
+Copyright (c) Pelle Orinius 2005-2007
+
+Syntax:
+POASM [options] srcfile[.ASM]
+
+Options:
+/A<name>            Select architecture: IA32 (default), AMD64 or ARM
+/D<name>[=<value>]  Define a symbol (with optional value)
+/Fo<outfile>        Name the output file (default: srcfile.OBJ)
+/Gd                 Use cdecl calling convention (default)
+/Gr                 Use fastcall calling convention
+/Gz                 Use stdcall calling convention
+/I<path>            Add a search path for include files
+/V<n>               Set verbosity level 0, 1 or 2 (default: n = 0)
+/X                  Don't search standard places for include files
+/Zd                 Enable line number debugging information
+/Zg                 Write function prototypes to stdout
+/Zi                 Enable full debugging information
+
+---------------------------------------------------------------------------
+
+Pelles Library Manager, Version 4.50.2
+Copyright (c) Pelle Orinius 1997-2006
+
+Syntax:
+POLIB [options] {files | @commandfile}
+
+Options:
+/DEF:filename      Build import library from module-definition file
+/EXPLODE           Create object files for all members
+/EXTRACT:member    Create object file for the given member
+/LIST              List all member names
+/MACHINE:type      Set target machine type: ARM, IX86, or X86
+/MAKEDEF:filename  Build module-definition file from import library
+/NOUND             Don't add underscore to import names
+/OLDIMPLIB         Create import library in old format
+/OUT:filename      Name the output file
+/REMOVE:member     Remove the given member
+/VERBOSE           Display more information
+
+---------------------------------------------------------------------------
+
+Pelles Linker, Version 4.50.3
+Copyright (c) Pelle Orinius 1998-2007
+
+Syntax:
+POLINK [options] [files] [@commandfile]
+
+Options:
+/ALIGN:#
+/ALLOWBIND[:NO]
+/BASE:address
+/DEBUG[:NO]
+/DEBUGTYPE:{CV|COFF|BOTH}
+/DEF:filename
+/DEFAULTLIB:library
+/DELAY:{NOBIND|UNLOAD}
+/DELAYLOAD:dll
+/DLL
+/DRIVER[:{UPONLY|WDM}]
+/ENTRY:symbol
+/EXPORT:symbol[=symbol][,@ordinal][,DATA]
+/FIXED[:NO]
+/FORCE:MULTIPLE
+/HEAP:reserve[,commit]
+/IMPLIB:filename
+/INCLUDE:symbol
+/LARGEADDRESSAWARE[:NO]
+/LIBPATH:path
+/MACHINE:{ARM|IX86|X86}
+/MAP[:filename]
+/MAPINFO:{EXPORTS|FIXUPS|LINES}
+/MERGE:from=to
+/NODEFAULTLIB
+/NOENTRY
+/OLDIMPLIB
+/OPT:{REF|NOREF|WIN98|NOWIN98}
+/OSVERSION:#[.##]
+/OUT:filename
+/RELEASE
+/SECTION:name,[E][R][W][S][D][K][P]
+/STACK:reserve[,commit]
+/STUB:filename
+/SUBSYSTEM:{NATIVE|WINDOWS|CONSOLE|WINDOWSCE}[,#[.##]]
+/SWAPRUN:{NET|CD}
+/TSAWARE[:NO]
+/VERBOSE
+/VERSION:#[.##]
+/WS:AGGRESSIVE
+
+---------------------------------------------------------------------------
+
+Pelles Resource Compiler, Version 4.50.1
+Copyright (c) Pelle Orinius 1997-2006
+
+Syntax:
+PORC [options] input[.RC]
+
+Options:
+/C<cp>             Define codepage for NLS conversion (default: 1252)
+/D<name>[=<text>]  Define a symbol
+/E                 Preprocess only (to stdout)
+/Fo<file>          Rename the output file (default: input.RES)
+/I<path>           Add a search path for #include files
+/L<langid>         Set default language ID
+/R                 Create a RES file (default action)
+/V                 Display more information
+/X                 Don't search standard places for #include files
+
+---------------------------------------------------------------------------

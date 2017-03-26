@@ -1,0 +1,36 @@
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+;          structure emulation using sequential named integers
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+    INTEGER &rct
+    INTEGER rct_left
+    INTEGER rct_top
+    INTEGER rct_right
+    INTEGER rct_bottom
+
+    INTEGER void
+
+    INTEGER GetWindowRect
+    INTEGER hUser
+    INTEGER hDsk
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+    &rct = ptr rct_left
+
+    hUser = LoadLibrary "user32"
+    GetWindowRect = GetProcAddress hUser "GetWindowRect"
+    hDsk = dll "user32" "GetDesktopWindow" 
+    void = STDCALL GetWindowRect hDsk &rct
+
+    num2str rct_right $1
+    msgbox "Screen Width" $1 MB_OK
+
+    num2str rct_bottom $1
+    msgbox "Screen Height" $1 MB_OK
+
+    void = FreeLibrary hUser
+
+    end
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤

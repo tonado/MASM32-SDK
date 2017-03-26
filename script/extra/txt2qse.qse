@@ -1,0 +1,52 @@
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+    INTEGER lcnt
+    STRING  result$
+    STRING  qt$
+    STRING  outpt$
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+
+    msgbox "Script will convert ALL text in editor to QSE text format script" "Proceed ?" MB_YESNO
+
+    if #0 == IDNO
+    end
+
+    starttext               ; set editor to 1st line
+
+    linecount               ; get the line count
+    lcnt = #0               ; store result in integer variable
+    sub lcnt 1              ; sub line count to avoid trash on last line
+    qt$ = chr$ 34           ; create a string from the double quote character
+
+  lbl0:
+    selectline              ; select the current line
+    cutsel                  ; copy to string variable $0 then delete line
+    result$ = $0            ; store text in string variable
+
+    escape                  ; press ESC to choose to exit the script
+
+  ; ----------------------------------
+  ; replace quotes in text with escape
+  ; ----------------------------------
+    result$ = replace$ result$ "\" "\\"     ; replace \ with \\
+    result$ = replace$ result$ qt$ "\q"     ; replace quote with \q
+
+  ; ------------------------
+  ; create the output string
+  ; ------------------------
+    outpt$ = cat$ "textc " qt$ result$ "\n" qt$
+
+    text outpt$             ; output result back to same line
+    down 1                  ; go down to next line
+    sub lcnt 1              ; sub 1 from loop counter
+    if lcnt > 0             ; if counter > 0
+    goto lbl0               ; loop back to start label
+
+    text lf "    end" lf    ; append the script terminator
+
+    starttext               ; set editor to 1st line again
+
+    end
+
+; ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤

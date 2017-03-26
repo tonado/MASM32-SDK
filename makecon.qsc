@@ -1,0 +1,46 @@
+yesno Is editor empty ?**Create CONSOLE makeit.bat
+jmp nxt1
+exit
+nxt1:
+Input Type the project name with NO extension**Set the name of the project
+
+text @echo off{lf}
+text {lf}
+text if not exist rsrc.rc goto over1{lf}
+text \masm32\bin\rc /v rsrc.rc{lf}
+text \masm32\bin\cvtres /machine:ix86 rsrc.res{lf}
+text :over1{lf}
+text {lf}
+text if exist "{str0}.obj" del "{str0}.obj"{lf}
+text if exist "{str0}.exe" del "{str0}.exe"{lf}
+text {lf}
+text \masm32\bin\ml /c /coff "{str0}.asm"{lf}
+text if errorlevel 1 goto errasm{lf}
+text {lf}
+text if not exist rsrc.obj goto nores{lf}
+text {lf}
+text \masm32\bin\Link /SUBSYSTEM:CONSOLE /OPT:NOREF "{str0}.obj" rsrc.res{lf}
+text if errorlevel 1 goto errlink{lf}
+text {lf}
+text dir "{str0}.*"{lf}
+text goto TheEnd{lf}
+text {lf}
+text :nores{lf}
+text \masm32\bin\Link /SUBSYSTEM:CONSOLE /OPT:NOREF "{str0}.obj"{lf}
+text if errorlevel 1 goto errlink{lf}
+text dir "{str0}.*"{lf}
+text goto TheEnd{lf}
+text {lf}
+text :errlink{lf}
+text echo _{lf}
+text echo Link error{lf}
+text goto TheEnd{lf}
+text {lf}
+text :errasm{lf}
+text echo _{lf}
+text echo Assembly Error{lf}
+text goto TheEnd{lf}
+text {lf}
+text :TheEnd{lf}
+text {lf}
+text pause{lf}

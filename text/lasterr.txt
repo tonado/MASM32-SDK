@@ -1,0 +1,1 @@
+fn MessageBox,0,LastError$(),"Last Error Text",MB_OK
